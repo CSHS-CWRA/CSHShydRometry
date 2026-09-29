@@ -3,3 +3,7 @@
 ^\.git$
 ^\.Rproj\.user$
 ^.*\.Rproj$
+^README\.Rmd$
+^\.github$
+^codecov\.yml$
+^LICENSE\.md$

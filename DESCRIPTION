@@ -22,7 +22,6 @@ Description: Fits stage-discharge rating curves by a range of frequentist
     at an estimated breakpoint, are also supported. Every fit is given a
     'predict()' method returning the same columns, so results from
     different approaches can be combined directly.
-License: AGPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

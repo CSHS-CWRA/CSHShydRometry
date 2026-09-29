@@ -1,17 +1,26 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # CSHShydRometry
 
-Frequentist methods for fitting stage–discharge rating curves, with confidence
-and prediction limits.
+<!-- badges: start -->
 
-Derived from work by Dan Moore on rating-curve methods, restructured into a
-model–predict form: every model is fitted by a `rc_*()` constructor and
-summarised by a `predict()` method.
+[![R-CMD-check](https://github.com/CSHS-CWRA/CSHShydRometry/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CSHS-CWRA/CSHShydRometry/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/CSHS-CWRA/CSHShydRometry/graph/badge.svg)](https://app.codecov.io/gh/CSHS-CWRA/CSHShydRometry)
+<!-- badges: end -->
+
+Frequentist methods for fitting stage–discharge rating curves, with
+confidence and prediction limits.
+
+Derived from work by Dan Moore on rating-curve methods, restructured
+into a model–predict form: every model is fitted by a `rc_*()`
+constructor and summarised by a `predict()` method.
 
 ## Installation
 
 ``` r
-# install.packages("pak")
-pak::pak("CSHShydRometry")
+remotes::install_github("CSHS-CWRA/CSHShydRometry")
 ```
 
 ## Fitting a curve
@@ -27,21 +36,22 @@ fit
 predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
 ```
 
-Single-segment models: `rc_log_ols()` and `rc_log_nls()` fit a power law on the
-log–log scale, `rc_nls()` on the natural scale, `rc_gnls()` estimates the error
-variance as a power of the mean, and `rc_poly()` and `rc_loess()` offer
-non-power-law alternatives.
+Single-segment models: `rc_log_ols()` and `rc_log_nls()` fit a power law
+on the log–log scale, `rc_nls()` on the natural scale, `rc_gnls()`
+estimates the error variance as a power of the mean, and `rc_poly()` and
+`rc_loess()` offer non-power-law alternatives.
 
-Two-segment curves are fitted by `rc_nls_2seg()`, joined either continuously
-(`config = "piecewise"`) or additively (`config = "compound"`) at an estimated
-breakpoint.
+Two-segment curves are fitted by `rc_nls_2seg()`, joined either
+continuously (`config = "piecewise"`) or additively
+(`config = "compound"`) at an estimated breakpoint.
 
 ## Consistent output
 
-`predict()` returns the same columns whatever the model, method or weighting:
-`h`, `fit`, and — when asked for — `ci_lwr`/`ci_upr` and `pi_lwr`/`pi_upr`.
-Quantities that cannot be computed come back as `NA` rather than as missing
-columns, so a batch of approaches stacks directly:
+`predict()` returns the same columns whatever the model, method or
+weighting: `h`, `fit`, and — when asked for — `ci_lwr`/`ci_upr` and
+`pi_lwr`/`pi_upr`. Quantities that cannot be computed come back as `NA`
+rather than as missing columns, so a batch of approaches stacks
+directly:
 
 ``` r
 rbind(
@@ -56,48 +66,49 @@ rbind(
 Constructors taking `wts_code` offer three error models:
 
 | `wts_code` | assumption |
-|---|---|
+|----|----|
 | `"none"` | constant variance |
 | `"prop"` | constant coefficient of variation, fitted by IRLS |
-| `"spec"` | variances supplied by the user, e.g. from reported gauging uncertainties |
+| `"spec"` | variances supplied by the user, e.g. from reported gauging uncertainties |
 
-Under `"spec"` a new observation's scatter is not identified by the fit, so
-prediction limits are returned as `NA`.
+Under `"spec"` a new observation’s scatter is not identified by the fit,
+so prediction limits are returned as `NA`.
 
 ## Intervals for two-segment curves
 
 `predict.rc_nls_2seg()` takes a `method`:
 
 | method | notes |
-|---|---|
+|----|----|
 | `"delta"` (default) | linearised, fast, **unreliable near the breakpoint** |
 | `"boot"` | resamples the gaugings and refits; slow, but trustworthy at the breakpoint |
 | `"sim"` | draws parameters from their asymptotic normal distribution; sensitive to the parameter scale |
 
-The default warrants a word. A two-segment mean function is not differentiable
-at the breakpoint, so the delta method's linearisation switches form there and
-the interval jumps. On one fitted curve the band widened from 29 to
-242 m³ s⁻¹ across the breakpoint, and in a simulation study a nominal 95%
-delta interval covered the true curve only about two-thirds of the time just
-above it, against roughly 97% for the bootstrap. Away from the breakpoint the
-delta method behaves normally.
+The default warrants a word. A two-segment mean function is not
+differentiable at the breakpoint, so the delta method’s linearisation
+switches form there and the interval jumps. On one fitted curve the band
+widened from 29 to 242 m³ s⁻¹ across the breakpoint, and in a simulation
+study a nominal 95% delta interval covered the true curve only about
+two-thirds of the time just above it, against roughly 97% for the
+bootstrap. Away from the breakpoint the delta method behaves normally.
 
 So `"delta"` for a quick look, and `"boot"` where the interval matters.
 
 ## Data
 
-`thompson` ships with the package: 93 gaugings from Water Survey of Canada
-station 08LF051, Thompson River. It is close to a single control, so it suits
-the single-segment models; its two-segment fit converges only with care.
+`thompson` ships with the package: 93 gaugings from Water Survey of
+Canada station 08LF051, Thompson River. It is close to a single control,
+so it suits the single-segment models; its two-segment fit converges
+only with care.
 
-For the two-segment models the examples and tests prefer the Ardeche at Sauze,
-`RBaM::SauzeGaugings`, which has a clear change of control and a reported
-uncertainty for every gauging. RBaM is a suggested dependency, used only as a
-source of that data — none of the fitting here is Bayesian, and the BaM engine
-is not needed.
+For the two-segment models the examples and tests prefer the Ardeche at
+Sauze, `RBaM::SauzeGaugings`, which has a clear change of control and a
+reported uncertainty for every gauging. RBaM is a suggested dependency,
+used only as a source of that data — none of the fitting here is
+Bayesian, and the BaM engine is not needed.
 
 ## Scope
 
 This package covers the frequentist methods only. Bayesian rating-curve
-estimation, and a breakpoint-averaged interval method that removes the jump
-described above, are deliberately left out for now.
+estimation, and a breakpoint-averaged interval method that removes the
+jump described above, are deliberately left out for now.
