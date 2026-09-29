@@ -1,0 +1,45 @@
+Type: Package
+Package: CSHShydRometry
+Title: Frequentist Rating Curve Methods
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Vincenzo", "Coia",
+           email = "vincenzo.coia@gmail.com",
+           role = c("aut", "cre")),
+    person("Daniel", "Moore",
+           email = "dan.moore@ubc.ca",
+           role = "aut"),
+    person("Paul", "Whitfield",
+           email = "paul.h.whitfield@gmail.com",
+           role = "aut")
+  )
+Description: Fits stage-discharge rating curves by a range of frequentist
+    methods, and attaches confidence and prediction limits to the fitted
+    curve. Single-segment curves may be fitted as a power law (by ordinary
+    or nonlinear least squares, on the log-log or the natural scale, or by
+    generalised nonlinear least squares), as a polynomial, or by loess.
+    Two-segment power-law curves, joined either continuously or additively
+    at an estimated breakpoint, are also supported. Every fit is given a
+    'predict()' method returning the same columns, so results from
+    different approaches can be combined directly.
+License: AGPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1)
+Imports:
+    checkmate,
+    investr,
+    nlme,
+    nlraa,
+    nls2,
+    rlang,
+    stats,
+    tidyr
+Suggests:
+    MASS,
+    testthat (>= 3.0.0),
+    tibble
+Config/testthat/edition: 3
+LazyData: true

@@ -1,0 +1,460 @@
+Station ID,Date (UTC),Timezone Offset,Activity Type,Gauge Height,Mean Gauge Height,Discharge,Rating Curve Table Number,Shift From Base Curve,Deviation From Base Curve,Deviation From Shifted Curve,Control Condition,Control Condition Remarks,Activity Remarks,Width,Area,Velocity,Air Temperature,Water Temperature,Approval,Uncertainty
+08LF051,2024-11-14T18:34:00Z,-8,Discharge/Débit,NA,2.028,522,10,0.0384,0.0608,5.00E-04,"Measurement condition : Clear; Cloudy , No Precipitation , Calm Wind",NA,"@ Uncertainty: IVE method, 2-sigma value (2 x Uncertainty Value reported in *.dis File). @ RSSL Comments: Parameters and settings marked with a * are not constant for all files. Report generated using SonTek RiverSurveyor Stationary Live v4.1 100% clear and open. Well 100% open.Flushed both upper and lower intakes starting at 1010pst. Good flush both intakes clean and clear. Well recovered and stabilized by 1035 pst. Delete HG during this period for maintenance. Mid-section",100,496,1.05,6.1,8,Provisional/Provisoire,2.54
+08LF051,2024-11-14T17:35:00Z,-8,Stage/Niveau d'eau,2.024,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.022 Surge: 0.010  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-10-10T16:50:00Z,-8,Stage/Niveau d'eau,2.089,NA,NA,NA,NA,NA,NA,NA,NA,HG: 2.088 Surge: 0.005  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-10-10T16:05:00Z,-8,Stage/Niveau d'eau,2.089,NA,NA,NA,NA,NA,NA,NA,NA,HG: 2.090 Surge: 0.005  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-08-20T23:34:00Z,-8,Discharge/Débit,NA,2.203,571,11.01,0.0891,0.05,0.05,"Measurement condition : Clear; Cloudy , No Precipitation , Moderate Wind Blowing Upstream",CLEAR,"STRONG WIND BLOWING UPSTREAM --> LIKELY CHANGED VELOCITIES AT THE SURFACE, CONSTANT PROFILE EXTRAP APPLIED TO TOP @ Uncertainty: IVE method, 2-sigma value (2 x Uncertainty Value reported in *.dis File). @ RSSL Comments: Parameters and settings marked with a * are not constant for all files. Report generated using SonTek RiverSurveyor Stationary Live v4.1 @ Uncertainty: IVE method, 2-sigma value (2 x Uncertainty Value reported in *.dis File). @ RSSL Comments: Parameters and settings marked with a * are not constant for all files. Report generated using SonTek RiverSurveyor Stationary Live v4.1 STRONG WIND BLOWING UPSTREAM, BENDING SURVEY ROD SLOW SURGE LIKELY CULPRIT BETWEEN INSIDE AND OUTSIDE WL DISCREPANCY READ TOP OF ETG BAR AS DIRECTED BY WRITING ON THE BENCH Mid-section",99,506,1.13,27.3,20.8,Provisional/Provisoire,3.58
+08LF051,2024-08-20T22:05:00Z,-8,Stage/Niveau d'eau,2.201,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.195 Surge: 0.010  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-06-20T18:05:00Z,-8,Stage/Niveau d'eau,4.527,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.527 Surge: 0.025  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-06-20T17:48:00Z,-8,Discharge/Débit,NA,4.528,1470,10,-0.00492,0.0235,0.0235,"Measurement condition : Clear; Clear , No Precipitation ,",NA,"Flushed upper and lower intakes, good flow in both. Mid-section",108,777,1.89,19.3,13.4,Provisional/Provisoire,NA
+08LF051,2024-06-20T16:40:00Z,-8,Stage/Niveau d'eau,4.529,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.526 Surge: 0.025  * The uncertainty value is equivalent to the surge value in eHSN.  No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-06-20T16:15:00Z,-8,Stage/Niveau d'eau,4.555,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.535 Surge: 0.025  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-05-23T18:35:00Z,-8,Stage/Niveau d'eau,4.127,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.127 Surge: 0.015  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-05-23T18:15:00Z,-8,Stage/Niveau d'eau,4.126,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.126 Surge: 0.015  * The uncertainty value is equivalent to the surge value in eHSN.  Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-05-23T18:04:00Z,-8,Discharge/Débit,NA,4.124,1300,10,0.0288,0.036,0.036,"Measurement condition : Clear; Clear , No Precipitation , Calm Wind","100% clear, mid stage flat.","RiverRay SxS via c-way. @ Uncertainty: ISO method, 2-sigma value (1 x Uncertainty Value reported in *.xml File). @ Flushing intakes 0955 to 1010pst. Mid-section",108,747,1.74,14.2,11,Provisional/Provisoire,2.49
+08LF051,2024-05-23T17:35:00Z,-8,Stage/Niveau d'eau,4.118,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.121 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-05-23T17:30:00Z,-8,Stage/Niveau d'eau,4.118,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 4.128 Surge: 0.015  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-04-09T18:00:00Z,-8,Stage/Niveau d'eau,1.461,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.460 Surge: 0.010  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-04-09T17:47:00Z,-8,Stage/Niveau d'eau,1.461,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.461 No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-04-09T17:45:00Z,-8,Stage/Niveau d'eau,1.461,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 Surge: 0.010  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-04-09T17:34:00Z,-8,Discharge/Débit,NA,1.461,362,10,0.0227,0.0638,0.026600001,"Measurement condition : Clear; Partly Cloudy , No Precipitation , Light Wind Swirling/Variable",100% clear and open.,"RiverRay tethered from cway. @ Uncertainty: ISO method, 2-sigma value (1 x Uncertainty Value reported in *.xml File). @ Flushed upper and lower intakes 2x each, flushing between 0910 and 0935. Well recovering until 0945, delete HG for this flushing time. Well fluctuating same as slow surge outside (obeserved float changes at shaft encoder display) - WL recovered to 0.000m at 0947 direct observation, no SRC required. No reset was applied, flushing returned HG to 0.000m. Mid-section",95.5,478,0.757,12.9,5.1,Provisional/Provisoire,2.63
+08LF051,2024-04-09T17:05:00Z,-8,Stage/Niveau d'eau,1.461,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.443 Surge: 0.010  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-01-31T19:35:00Z,-8,Stage/Niveau d'eau,0.948,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 0.945 No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2024-01-31T19:08:00Z,-8,Discharge/Débit,NA,0.954,254,11.01,-0.134,0.1251,0.0326,"Measurement condition : Clear; Cloudy , No Precipitation , Calm Wind","No ice, open water.","SxS off cableway. Good mmt cond. @ Uncertainty: ISO method, 2-sigma value (1 x Uncertainty Value reported in *.xml File). @ Mid-section",93.5,430,0.591,4.4,1.9,Provisional/Provisoire,2.65
+08LF051,2024-01-31T17:50:00Z,-8,Stage/Niveau d'eau,0.946,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 0.943 Found (FD),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-10-25T19:25:00Z,-8,Stage/Niveau d'eau,1.167,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.166,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-10-25T18:58:30Z,-8,Discharge/Débit,NA,1.169,288,11,0.0717,0.059499998,-0.004,"Measurement condition : Clear; Clear , No Precipitation , Calm Wind",NA,Good quality SxS QM.  Plots on current trend.   Wire in notches.  Mid-section,88,431,0.667,0.7,9.7,Provisional/Provisoire,2.54
+08LF051,2023-10-25T17:00:00Z,-8,Stage/Niveau d'eau,1.171,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.170 Surge: 0.002  * The uncertainty value is equivalent to the surge value in eHSN.  No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-08-30T21:20:00Z,-8,Stage/Niveau d'eau,1.513,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.513 Surge: 0.004  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-08-30T20:33:00Z,-8,Discharge/Débit,NA,1.519,376,11,0.0879,0.060100004,0.0277,"Measurement condition : Clear; Partly Cloudy , No Precipitation , Heavy Wind Blowing Upstream",CONTROL CLEAR,BOAT CONTROL WAS DIFFICULT DUE TO STRONG WINDS BLOWING U/S EVEN WITH DROUGE (SHOULD HAVE SHRUNK DROUGE OPENING A BIT MORE) FOUND BEADS OFF FLOAT - FIXED AT 1118  Mid-section,97,475,0.79,25.3,18.9,Provisional/Provisoire,3.24
+08LF051,2023-08-30T19:25:00Z,-8,Stage/Niveau d'eau,1.524,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.520 Surge: 0.004  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-08-30T18:20:00Z,-8,Stage/Niveau d'eau,1.534,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.545 Surge: 0.004  * The uncertainty value is equivalent to the surge value in eHSN.  Flushed (FL),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-26T19:40:00Z,-8,Stage/Niveau d'eau,7.122,NA,NA,NA,NA,NA,NA,NA,NA,HG: 7.123,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-26T19:35:00Z,-8,Stage/Niveau d'eau,7.124,NA,NA,NA,NA,NA,NA,NA,NA,HG: 7.129 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-26T19:30:00Z,-8,Stage/Niveau d'eau,7.126,NA,NA,NA,NA,NA,NA,NA,NA,HG: 7.131 Surge: 0.030  * The uncertainty value is equivalent to the surge value in eHSN.  Maintenance (MT),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-26T19:15:00Z,-8,Stage/Niveau d'eau,7.127,NA,NA,NA,NA,NA,NA,NA,NA,HG: 7.132,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-17T20:55:00Z,-8,Stage/Niveau d'eau,6.488,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 6.491,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-17T20:39:00Z,-8,Discharge/Débit,NA,6.485,2560,11,0.164,0.0392,0.0392,"Measurement condition : Clear; Smokey , No Precipitation ,",NA,"@ Uncertainty: QRev Uncertainty Analysis (DS Mueller, 2016), 2-sigma value (1 x Uncertainty Value reported in *.xml File). @ 100% clear and open. Inside WL returned close to outside after flush, minor SRC. Upper intake flushed decently. Rising stage - debris heavy at times (complete trees, channel buoys etc with branches/sticks). ADCP by Moving Boat",118,1070,2.4,24.5,11.3,Provisional/Provisoire,10.8
+08LF051,2023-05-17T19:30:00Z,-8,Stage/Niveau d'eau,6.47,NA,NA,NA,NA,NA,NA,NA,NA,HG: 6.472 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-17T19:25:00Z,-8,Stage/Niveau d'eau,6.47,NA,NA,NA,NA,NA,NA,NA,NA,HG: 6.481 Surge: 0.050  * The uncertainty value is equivalent to the surge value in eHSN.  Flushed (FL),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-05-17T18:50:00Z,-8,Stage/Niveau d'eau,6.47,NA,NA,NA,NA,NA,NA,NA,NA,HG: 6.431 Surge: 0.050  * The uncertainty value is equivalent to the surge value in eHSN.,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-03-22T23:35:00Z,-8,Stage/Niveau d'eau,0.376,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 0.386 Surge: 0.004  * The uncertainty value is equivalent to the surge value in eHSN.  No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-03-22T23:03:00Z,-8,Discharge/Débit,NA,0.376,141,11,-0.123,0.165,0.0041,"Measurement condition : Clear; Clear ,  ,",NA,"100% clear. Lower 2 intakes appear plugged, cannot flush (in-gauge pump cannot draw water). Upper 2 intakes open but at water line and seem to be angled and not connecting to WL. When stage rises, intakes should be ok and lowers can be flushed. No SRC applied, HG values are invalid. Direct WL for MGH at record low stages. Mid-section",91,346,0.407,10.6,4.1,Provisional/Provisoire,NA
+08LF051,2023-03-22T20:50:00Z,-8,Stage/Niveau d'eau,0.376,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 0.404 Surge: 0.004  * The uncertainty value is equivalent to the surge value in eHSN.  No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-01-11T23:25:00Z,-8,Stage/Niveau d'eau,0.405,NA,NA,NA,NA,NA,NA,NA,NA,HG: 0.405 No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-01-11T20:45:00Z,-8,Stage/Niveau d'eau,0.399,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 Surge: 0.005  * The uncertainty value is equivalent to the surge value in eHSN.  Flushed (FL),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2023-01-11T20:16:00Z,-8,Discharge/Débit,NA,0.399,146,11,0.13,0.1713,0.0119,"Measurement condition : Clear; Mostly Cloudy , No Precipitation , Calm Wind","Minor hung shore ice, not impacting water level.",Lowest QM on record.  Good low water SxS ADCP.  New multi-equation curve required: all low end measurements are right of a single equation rating.  *RFT note: I have already applied a knee-bend shift so discharge is being produced.   Both intakes are plugged on arrival.  Shaft encoder wire in notches but HG invalid: took DWL.   No reset after clearing intakes: well naturally recharged to 0.000m SRC.  I have deleted stage back to November 4 in AQ.  Mid-section,90,370,0.394,2.4,2.4,Provisional/Provisoire,2.6
+08LF051,2023-01-11T18:25:00Z,-8,Stage/Niveau d'eau,0.691,NA,NA,NA,NA,NA,NA,NA,NA,HG: 0.691 Surge: 0.005  * The uncertainty value is equivalent to the surge value in eHSN.  Maintenance (MT),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-12-15T20:45:00Z,-8,Stage/Niveau d'eau,0.707,NA,NA,NA,NA,NA,NA,NA,NA,HG: 0.707,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-12-15T19:45:00Z,-8,Stage/Niveau d'eau,0.707,NA,NA,NA,NA,NA,NA,NA,NA,HG: 0.703 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-09-07T23:05:00Z,-8,Stage/Niveau d'eau,2.522,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.522,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-09-07T22:49:00Z,-8,Discharge/Débit,NA,2.523,650,11,0.0178,0.009,0.009,"Measurement condition : Clear; Clear , No Precipitation , Moderate Wind Blowing Upstream",NA,Wire slightly out of notches.  Replaced in notches at 13:54.  Reset water level at 13:58.  Mid-section,100,575,1.13,29.9,19.1,Provisional/Provisoire,2.64
+08LF051,2022-09-07T21:50:00Z,-8,Stage/Niveau d'eau,2.524,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.531 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-07-26T16:10:00Z,-8,Stage/Niveau d'eau,5.482,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 5.482,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-07-26T15:48:00Z,-8,Discharge/Débit,NA,5.483,1860,11,-0.0417,-0.0248,-0.0248,"Measurement condition : Clear; Clear , No Precipitation , Calm Wind",NA,Wire in notches.  Reset water level after restart.  Apply offset correction from 6:50 to 7:10 HG values.  Mid-section,109,896,2.07,18.5,15.7,Provisional/Provisoire,2.59
+08LF051,2022-07-26T14:35:00Z,-8,Stage/Niveau d'eau,5.488,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 5.488 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-06-15T21:05:00Z,-8,Stage/Niveau d'eau,7.401,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 7.401,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-06-15T20:41:30Z,-8,Discharge/Débit,NA,7.407,2940,11,-0.0656,-0.0295,-0.0295,"Measurement condition : Clear; Partly Cloudy , No Precipitation , Calm Wind",NA,Wire out of notches.  Set wire back in notches and reset water level at 11:38.  Mid-section,118,1130,2.6,21.5,9,Provisional/Provisoire,2.69
+08LF051,2022-06-15T19:35:00Z,-8,Stage/Niveau d'eau,7.413,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 7.381 Reset (RS),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-04-19T21:35:00Z,-8,Stage/Niveau d'eau,1.737,NA,NA,NA,NA,NA,NA,NA,NA,HG: 1.737 No Reset (NR),NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2022-01-18T20:20:00Z,-8,Stage/Niveau d'eau,1.549,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.549,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2022-01-18T20:01:00Z,-8,Discharge/Débit,NA,1.55,357,11,-0.0143,-0.0151,-0.0151,"Measurement condition : Clear; Mostly Cloudy , No Precipitation , Calm Wind",NA,"Wire slightly out of notches.  Replaced wire in wheel notches at 10:57, eliminating -0.005m SRC.   Mid-section",96,421,0.848,3.4,1.1,Final/Finales,2.38
+08LF051,2022-01-18T18:55:00Z,-8,Stage/Niveau d'eau,1.55,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.555 SRC: -0.005 No Reset (NR),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-11-03T19:50:00Z,-8,Stage/Niveau d'eau,2.067,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.067,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-11-03T19:22:30Z,-8,Discharge/Débit,NA,2.068,492,11,-0.0285,-0.0232,-0.0232,"Measurement condition : Clear; Mostly Cloudy , No Precipitation , Calm Wind",NA,"Wire slightly out of notches; placed in notches of wheel at 9:34, which eliminated SRC.  No reset.  Mid-section",98,537,0.916,9.4,8.7,Final/Finales,2.54
+08LF051,2021-11-03T17:30:00Z,-8,Stage/Niveau d'eau,2.07,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.075 SRC: -0.005 No Reset (NR),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-07-06T17:40:00Z,-8,Stage/Niveau d'eau,6.136,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 6.139 SRC: -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-07-06T17:17:30Z,-8,Discharge/Débit,NA,6.146,2200,11,-0.122,-0.0301,-0.0301,"Measurement condition : Clear; Smokey , No Precipitation , Calm Wind",NA,Wire in notches.  No flush.  No reset.  Mid-section,114,986,2.23,19.1,16.4,Final/Finales,2.48
+08LF051,2021-07-06T16:15:00Z,-8,Stage/Niveau d'eau,6.155,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 6.158 SRC: -0.003 No Reset (NR),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-05-11T23:10:00Z,-8,Stage/Niveau d'eau,3.974,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 3.974,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-05-11T22:50:00Z,-8,Discharge/Débit,NA,3.973,1140,11,-0.118,-0.0418,-0.0418,"Measurement condition : Clear; Clear , No Precipitation , Calm Wind",NA,Wire in notches.  No reset.  Mid-section,102,715,1.59,24.7,9.2,Final/Finales,2.75
+08LF051,2021-05-11T21:55:00Z,-8,Stage/Niveau d'eau,3.969,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 3.969 No Reset (NR),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-04-06T00:00:00Z,-8,Stage/Niveau d'eau,1.139,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.139,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-04-05T23:27:00Z,-8,Discharge/Débit,NA,1.139,254,10,-0.115,-0.0421,-0.0421,"Measurement condition : Clear; Clear , No Precipitation , Light Wind Blowing Upstream",NA,Increase knee-bend shift slightly.   SxS measurement notes: Good quality measurement.  Mild upstream wind not significantly impacting velocities.    Wire in notches.  Moved shaft encoder to centre of well to prevent float from catching during high water.  Reset water level at 13:56.  Mid-section,95,451,0.563,14.5,6,Final/Finales,2.47
+08LF051,2021-04-05T19:40:00Z,-8,Stage/Niveau d'eau,1.137,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 1.137 Maintenance (MT),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2021-01-12T17:15:00Z,-8,Stage/Niveau d'eau,1.418,NA,NA,NA,NA,NA,NA,NA,NA,HG: 1.418,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-11-17T20:40:00Z,-8,Stage/Niveau d'eau,2.31,NA,NA,NA,NA,NA,NA,NA,NA,HG: 2.310,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-11-17T20:15:00Z,-8,Stage/Niveau d'eau,2.3,NA,NA,NA,NA,NA,NA,NA,NA,HG: 2.314 SRC: -0.004 Reset (RS),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-09-17T17:15:00Z,-8,Stage/Niveau d'eau,2.12,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.123 SRC: -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-09-17T16:55:00Z,-8,Discharge/Débit,NA,2.123,508,10,-0.102,-0.0574,-0.0359,"Measurement condition : Clear; Smokey , No Precipitation , Calm Wind",NA,Plots on current knee-bend shift Wire in notches.  No flush.  No reset.   Mid-section,98,547,0.927,16.3,18,Final/Finales,2.55
+08LF051,2020-09-17T15:50:00Z,-8,Stage/Niveau d'eau,2.125,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000 HG: 2.128 SRC: -0.003 No Reset (NR),NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-07-14T16:10:00Z,-8,Stage/Niveau d'eau,6.782,NA,NA,NA,NA,NA,NA,NA,NA,HG: 6.782,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-06-05T01:20:00Z,-8,Stage/Niveau d'eau,7.722,NA,NA,NA,NA,NA,NA,NA,NA,GC: 0.000,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-06-05T00:24:00Z,-8,Discharge/Débit,NA,7.719,3260,10,-0.0779,-0.0159,-0.0159,"Measurement condition : Debris; Partly Cloudy ,  , Moderate Wind Swirling/Variable","Clear, into the bush on both banks.","Debris frequent, cavitation at thalweg transects, got as many good samples as I was confortable with.  Shaft Encoder/Float/Cable was hung fixed @15:05 Bar in well @ current GH approx, maybe it should be removed. see Photos Mid-section",123,1160,2.82,21.6,11.2,Final/Finales,NA
+08LF051,2020-05-07T18:00:00Z,-8,Stage/Niveau d'eau,4.325,NA,NA,NA,NA,NA,NA,NA,NA,HG: 4.330 Sensor Reset Correction of -0.005,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2020-01-14T19:00:00Z,-8,Stage/Niveau d'eau,1.074,NA,NA,NA,NA,NA,NA,NA,NA,HG: 1.074,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-11-04T23:10:00Z,-8,Stage/Niveau d'eau,1.84,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-11-04T22:11:30Z,-8,Discharge/Débit,NA,1.841,449,NA,NA,NA,NA,NA,NA,Sources:Manual,108,508,0.883,NA,9.5,Final/Finales,NA
+08LF051,2019-11-04T21:55:00Z,-8,Stage/Niveau d'eau,1.841,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-09-16T20:50:00Z,-8,Stage/Niveau d'eau,2.707,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2 Sensor Reset Correction of -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-08-12T22:55:00Z,-8,Stage/Niveau d'eau,3.089,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2 Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-08-12T22:19:00Z,-8,Discharge/Débit,NA,3.091,870,NA,NA,NA,NA,NA,NA,Sources:Manual,109,635,1.37,32.3,20.7,Final/Finales,NA
+08LF051,2019-08-12T21:04:00Z,-8,Discharge/Débit,NA,3.096,817,NA,NA,NA,NA,NA,NA,"Discharge Remarks: DID MOVING BOAT CONFIRMATION MMNT  ST: 1412  END:  1426  WIDTH: 109m  AREA: 635m2   VEL: 1.37m/s   Q: 870cms  MGH: 3.092  PLOTS 1.46%  USED QRev EXTRAP FOR SxS MMNT. Control Condition Remarks: CONTROL CLEAR Depth Ref: Bottom Track Extrapolation:  	Top: Constant; Bottom: No Slip; Exponent: 0.1667 Sources:eHSN v1.3.2",104,608,1.34,32.3,20.7,Final/Finales,NA
+08LF051,2019-08-12T20:25:00Z,-8,Stage/Niveau d'eau,3.098,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2 Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-05-27T21:30:00Z,-8,Stage/Niveau d'eau,5.315,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2 Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-05-27T20:43:30Z,-8,Discharge/Débit,NA,5.314,1910,NA,NA,NA,NA,NA,NA,"Control Condition Remarks: CONTROL CLEAR Depth Ref: Bottom Track Extrapolation:  	Top: Power; Bottom: Power; Exponent: 0.05 Sources:eHSN v1.3.2",117,896,2.13,31.2,12.1,Final/Finales,NA
+08LF051,2019-05-27T20:00:00Z,-8,Stage/Niveau d'eau,5.314,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2 Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-05-09T20:45:00Z,-8,Stage/Niveau d'eau,2.818,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-05-09T20:08:00Z,-8,Discharge/Débit,NA,2.813,761,NA,NA,NA,NA,NA,NA,"Control Condition Remarks: CONTROL CLEAR Depth Ref: Bottom Track Extrapolation:  	Top: Power; Bottom: Power; Exponent: 0.06181 Sources:eHSN v1.3.2",109,609,1.25,27.8,8.2,Final/Finales,NA
+08LF051,2019-05-09T19:15:00Z,-8,Stage/Niveau d'eau,2.807,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3.2 Sensor Reset Correction of -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-03-28T18:55:00Z,-8,Stage/Niveau d'eau,1.016,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Upgraded from 'Logger Value' field.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-03-28T18:20:00Z,-8,Stage/Niveau d'eau,1.017,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Upgraded from 'Logger Value' field.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-03-28T17:29:00Z,-8,Discharge/Débit,NA,1.014,245,NA,NA,NA,NA,NA,NA,Sources:Manual,95,410.171,0.597,5.4,4.8,Final/Finales,NA
+08LF051,2019-03-28T16:45:00Z,-8,Stage/Niveau d'eau,1.012,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Upgraded from 'Logger Value' field.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2019-01-31T17:15:00Z,-8,Stage/Niveau d'eau,1.074,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3_Beta Sensor Reset Correction of 0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-11-01T01:15:00Z,-8,Stage/Niveau d'eau,1.404,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-11-01T01:01:54Z,-8,Discharge/Débit,NA,1.404,315,NA,NA,NA,NA,NA,NA,Sources:Import,96,447.15,0.7,10.3,10.79,Final/Finales,0.0226
+08LF051,2018-11-01T00:00:00Z,-8,Stage/Niveau d'eau,1.403,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-08-21T23:25:00Z,-8,Stage/Niveau d'eau,2.46,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3_Beta Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-07-16T20:40:00Z,-8,Stage/Niveau d'eau,4.45,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.4 Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-05-24T23:00:00Z,-8,Stage/Niveau d'eau,7.817,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.4 Sensor Reset Correction of -0.010,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-05-24T22:07:30Z,-8,Discharge/Débit,NA,7.808,3080,NA,NA,NA,NA,NA,NA,SXS FROM CABLEWAY WITH HIGH SPEED TETHER Sources:eHSN v1.2.4,119,1126.832,2.728,28,11.8,Final/Finales,NA
+08LF051,2018-05-24T21:10:00Z,-8,Stage/Niveau d'eau,7.804,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.4 Sensor Reset Correction of -0.016,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-05-19T22:25:00Z,-8,Stage/Niveau d'eau,7.69,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-05-19T22:20:00Z,-8,Stage/Niveau d'eau,7.689,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.005,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-05-19T22:00:00Z,-8,Discharge/Débit,NA,7.694,3150,NA,NA,NA,NA,NA,NA,"* Post Processes using Extrap - constant, no slip, Exp = 0.1667 applied to all panels  Significant Debris flowing, large trees, Difficulty at panels 11 - 14 many bad ensembles, re-ran measuments multiple times at theses locations to get at least 40 good ensembles. Sources:Manual",123,1150,2.74,21.6,10.1,Final/Finales,NA
+08LF051,2018-05-16T16:00:00Z,-8,Stage/Niveau d'eau,7.135,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.4 Sensor Reset Correction of 0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-05-16T15:20:00Z,-8,Stage/Niveau d'eau,7.127,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.4,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2018-01-18T18:00:00Z,-8,Stage/Niveau d'eau,0.767,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.3 Sensor Reset Correction of 0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-10-25T20:10:00Z,-8,Stage/Niveau d'eau,1.428,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-10-25T19:30:30Z,-8,Discharge/Débit,NA,1.431,355,NA,NA,NA,NA,NA,NA,Sources:Manual,101,445,0.798,12.3,11,Final/Finales,NA
+08LF051,2017-10-25T19:00:00Z,-8,Stage/Niveau d'eau,1.433,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-10-25T17:35:00Z,-8,Stage/Niveau d'eau,1.427,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-10-13T18:10:00Z,-8,Stage/Niveau d'eau,1.117,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-07-19T16:30:00Z,-8,Stage/Niveau d'eau,4.27,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-07-19T15:45:00Z,-8,Stage/Niveau d'eau,4.268,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-05-16T15:45:00Z,-8,Stage/Niveau d'eau,5.82,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-03-14T22:00:00Z,-8,Stage/Niveau d'eau,0.981,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2017-01-31T17:15:00Z,-8,Stage/Niveau d'eau,1.235,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-12-15T20:20:00Z,-8,Stage/Niveau d'eau,1.944,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-12-15T19:54:43Z,-8,Discharge/Débit,NA,1.945,484,NA,NA,NA,NA,NA,NA,"Sources:Manual,Import  ==Additional discharge result== Time,ParameterId,UnitId,Value,Correction,Remark 2016-12-15T11:54:43,QR,m^3/s,487.161,,Transect No1. Source:Import 2016-12-15T11:54:43,QR,m^3/s,481.311,,Transect No2. Source:Import",105.2885,505.956,0.9575,-9.5,3.1,Final/Finales,NA
+08LF051,2016-12-15T18:50:00Z,-8,Stage/Niveau d'eau,1.946,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-12-15T17:20:00Z,-8,Stage/Niveau d'eau,1.951,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-11-08T16:40:00Z,-8,Stage/Niveau d'eau,2.656,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-09-07T19:15:00Z,-8,Stage/Niveau d'eau,2.315,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-09-07T18:55:00Z,-8,Stage/Niveau d'eau,2.314,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.005,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-08-09T23:15:00Z,-8,Stage/Niveau d'eau,2.973,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-06-23T17:10:00Z,-8,Stage/Niveau d'eau,4.516,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-06-23T16:20:13Z,-8,Discharge/Débit,NA,4.515,1450,NA,NA,NA,NA,NA,NA,"Extrap - Constant, No Slip - applied Sources:Manual,Import  ==Additional discharge result== Time,ParameterId,UnitId,Value,Correction,Remark 2016-06-23T08:20:13,QR,m^3/s,1457.298,,Transect No2. Source:Import 2016-06-23T08:20:13,QR,m^3/s,1445.918,,Transect No3. Source:Import",113.8495,786.4505,1.846,19.4,15.1,Final/Finales,NA
+08LF051,2016-06-23T14:45:00Z,-8,Stage/Niveau d'eau,4.513,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-06-08T18:45:00Z,-8,Stage/Niveau d'eau,5.733,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-04-15T18:50:00Z,-8,Stage/Niveau d'eau,3.36,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.009,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-04-15T17:55:00Z,-8,Discharge/Débit,NA,3.355,974,NA,NA,NA,NA,NA,NA,"Extrap - Constant, no-slip applied Sources:Manual",NA,NA,NA,8.1,7.2,Final/Finales,NA
+08LF051,2016-04-15T16:00:00Z,-8,Stage/Niveau d'eau,3.346,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-04-13T15:35:00Z,-8,Stage/Niveau d'eau,3.295,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-04-13T15:30:00Z,-8,Stage/Niveau d'eau,3.293,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.028,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-04-13T15:00:00Z,-8,Stage/Niveau d'eau,3.299,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-02-10T21:15:00Z,-8,Stage/Niveau d'eau,1.029,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-02-10T18:20:00Z,-8,Stage/Niveau d'eau,1.027,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 1.050,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2016-02-10T16:25:00Z,-8,Stage/Niveau d'eau,1.026,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-12-11T17:40:00Z,-8,Stage/Niveau d'eau,1.403,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-10-21T15:50:00Z,-8,Stage/Niveau d'eau,1.775,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-08-25T19:45:00Z,-8,Stage/Niveau d'eau,1.86,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-08-25T18:50:00Z,-8,Stage/Niveau d'eau,1.867,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-07-14T23:10:00Z,-8,Stage/Niveau d'eau,3.442,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2015-07-14T23:00:00Z,-8,Stage/Niveau d'eau,3.444,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.005,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2015-07-14T22:21:54Z,-8,Discharge/Débit,NA,3.445,1020,NA,NA,NA,NA,NA,NA,"1st solo ADCP mmnt Sources:Manual,Import  ==Additional discharge result== Time,ParameterId,UnitId,Value,Correction,Remark 2015-07-14T14:21:54,QR,m^3/s,1012.183,,Transect No1. Source:Import 2015-07-14T14:21:54,QR,m^3/s,1032.35,,Transect No4. Source:Import",106.41,642.15,1.592,31.3,20.75,Provisional/Provisoire,NA
+08LF051,2015-07-14T19:20:00Z,-8,Stage/Niveau d'eau,3.452,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2015-06-03T23:55:00Z,-8,Stage/Niveau d'eau,6.058,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-05-27T23:10:00Z,-8,Stage/Niveau d'eau,5.651,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-05-27T22:34:18Z,-8,Discharge/Débit,NA,5.654,2060,NA,NA,NA,NA,NA,NA,"Extrap: Constant, No Slip, Exp = 0.1667, Applied Sources:Import",112.96,871.46,NA,25.5,12.7,Final/Finales,NA
+08LF051,2015-05-27T20:40:00Z,-8,Stage/Niveau d'eau,5.662,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-05-07T19:10:00Z,-8,Stage/Niveau d'eau,3.374,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-05-07T19:00:00Z,-8,Stage/Niveau d'eau,3.371,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-03-17T18:30:00Z,-8,Stage/Niveau d'eau,2.123,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-03-17T17:57:30Z,-8,Discharge/Débit,NA,2.121,542,NA,NA,NA,NA,NA,NA,"Compass cal failed, system test failed due to version of Winriver on laptop. Extrap: Constant, No Slip., Exp = 0.1073 applied Sources:Manual ==Mean gage height correction: Observed value=2.122, Correction=-0.001 ==",104,535,1.01,9.9,4.5,Final/Finales,NA
+08LF051,2015-03-17T16:25:00Z,-8,Stage/Niveau d'eau,2.113,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.005,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-01-21T18:15:00Z,-8,Stage/Niveau d'eau,1.489,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2015-01-21T18:00:00Z,-8,Stage/Niveau d'eau,1.49,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-12-02T17:25:00Z,-8,Stage/Niveau d'eau,1.942,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-10-10T00:50:00Z,-8,Stage/Niveau d'eau,1.967,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-10-10T00:32:30Z,-8,Discharge/Débit,NA,1.967,491,NA,NA,NA,NA,NA,NA,Tethered boat Sources:Manual,107.85,513.1,0.956,17.5,14.9,Final/Finales,NA
+08LF051,2014-10-10T00:30:00Z,-8,Stage/Niveau d'eau,1.967,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.009,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-10-09T22:45:00Z,-8,Stage/Niveau d'eau,1.965,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.007,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-08-21T16:05:00Z,-8,Stage/Niveau d'eau,2.929,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.020,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-08-21T15:40:00Z,-8,Stage/Niveau d'eau,2.929,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.017,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-07-09T00:30:00Z,-8,Stage/Niveau d'eau,5.575,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.121,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-07-08T22:55:00Z,-8,Stage/Niveau d'eau,5.58,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.032,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-06-19T18:55:00Z,-8,Stage/Niveau d'eau,6.431,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.060,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2014-06-19T18:35:30Z,-8,Discharge/Débit,NA,6.431,2500,NA,NA,NA,NA,NA,NA,Sources:Manual,170.344,903.835,2.772,16,11.2,Provisional/Provisoire,NA
+08LF051,2014-06-19T14:50:00Z,-8,Stage/Niveau d'eau,6.434,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.009,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2014-06-19T04:10:00Z,-8,Stage/Niveau d'eau,6.467,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-06-19T04:05:00Z,-8,Stage/Niveau d'eau,6.464,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-06-04T00:00:00Z,-8,Stage/Niveau d'eau,7.13,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.077,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-06-03T22:05:00Z,-8,Stage/Niveau d'eau,7.16,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.082,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-06-03T18:00:00Z,-8,Stage/Niveau d'eau,7.165,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.079,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-04-25T18:55:00Z,-8,Stage/Niveau d'eau,2.068,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 1.283,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2014-04-25T18:15:00Z,-8,Stage/Niveau d'eau,2.062,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.009,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2014-04-25T17:15:00Z,-8,Discharge/Débit,NA,2.058,503,NA,NA,NA,NA,NA,NA,Sources:Manual,103.157,511.081,0.985,14.2,5.8,Provisional/Provisoire,NA
+08LF051,2014-04-25T16:15:00Z,-8,Stage/Niveau d'eau,2.053,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.008,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2014-03-05T20:00:00Z,-8,Stage/Niveau d'eau,0.526,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.020,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-03-05T19:15:00Z,-8,Stage/Niveau d'eau,0.526,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.019,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-03-05T18:17:00Z,-8,Discharge/Débit,NA,0.526,160,NA,NA,NA,NA,NA,NA,Control Condition: clear Measurement Section Conition: clear Weather Condition: cloudy Wind Velocity: LIGHT Sources:Import,94,415.68,0.3856,NA,0.7,Final/Finales,NA
+08LF051,2014-03-05T16:45:00Z,-8,Stage/Niveau d'eau,0.527,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.020,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2014-03-05T16:30:00Z,-8,Stage/Niveau d'eau,0.527,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.019,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-12-11T23:40:00Z,-8,Stage/Niveau d'eau,0.764,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -5.551,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-12-11T23:25:00Z,-8,Stage/Niveau d'eau,0.764,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.010,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-30T21:00:00Z,-8,Stage/Niveau d'eau,1.457,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.003,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-30T20:50:00Z,-8,Stage/Niveau d'eau,1.457,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-30T20:04:00Z,-8,Discharge/Débit,NA,1.458,350,NA,NA,NA,NA,NA,NA,"Direction Bias in GPS, therfore used Botton Track Extrap Recommendations: Power, Power, Exponent = 0.0933 0.16 Screening Distance Applied Percent Measured 72% Sources:Manual",101,453,0.751,7.5,9.3,Final/Finales,NA
+08LF051,2013-10-30T18:50:00Z,-8,Stage/Niveau d'eau,1.459,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-30T18:20:00Z,-8,Stage/Niveau d'eau,1.459,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.007,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-08T18:30:00Z,-8,Stage/Niveau d'eau,1.857,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-08T18:20:00Z,-8,Stage/Niveau d'eau,1.857,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-10-08T18:10:00Z,-8,Stage/Niveau d'eau,1.85,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.010,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2013-05-31T19:00:00Z,-8,Stage/Niveau d'eau,6.131,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2013-05-31T18:55:00Z,-8,Stage/Niveau d'eau,6.14,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2013-05-29T20:00:00Z,-8,Stage/Niveau d'eau,6.051,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.029,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2013-05-29T19:22:15Z,-8,Discharge/Débit,NA,6.057,2370,NA,NA,NA,NA,NA,NA,"Sources:Import,Manual  ==Additional discharge result== Time,ParameterId,UnitId,Value,Correction,Remark 2013-05-29T11:22:15,QR,m^3/s,2370,,Source:Manual",168.22,1112.26,2.144,NA,9.8,Provisional/Provisoire,NA
+08LF051,2013-05-29T18:59:37Z,-8,Discharge/Débit,NA,6.063,2360,NA,NA,NA,NA,NA,NA,"Provisional data.  600kHz ADCP Manual entry. Sources:Manual  ==Additional discharge result== Time,ParameterId,UnitId,Value,Correction,Remark 2013-05-29T10:59:37,QR,m^3/s,2425,,Source:Manual",NA,NA,NA,NA,9.8,Provisional/Provisoire,NA
+08LF051,2013-05-29T17:56:00Z,-8,Stage/Niveau d'eau,6.069,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.028,NA,NA,NA,NA,NA,Provisional/Provisoire,NA
+08LF051,2012-11-27T18:16:00Z,-8,Stage/Niveau d'eau,1.362,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-11-27T18:10:00Z,-8,Stage/Niveau d'eau,1.362,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.036,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-06-27T16:50:00Z,-8,Stage/Niveau d'eau,8.14,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-06-27T16:40:00Z,-8,Stage/Niveau d'eau,8.14,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.004,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-06-20T01:00:00Z,-8,Stage/Niveau d'eau,7.611,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.020,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-06-20T00:41:30Z,-8,Discharge/Débit,NA,7.598,3280,NA,NA,NA,NA,NA,NA,Estimated mean velocity using stage - velocity regression due to beam separation and velocity bias from ADCP data.  T- boat difficult deployment at this GH/flow Sources:Manual,129,1140,2.867,19,10.7,Final/Finales,NA
+08LF051,2012-06-20T00:00:00Z,-8,Stage/Niveau d'eau,7.585,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-06-19T23:20:00Z,-8,Stage/Niveau d'eau,7.594,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-05-11T19:40:00Z,-8,Stage/Niveau d'eau,4.403,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.001,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-05-11T19:00:30Z,-8,Discharge/Débit,NA,4.402,1390,NA,NA,NA,NA,NA,NA,M-9 from CW via T-Boat - loop correction performed no correction recomended Sources:Manual,111,761,1.825,16,7,Final/Finales,NA
+08LF051,2012-05-11T18:00:00Z,-8,Stage/Niveau d'eau,4.4,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.013,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2012-05-11T17:45:00Z,-8,Stage/Niveau d'eau,4.401,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-12-13T22:15:00Z,-8,Stage/Niveau d'eau,0.951,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.011,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-12-13T21:38:30Z,-8,Discharge/Débit,NA,0.952,240,NA,NA,NA,NA,NA,NA,Sources:Manual,98.22,406.1,0.59,-1.6,3.4,Final/Finales,NA
+08LF051,2011-12-13T20:50:00Z,-8,Stage/Niveau d'eau,0.954,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-12-13T19:46:30Z,-8,Discharge/Débit,NA,0.953,231,NA,NA,NA,NA,NA,NA,Sources:Import,93,417.705,0.5524,-1.6,3.4,Final/Finales,NA
+08LF051,2011-12-13T19:00:00Z,-8,Stage/Niveau d'eau,0.952,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-12-13T00:00:00Z,-8,Stage/Niveau d'eau,0.966,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-12-12T23:25:00Z,-8,Stage/Niveau d'eau,0.969,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.006,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-10-07T19:05:00Z,-8,Stage/Niveau d'eau,2.302,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-10-07T18:38:30Z,-8,Discharge/Débit,NA,2.312,568,NA,NA,NA,NA,NA,NA,Sources:Manual,100,559.35,1.015,11.7,12.5,Final/Finales,NA
+08LF051,2011-10-07T18:20:00Z,-8,Stage/Niveau d'eau,2.319,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of -0.009,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-08-12T16:33:00Z,-8,Stage/Niveau d'eau,3.968,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-07-13T17:00:00Z,-8,Stage/Niveau d'eau,6.317,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-06-20T19:15:00Z,-8,Stage/Niveau d'eau,7,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-06-07T18:19:00Z,-8,Stage/Niveau d'eau,6.806,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-06-01T18:00:00Z,-8,Stage/Niveau d'eau,6.668,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-06-01T17:59:30Z,-8,Discharge/Débit,NA,6.664,2750,NA,NA,NA,NA,NA,NA,TRDI 600kHz used Sources:Manual,188,1149,2.4,15,9.3,Final/Finales,NA
+08LF051,2011-04-03T20:32:00Z,-8,Stage/Niveau d'eau,0.778,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-02-25T18:56:30Z,-8,Discharge/Débit,NA,0.567,172,NA,NA,NA,NA,NA,NA,Sources:Manual,90,375.465,0.459,-10.3,1,Final/Finales,NA
+08LF051,2011-02-25T18:56:00Z,-8,Stage/Niveau d'eau,0.567,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2011-01-26T17:55:00Z,-8,Stage/Niveau d'eau,0.786,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-11-28T17:37:00Z,-8,Stage/Niveau d'eau,1.087,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-10-20T00:35:00Z,-8,Stage/Niveau d'eau,1.831,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-10-20T00:35:00Z,-8,Discharge/Débit,NA,1.831,461,NA,NA,NA,NA,NA,NA,NA,97.3,401,1.15,17.5,12,Final/Finales,NA
+08LF051,2010-09-28T17:20:00Z,-8,Stage/Niveau d'eau,2.132,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-08-18T18:40:00Z,-8,Stage/Niveau d'eau,2.677,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-07-13T18:29:00Z,-8,Stage/Niveau d'eau,4.687,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-06-10T20:01:00Z,-8,Discharge/Débit,NA,5.397,1960,NA,NA,NA,NA,NA,NA,NA,193,797,2.46,15.4,12,Final/Finales,NA
+08LF051,2010-06-10T20:01:00Z,-8,Stage/Niveau d'eau,5.397,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-06-02T18:15:00Z,-8,Stage/Niveau d'eau,4.812,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2010-02-04T18:20:00Z,-8,Stage/Niveau d'eau,0.67,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-11-12T18:24:00Z,-8,Stage/Niveau d'eau,1.067,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-07-23T17:12:00Z,-8,Stage/Niveau d'eau,3.719,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-06-11T17:58:30Z,-8,Discharge/Débit,NA,5.661,2010,NA,NA,NA,NA,NA,NA,NA,114,917.25,2.191,21.4,12.7,Final/Finales,NA
+08LF051,2009-06-11T17:58:00Z,-8,Stage/Niveau d'eau,5.661,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-05-26T17:22:00Z,-8,Stage/Niveau d'eau,4.333,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-04-30T16:45:00Z,-8,Stage/Niveau d'eau,1.92,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-04-16T19:21:00Z,-8,Stage/Niveau d'eau,0.998,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-04-16T19:21:00Z,-8,Discharge/Débit,NA,0.998,247,NA,NA,NA,NA,NA,NA,NA,94,426.075,0.579,13.5,5.4,Final/Finales,NA
+08LF051,2009-03-02T18:36:00Z,-8,Stage/Niveau d'eau,0.664,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2009-01-12T20:55:00Z,-8,Stage/Niveau d'eau,1.095,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-10-23T18:40:00Z,-8,Stage/Niveau d'eau,1.713,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-08-12T18:41:00Z,-8,Discharge/Débit,NA,3.018,821,NA,NA,NA,NA,NA,NA,NA,104,622.6,1.319,21.6,18.6,Final/Finales,NA
+08LF051,2008-08-12T18:41:00Z,-8,Stage/Niveau d'eau,3.018,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-07-31T16:30:00Z,-8,Stage/Niveau d'eau,3.621,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-06-02T21:45:00Z,-8,Discharge/Débit,NA,6.994,2620,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,20,10.4,Final/Finales,NA
+08LF051,2008-06-02T21:45:00Z,-8,Stage/Niveau d'eau,6.994,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-05-21T17:52:00Z,-8,Stage/Niveau d'eau,5.717,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-03-19T18:54:30Z,-8,Discharge/Débit,NA,0.741,200,NA,NA,NA,NA,NA,NA,NA,93,396.975,0.504,6,3.2,Final/Finales,NA
+08LF051,2008-03-19T18:54:00Z,-8,Stage/Niveau d'eau,0.741,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-03-13T16:45:00Z,-8,Stage/Niveau d'eau,0.756,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2008-02-13T17:56:00Z,-8,Stage/Niveau d'eau,0.842,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-09-19T18:45:00Z,-8,Stage/Niveau d'eau,1.634,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-08-28T17:45:00Z,-8,Stage/Niveau d'eau,2.137,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-07-30T21:43:00Z,-8,Stage/Niveau d'eau,3.957,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-06-08T18:39:30Z,-8,Discharge/Débit,NA,7.368,2860,NA,NA,NA,NA,NA,NA,NA,123,1126.19,2.536,18,11.4,Final/Finales,NA
+08LF051,2007-06-08T18:39:00Z,-8,Stage/Niveau d'eau,7.368,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-03-20T18:34:00Z,-8,Discharge/Débit,NA,1.306,308,NA,NA,NA,NA,NA,NA,NA,95,450.885,0.683,8.1,4.8,Final/Finales,NA
+08LF051,2007-03-20T18:34:00Z,-8,Stage/Niveau d'eau,1.306,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-03-07T20:06:00Z,-8,Stage/Niveau d'eau,0.604,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2007-02-01T18:02:00Z,-8,Stage/Niveau d'eau,0.619,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2006-11-10T17:42:00Z,-8,Stage/Niveau d'eau,1.003,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2006-09-19T17:23:00Z,-8,Stage/Niveau d'eau,1.534,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2006-07-26T17:35:00Z,-8,Stage/Niveau d'eau,3.35,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2006-05-29T17:56:00Z,-8,Discharge/Débit,NA,6.676,2590,NA,NA,NA,NA,NA,NA,NA,118,1004.813,2.577,15.3,9.9,Final/Finales,NA
+08LF051,2006-05-29T17:56:00Z,-8,Stage/Niveau d'eau,6.676,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2006-04-07T18:00:00Z,-8,Stage/Niveau d'eau,1.075,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2006-01-11T17:30:00Z,-8,Stage/Niveau d'eau,1.523,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-11-16T17:50:00Z,-8,Stage/Niveau d'eau,2.306,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-11-10T19:00:00Z,-8,Stage/Niveau d'eau,2.449,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-10-13T16:56:00Z,-8,Stage/Niveau d'eau,1.725,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-08-24T19:59:00Z,-8,Stage/Niveau d'eau,2.355,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-08-05T18:53:00Z,-8,Stage/Niveau d'eau,3.335,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-06-07T18:25:00Z,-8,Discharge/Débit,NA,5.769,2030,NA,NA,NA,NA,NA,NA,NA,116,900.07,2.25,10.9,12,Final/Finales,NA
+08LF051,2005-06-07T17:41:00Z,-8,Stage/Niveau d'eau,5.769,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-05-05T18:08:30Z,-8,Discharge/Débit,NA,4.052,1210,NA,NA,NA,NA,NA,NA,NA,108,708.5,1.704,16.1,9.6,Final/Finales,NA
+08LF051,2005-05-05T17:36:00Z,-8,Stage/Niveau d'eau,4.052,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-02-23T22:00:00Z,-8,Stage/Niveau d'eau,1.975,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-01-27T17:43:00Z,-8,Stage/Niveau d'eau,2.051,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2005-01-05T18:00:00Z,-8,Stage/Niveau d'eau,1.144,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-12-22T19:30:00Z,-8,Stage/Niveau d'eau,1.652,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-12-16T18:50:00Z,-8,Stage/Niveau d'eau,1.673,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-11-23T19:15:00Z,-8,Stage/Niveau d'eau,2.076,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-11-08T19:05:00Z,-8,Stage/Niveau d'eau,1.843,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-10-07T19:59:00Z,-8,Stage/Niveau d'eau,2.223,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-09-22T18:15:00Z,-8,Stage/Niveau d'eau,3.137,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-08-05T18:17:30Z,-8,Discharge/Débit,NA,2.799,731,NA,NA,NA,NA,NA,NA,NA,102,576.77,1.268,16.9,20.7,Final/Finales,NA
+08LF051,2004-08-05T18:17:00Z,-8,Stage/Niveau d'eau,2.799,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-06-22T15:43:00Z,-8,Discharge/Débit,NA,4.798,1570,NA,NA,NA,NA,NA,NA,NA,110,798.6,1.97,20.9,14.4,Final/Finales,NA
+08LF051,2004-06-22T15:20:00Z,-8,Stage/Niveau d'eau,4.798,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-06-15T19:33:30Z,-8,Discharge/Débit,NA,5.436,1750,NA,NA,NA,NA,NA,NA,NA,113,805,2.174,22.2,13,Final/Finales,NA
+08LF051,2004-06-15T19:12:00Z,-8,Stage/Niveau d'eau,5.436,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-04-28T20:29:30Z,-8,Discharge/Débit,NA,2.857,739,NA,NA,NA,NA,NA,NA,NA,104,593.605,1.244,18.9,7.3,Final/Finales,NA
+08LF051,2004-04-28T20:02:00Z,-8,Stage/Niveau d'eau,2.857,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-03-31T19:05:00Z,-8,Stage/Niveau d'eau,0.818,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-03-08T18:32:00Z,-8,Stage/Niveau d'eau,0.555,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2004-03-04T21:42:00Z,-8,Stage/Niveau d'eau,0.537,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-11-18T22:17:00Z,-8,Discharge/Débit,NA,1.492,337,NA,NA,NA,NA,NA,NA,NA,96,463.85,0.726,5.5,6.8,Final/Finales,NA
+08LF051,2003-11-18T21:46:00Z,-8,Stage/Niveau d'eau,1.492,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-09-18T19:40:00Z,-8,Stage/Niveau d'eau,1.487,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-08-28T17:47:00Z,-8,Discharge/Débit,NA,2.01,462,NA,NA,NA,NA,NA,NA,NA,100,507.95,0.909,17.4,18.4,Final/Finales,NA
+08LF051,2003-08-28T17:22:00Z,-8,Stage/Niveau d'eau,2.01,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-07-11T17:25:00Z,-8,Stage/Niveau d'eau,4.335,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-06-26T18:33:00Z,-8,Stage/Niveau d'eau,5.363,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-06-05T18:28:00Z,-8,Discharge/Débit,NA,5.728,2110,NA,NA,NA,NA,NA,NA,NA,115,944.425,2.232,21.3,11.3,Final/Finales,NA
+08LF051,2003-06-05T17:49:00Z,-8,Stage/Niveau d'eau,5.728,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-04-30T18:45:00Z,-8,Stage/Niveau d'eau,3.11,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-04-10T19:15:00Z,-8,Stage/Niveau d'eau,0.973,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-03-31T18:51:00Z,-8,Discharge/Débit,NA,0.729,201,NA,NA,NA,NA,NA,NA,NA,92,407.805,0.494,NA,NA,Final/Finales,NA
+08LF051,2003-03-31T18:18:00Z,-8,Stage/Niveau d'eau,0.729,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2003-01-29T18:05:00Z,-8,Stage/Niveau d'eau,0.709,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-12-31T18:05:00Z,-8,Stage/Niveau d'eau,0.724,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-11-14T17:55:00Z,-8,Stage/Niveau d'eau,0.897,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-10-16T17:05:00Z,-8,Stage/Niveau d'eau,1.554,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-08-23T16:19:30Z,-8,Discharge/Débit,NA,2.471,635,NA,NA,NA,NA,NA,NA,NA,100,571.88,1.11,16.3,16.6,Final/Finales,NA
+08LF051,2002-08-23T15:41:00Z,-8,Stage/Niveau d'eau,2.471,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-08-21T16:00:00Z,-8,Stage/Niveau d'eau,2.588,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-07-22T16:35:00Z,-8,Stage/Niveau d'eau,5.307,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-07-02T17:30:00Z,-8,Stage/Niveau d'eau,7.434,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-06-18T19:41:30Z,-8,Discharge/Débit,NA,7.346,2940,NA,NA,NA,NA,NA,NA,NA,120,1102.9,2.666,17.3,11.8,Final/Finales,NA
+08LF051,2002-06-18T19:10:00Z,-8,Stage/Niveau d'eau,7.346,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-06-12T18:23:00Z,-8,Discharge/Débit,NA,6.516,2400,NA,NA,NA,NA,NA,NA,NA,118.5,999.925,2.4,21.4,10.3,Final/Finales,NA
+08LF051,2002-06-12T17:52:00Z,-8,Stage/Niveau d'eau,6.516,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-05-24T16:50:00Z,-8,Stage/Niveau d'eau,5.707,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-05-07T17:05:00Z,-8,Stage/Niveau d'eau,2.952,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-04-11T20:42:00Z,-8,Discharge/Débit,NA,0.828,218,NA,NA,NA,NA,NA,NA,NA,93,394.52,0.552,15.3,4,Final/Finales,NA
+08LF051,2002-04-11T20:05:00Z,-8,Stage/Niveau d'eau,0.828,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-04-02T18:15:00Z,-8,Stage/Niveau d'eau,0.703,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-01-30T18:20:00Z,-8,Stage/Niveau d'eau,0.891,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2002-01-02T19:20:00Z,-8,Stage/Niveau d'eau,1.03,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-12-07T18:30:00Z,-8,Stage/Niveau d'eau,1.463,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-09-27T20:05:00Z,-8,Stage/Niveau d'eau,1.805,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-06-06T18:58:00Z,-8,Stage/Niveau d'eau,5.81,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-05-16T19:00:00Z,-8,Stage/Niveau d'eau,2.873,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-04-02T22:20:30Z,-8,Discharge/Débit,NA,0.618,187,NA,NA,NA,NA,NA,NA,NA,90,391,NA,13.9,5.1,Final/Finales,NA
+08LF051,2001-04-02T21:44:00Z,-8,Stage/Niveau d'eau,0.618,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-03-02T20:45:00Z,-8,Stage/Niveau d'eau,0.61,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-01-30T20:40:00Z,-8,Stage/Niveau d'eau,0.683,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2001-01-03T19:20:00Z,-8,Stage/Niveau d'eau,0.936,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-12-06T19:35:00Z,-8,Stage/Niveau d'eau,1.157,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-10-05T18:35:00Z,-8,Stage/Niveau d'eau,1.965,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-08-22T18:04:00Z,-8,Discharge/Débit,NA,3.031,853,NA,NA,NA,NA,NA,NA,NA,103,638.98,1.336,16.5,17.2,Final/Finales,NA
+08LF051,2000-08-22T17:27:00Z,-8,Stage/Niveau d'eau,3.031,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-07-28T16:30:00Z,-8,Stage/Niveau d'eau,5.421,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-07-10T19:15:00Z,-8,Stage/Niveau d'eau,5.803,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-06-14T16:55:00Z,-8,Stage/Niveau d'eau,6.407,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-05-16T23:04:00Z,-8,Discharge/Débit,NA,3.797,1190,NA,NA,NA,NA,NA,NA,NA,107,755.64,1.579,20.3,10,Final/Finales,NA
+08LF051,2000-05-16T22:22:00Z,-8,Stage/Niveau d'eau,3.797,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-05-01T19:53:00Z,-8,Stage/Niveau d'eau,3.126,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-04-17T18:04:00Z,-8,Discharge/Débit,NA,1.78,418,NA,NA,NA,NA,NA,NA,NA,98,508.65,0.822,15.4,5.3,Final/Finales,NA
+08LF051,2000-04-17T17:25:00Z,-8,Stage/Niveau d'eau,1.78,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-04-10T18:28:00Z,-8,Discharge/Débit,NA,1.479,351,NA,NA,NA,NA,NA,NA,NA,98,483.355,0.726,16.4,5.7,Final/Finales,NA
+08LF051,2000-04-10T17:42:00Z,-8,Stage/Niveau d'eau,1.479,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-03-31T23:25:00Z,-8,Stage/Niveau d'eau,1.163,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-03-01T21:00:00Z,-8,Stage/Niveau d'eau,1,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-02-01T19:45:00Z,-8,Stage/Niveau d'eau,1.248,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,2000-01-05T18:00:00Z,-8,Stage/Niveau d'eau,1.628,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-11-15T19:20:00Z,-8,Stage/Niveau d'eau,2.435,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-09-22T17:30:00Z,-8,Stage/Niveau d'eau,2.63,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-09-01T17:55:00Z,-8,Stage/Niveau d'eau,4.059,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-07-20T17:01:30Z,-8,Discharge/Débit,NA,7.252,3030,NA,NA,NA,NA,NA,NA,NA,123,1121.417,2.753,19,13.6,Final/Finales,NA
+08LF051,1999-07-20T16:08:00Z,-8,Stage/Niveau d'eau,7.252,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-06-30T17:20:00Z,-8,Stage/Niveau d'eau,7.78,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-06-23T19:53:30Z,-8,Discharge/Débit,NA,8.376,3690,NA,NA,NA,NA,NA,NA,NA,130,1298.8,3.051,23.4,11.3,Final/Finales,NA
+08LF051,1999-06-23T19:24:00Z,-8,Stage/Niveau d'eau,8.376,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-06-01T22:15:00Z,-8,Stage/Niveau d'eau,6.142,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-04-19T19:30:00Z,-8,Stage/Niveau d'eau,1.588,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-03-31T17:10:00Z,-8,Stage/Niveau d'eau,1.11,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-03-01T18:30:00Z,-8,Stage/Niveau d'eau,0.742,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-02-10T18:10:00Z,-8,Stage/Niveau d'eau,0.823,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1999-01-04T20:05:00Z,-8,Stage/Niveau d'eau,0.878,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-11-23T20:25:00Z,-8,Stage/Niveau d'eau,1.124,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-09-18T17:15:00Z,-8,Stage/Niveau d'eau,1.55,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-08-20T17:00:00Z,-8,Discharge/Débit,NA,2.34,666,NA,NA,NA,NA,NA,NA,NA,101,587.84,1.208,19.8,19.3,Final/Finales,NA
+08LF051,1998-08-20T16:47:00Z,-8,Stage/Niveau d'eau,2.34,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-06-22T19:10:00Z,-8,Stage/Niveau d'eau,4.44,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-05-19T18:56:30Z,-8,Discharge/Débit,NA,5.781,2180,NA,NA,NA,NA,NA,NA,NA,115,939.5,2.473,14.6,9.7,Final/Finales,NA
+08LF051,1998-05-19T18:35:00Z,-8,Stage/Niveau d'eau,5.781,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-05-04T19:50:00Z,-8,Stage/Niveau d'eau,4.485,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-04-21T19:50:30Z,-8,Discharge/Débit,NA,1.972,506,NA,NA,NA,NA,NA,NA,NA,99,518.11,0.958,18.4,8.3,Final/Finales,NA
+08LF051,1998-04-21T19:16:00Z,-8,Stage/Niveau d'eau,1.972,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-03-31T18:55:00Z,-8,Stage/Niveau d'eau,1.75,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-03-02T19:25:00Z,-8,Stage/Niveau d'eau,1.172,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-01-30T17:15:00Z,-8,Stage/Niveau d'eau,1.244,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1998-01-05T21:15:00Z,-8,Stage/Niveau d'eau,1.29,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-11-07T16:30:00Z,-8,Stage/Niveau d'eau,2.982,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-09-23T19:00:00Z,-8,Stage/Niveau d'eau,2.922,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-08-14T14:55:00Z,-8,Stage/Niveau d'eau,4.153,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-06-09T19:46:30Z,-8,Discharge/Débit,NA,7.778,3460,NA,NA,NA,NA,NA,NA,NA,125,1116.11,3.099,27,11,Final/Finales,NA
+08LF051,1997-06-09T17:58:00Z,-8,Stage/Niveau d'eau,7.778,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-06-03T18:45:00Z,-8,Stage/Niveau d'eau,8.01,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-04-30T20:35:00Z,-8,Stage/Niveau d'eau,3.635,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-02-24T19:25:00Z,-8,Stage/Niveau d'eau,0.992,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-02-03T18:35:00Z,-8,Stage/Niveau d'eau,1.091,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1997-01-08T19:00:00Z,-8,Stage/Niveau d'eau,1.241,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-12-12T18:40:00Z,-8,Stage/Niveau d'eau,1.645,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-11-12T18:40:00Z,-8,Stage/Niveau d'eau,1.645,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-10-31T18:10:00Z,-8,Stage/Niveau d'eau,1.802,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-09-20T17:40:00Z,-8,Stage/Niveau d'eau,2.65,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-08-22T19:51:00Z,-8,Discharge/Débit,NA,3.291,969,NA,NA,NA,NA,NA,NA,NA,103,628.37,1.542,23.6,16.8,Final/Finales,NA
+08LF051,1996-08-22T19:07:00Z,-8,Stage/Niveau d'eau,3.291,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-06-27T18:55:00Z,-8,Discharge/Débit,NA,6.032,2290,NA,NA,NA,NA,NA,NA,NA,115,886.25,2.583,20,12.6,Final/Finales,NA
+08LF051,1996-06-27T18:16:00Z,-8,Stage/Niveau d'eau,6.032,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-06-27T16:40:00Z,-8,Stage/Niveau d'eau,6.032,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-06-03T17:30:00Z,-8,Stage/Niveau d'eau,5.794,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-04-22T19:45:00Z,-8,Stage/Niveau d'eau,2.156,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-04-01T22:00:00Z,-8,Stage/Niveau d'eau,1.432,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-03-27T21:10:00Z,-8,Stage/Niveau d'eau,1.257,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-02-28T18:00:00Z,-8,Stage/Niveau d'eau,1.136,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-01-31T18:25:00Z,-8,Stage/Niveau d'eau,1.232,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-01-08T19:00:00Z,-8,Stage/Niveau d'eau,1.241,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1996-01-03T17:55:00Z,-8,Stage/Niveau d'eau,1.828,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-07-13T17:50:00Z,-8,Stage/Niveau d'eau,4.328,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-06-09T17:40:00Z,-8,Discharge/Débit,NA,6.402,2440,NA,NA,NA,NA,NA,NA,NA,120,996,2.45,21,12,Final/Finales,NA
+08LF051,1995-06-09T17:40:00Z,-8,Stage/Niveau d'eau,6.402,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-06-09T17:05:00Z,-8,Stage/Niveau d'eau,6.402,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-05-25T18:20:00Z,-8,Stage/Niveau d'eau,4.77,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-05-04T18:50:00Z,-8,Stage/Niveau d'eau,2.45,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-04-03T17:30:00Z,-8,Stage/Niveau d'eau,0.968,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-03-17T19:50:00Z,-8,Stage/Niveau d'eau,0.645,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-03-17T19:45:00Z,-8,Discharge/Débit,NA,0.645,197,NA,NA,NA,NA,NA,NA,NA,94,367,0.537,8,4,Final/Finales,NA
+08LF051,1995-02-27T17:40:00Z,-8,Stage/Niveau d'eau,0.641,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-01-30T18:00:00Z,-8,Stage/Niveau d'eau,0.466,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1995-01-09T19:00:00Z,-8,Stage/Niveau d'eau,0.31,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-12-06T18:00:00Z,-8,Stage/Niveau d'eau,0.5,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-11-02T18:20:00Z,-8,Stage/Niveau d'eau,0.937,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-09-15T20:20:00Z,-8,Discharge/Débit,NA,1.756,451,NA,NA,NA,NA,NA,NA,NA,99,478,0.944,25,18,Final/Finales,NA
+08LF051,1994-09-15T20:20:00Z,-8,Stage/Niveau d'eau,1.756,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-07-25T17:50:00Z,-8,Stage/Niveau d'eau,4.134,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-06-14T18:50:00Z,-8,Stage/Niveau d'eau,5.652,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-05-20T18:40:00Z,-8,Discharge/Débit,NA,5.578,2000,NA,NA,NA,NA,NA,NA,NA,117,903,2.215,17,10,Final/Finales,NA
+08LF051,1994-05-20T18:40:00Z,-8,Stage/Niveau d'eau,5.578,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-05-05T17:20:00Z,-8,Stage/Niveau d'eau,4.5,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-04-29T19:10:00Z,-8,Stage/Niveau d'eau,4.342,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-03-29T19:20:00Z,-8,Discharge/Débit,NA,1.01,266,NA,NA,NA,NA,NA,NA,NA,95,405,0.657,13,5,Final/Finales,NA
+08LF051,1994-03-29T19:20:00Z,-8,Stage/Niveau d'eau,1.01,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-03-01T21:40:00Z,-8,Stage/Niveau d'eau,0.711,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-02-01T18:20:00Z,-8,Stage/Niveau d'eau,0.77,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
+08LF051,1994-01-05T18:20:00Z,-8,Stage/Niveau d'eau,0.73,NA,NA,NA,NA,NA,NA,NA,NA,Reference point and method not documented.,NA,NA,NA,NA,NA,Final/Finales,NA
