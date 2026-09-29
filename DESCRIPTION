@@ -3,12 +3,12 @@ Package: CSHShydRometry
 Title: Frequentist Rating Curve Methods
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Vincenzo", "Coia",
-           email = "vincenzo.coia@gmail.com",
-           role = c("aut", "cre")),
     person("Daniel", "Moore",
            email = "dan.moore@ubc.ca",
            role = "aut"),
+    person("Vincenzo", "Coia",
+           email = "vincenzo.coia@gmail.com",
+           role = c("aut", "cre")),
     person("Paul", "Whitfield",
            email = "paul.h.whitfield@gmail.com",
            role = "aut")
