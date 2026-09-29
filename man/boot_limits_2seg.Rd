@@ -79,12 +79,15 @@ method.
 }
 }
 \examples{
-fit <- rc_nls_2seg(
-  q,
-  h,
-  data = thompson,
-  wts_code = "prop",
-  kstart = 2
-)
-boot_limits_2seg(fit, hpred = c(1, 3, 6), conflev = 0.95, B = 50, seed = 1)
+if (requireNamespace("RBaM", quietly = TRUE)) {
+  sauze <- RBaM::SauzeGaugings
+  fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+  boot_limits_2seg(
+    fit,
+    hpred = c(1, 2, 4),
+    conflev = 0.95,
+    B = 50,
+    seed = 1
+  )
+}
 }

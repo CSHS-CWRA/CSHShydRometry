@@ -55,25 +55,27 @@
 #'   for the `rc_nls` class; the two do not collide.
 #' @seealso [delta_limits_2seg()], [boot_limits_2seg()], [sim_limits_2seg()].
 #' @examples
-#' fit <- rc_nls_2seg(
-#'   q,
-#'   h,
-#'   data = thompson,
-#'   wts_code = "prop",
-#'   kstart = 2
-#' )
+#' if (requireNamespace("RBaM", quietly = TRUE)) {
+#'   sauze <- RBaM::SauzeGaugings
+#'   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+#'   hp <- c(1, 1.5, 2, 4)
 #'
-#' # the default, and fast
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#'   # the default, and fast
+#'   predict(fit, hpred = hp, conflev = 0.95)
 #'
-#' # slower, but does not assume the breakpoint is known
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95, method = "boot", B = 50)
+#'   # slower, but does not assume the breakpoint is known. Compare the two
+#'   # either side of the breakpoint, at about 1.85 m: the delta band jumps
+#'   # there, the bootstrap band does not.
+#'   predict(fit, hpred = hp, conflev = 0.95, method = "boot", B = 50)
+#' }
 #'
 #' # the columns returned never depend on the model or the method, so results
 #' # from different approaches stack directly
+#' one <- rc_nls(q, h, data = thompson)
+#' two <- rc_nls_2seg(q, h, data = thompson, wts_code = "prop", kstart = 2)
 #' rbind(
-#'   predict(rc_nls(q, h, data = thompson), hpred = 3, conflev = 0.95),
-#'   predict(fit, hpred = 3, conflev = 0.95)
+#'   predict(one, hpred = 3, conflev = 0.95),
+#'   predict(two, hpred = 3, conflev = 0.95)
 #' )
 #' @export
 predict.rc_nls_2seg <- function(
@@ -133,14 +135,11 @@ predict.rc_nls_2seg <- function(
 #' @return A data frame (tibble if \pkg{tibble} is available); see
 #'   [predict.rc_nls_2seg()] for the columns.
 #' @examples
-#' fit <- rc_nls_2seg(
-#'   q,
-#'   h,
-#'   data = thompson,
-#'   wts_code = "prop",
-#'   kstart = 2
-#' )
-#' delta_limits_2seg(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#' if (requireNamespace("RBaM", quietly = TRUE)) {
+#'   sauze <- RBaM::SauzeGaugings
+#'   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+#'   delta_limits_2seg(fit, hpred = c(1, 2, 4), conflev = 0.95)
+#' }
 #' @export
 delta_limits_2seg <- function(
   object,

@@ -66,12 +66,15 @@ information matrix is unreliable. Where a calibrated band matters, prefer
 }
 
 \examples{
-fit <- rc_nls_2seg(
-  q,
-  h,
-  data = thompson,
-  wts_code = "prop",
-  kstart = 2
-)
-sim_limits_2seg(fit, hpred = c(1, 3, 6), conflev = 0.95, M = 200, seed = 1)
+if (requireNamespace("RBaM", quietly = TRUE)) {
+  sauze <- RBaM::SauzeGaugings
+  fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+  sim_limits_2seg(
+    fit,
+    hpred = c(1, 2, 4),
+    conflev = 0.95,
+    M = 200,
+    seed = 1
+  )
+}
 }

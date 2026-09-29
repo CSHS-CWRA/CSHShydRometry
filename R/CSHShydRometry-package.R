@@ -39,6 +39,12 @@
 #' come back as `NA` rather than as missing columns, so results from different
 #' approaches stack directly with `rbind()`.
 #'
+#' @section Data:
+#' [thompson] ships with the package and suits the single-segment models. The
+#' two-segment examples prefer the Ardeche at Sauze, `RBaM::SauzeGaugings`,
+#' which has a clearer change of control; RBaM is a suggested dependency used
+#' only as a source of that data.
+#'
 #' For two-segment curves, [predict.rc_nls_2seg()] takes a `method`. The
 #' default, `"delta"`, is fast but unreliable near the breakpoint, where the
 #' mean function is not differentiable; `"boot"` costs a refit per resample and

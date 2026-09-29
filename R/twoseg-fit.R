@@ -56,8 +56,7 @@
 #'   0.95) for downstream prediction/plotting; they do not affect the fit.
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs a
-#' # starting breakpoint and proportional weights to converge. A river with a
-#' # clearer change of control is less fussy.
+#' # starting breakpoint and proportional weights to converge.
 #' fit <- rc_nls_2seg(
 #'   q,
 #'   h,
@@ -66,9 +65,29 @@
 #'   kstart = 2
 #' )
 #' fit
-#' coef(fit$model)
+#' stats::coef(fit$model)
 #'
 #' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#'
+#' # A river with a clearer change of control is far less fussy. The Ardeche
+#' # at Sauze, in the RBaM package, fits under either configuration and
+#' # carries a reported uncertainty for every gauging.
+#' if (requireNamespace("RBaM", quietly = TRUE)) {
+#'   sauze <- RBaM::SauzeGaugings
+#'   pw <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+#'   cp <- rc_nls_2seg(Q, H, data = sauze, config = "compound", kstart = 1)
+#'   c(piecewise = pw$pars[["k"]], compound = cp$pars[["k"]])
+#'
+#'   # weights from the reported gauging uncertainties
+#'   rc_nls_2seg(
+#'     Q,
+#'     H,
+#'     data = sauze,
+#'     wts_code = "spec",
+#'     wts = 1 / sauze$uQ^2,
+#'     kstart = 1
+#'   )
+#' }
 #' @export
 rc_nls_2seg <- function(
   q,

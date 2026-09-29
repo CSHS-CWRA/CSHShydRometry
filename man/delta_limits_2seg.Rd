@@ -41,12 +41,9 @@ per-observation error variances are supplied, not estimated, so there is no
 single scatter to add to the mean curve. Those columns come back \code{NA}.
 }
 \examples{
-fit <- rc_nls_2seg(
-  q,
-  h,
-  data = thompson,
-  wts_code = "prop",
-  kstart = 2
-)
-delta_limits_2seg(fit, hpred = c(1, 3, 6), conflev = 0.95)
+if (requireNamespace("RBaM", quietly = TRUE)) {
+  sauze <- RBaM::SauzeGaugings
+  fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+  delta_limits_2seg(fit, hpred = c(1, 2, 4), conflev = 0.95)
+}
 }

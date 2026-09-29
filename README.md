@@ -84,6 +84,18 @@ delta method behaves normally.
 
 So `"delta"` for a quick look, and `"boot"` where the interval matters.
 
+## Data
+
+`thompson` ships with the package: 93 gaugings from Water Survey of Canada
+station 08LF051, Thompson River. It is close to a single control, so it suits
+the single-segment models; its two-segment fit converges only with care.
+
+For the two-segment models the examples and tests prefer the Ardeche at Sauze,
+`RBaM::SauzeGaugings`, which has a clear change of control and a reported
+uncertainty for every gauging. RBaM is a suggested dependency, used only as a
+source of that data — none of the fitting here is Bayesian, and the BaM engine
+is not needed.
+
 ## Scope
 
 This package covers the frequentist methods only. Bayesian rating-curve
