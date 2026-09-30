@@ -12,21 +12,25 @@ coverage](https://codecov.io/gh/CSHS-CWRA/CSHShydRometry/graph/badge.svg)](https
 MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.org/web/licenses/MIT)
 <!-- badges: end -->
 
-A rating curve turns a river’s stage (its water level, which is easy to
-record continuously) into discharge (the flow, which is not). It is
+A rating curve turns a river’s stage (its water level, which is easier
+to record continuously) into discharge (the flow, which is not). It is
 fitted to gaugings: occasions when both were measured. This package fits
-rating curves by a range of statistical methods, and puts confidence and
-prediction limits on them.
-
-It is derived from work by Dan Moore on rating-curve methods.
+rating curves by a range of statistical methods, and calculates
+uncertainty associated with them.
 
 ## Installation
+
+The package is not on CRAN yet. Get it from GitHub:
 
 ``` r
 remotes::install_github("CSHS-CWRA/CSHShydRometry")
 ```
 
-## The data
+## Fitting a single-segment rating curve
+
+``` r
+library(CSHShydRometry)
+```
 
 The package comes with 93 gaugings from the Thompson River (Water Survey
 of Canada station 08LF051). `stage` is in metres and `discharge` in
@@ -34,7 +38,6 @@ cubic metres per second. A few gaugings also carry a reported
 uncertainty.
 
 ``` r
-library(CSHShydRometry)
 head(thompson)
 #>         date stage discharge uncertainty_pct
 #> 1 2023-03-22 0.376       141              NA
@@ -54,8 +57,6 @@ plot(stage ~ discharge, data = thompson)
 
 <img src="man/figures/README-plot-data-1.png" alt="" width="100%" />
 
-## Fitting a curve
-
 The classic rating curve is a power law relating discharge $Q$ to stage
 $h$:
 
@@ -63,7 +64,8 @@ $$
 Q = a (h - c)^b
 $$
 
-`rc_nls()` fits it by nonlinear least squares:
+`rc_nls()` is one method, which fits this relationship by nonlinear
+least squares:
 
 ``` r
 fit <- rc_nls(discharge, stage, data = thompson)
@@ -172,32 +174,6 @@ rbind(
 #> 2     3  835.   816.   855.
 ```
 
-## Weighting
-
-Gaugings of big flows usually scatter more than gaugings of small ones.
-`wts_code` says how to allow for that:
-
-| `wts_code`         | the scatter is…                            |
-|--------------------|--------------------------------------------|
-| `"none"` (default) | the same at every flow                     |
-| `"prop"`           | proportional to the flow                   |
-| `"spec"`           | known for each gauging, and given in `wts` |
-
-With `"prop"`, the prediction limits widen as the flow grows:
-
-``` r
-fit_prop <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
-predict(fit_prop, stage = c(1, 6), predlev = 0.95)
-#> # A tibble: 2 × 4
-#>   stage   fit pi_lwr pi_upr
-#>   <dbl> <dbl>  <dbl>  <dbl>
-#> 1     1  252.   232.   272.
-#> 2     6 2205.  2027.  2383.
-```
-
-With `"spec"` the fit does not estimate the scatter of a new gauging, so
-its prediction limits come back as `NA`.
-
 ## Two-segment curves
 
 Where the river’s control changes (say, when the water rises out of the
@@ -275,14 +251,9 @@ against roughly 97% for the bootstrap. Away from the breakpoint the two
 agree. So use `"delta"` for a quick look, and `"boot"` where the
 interval matters.
 
-## Scope
+## Acknowledgements
 
-The package covers frequentist methods only. Bayesian rating-curve
-estimation, and a breakpoint-averaged interval method that removes the
-jump described above, are left out for now.
-
-An interval method that draws parameters from their estimated sampling
-distribution and pushes each draw through the model was tried and
-dropped: where a segment is poorly identified, the sampled parameters
-too often give impossible curves (negative or astronomically large
-discharges).
+The name of this R package is in recognition of the support provided by
+the [Canadian Society for Hydrological Sciences
+(CSHS)](https://cwra.org/en/affiliates-programs/cshs/) which is an
+affiliated society of the Canadian Water Resources Association (CWRA).
