@@ -15,10 +15,10 @@
   * the gaugings stored on a fit are `gaugings`, with columns `discharge` and
     `stage` (formerly `qh_obs`, with `q` and `h`), and the fitted models'
     formulas use the same names;
-  * `thompson` has columns `stage`, `discharge` and `uncertainty_percent`
+  * `thompson` has columns `stage`, `discharge` and `uncertainty_pct`
     (formerly `h`, `q` and `uq`).
 
-* `thompson$uncertainty_percent` is now documented as what it is: a
+* `thompson$uncertainty_pct` is now documented as what it is: a
   percentage of the discharge at two standard deviations, as reported by the
   Water Survey of Canada. It was previously described as a discharge
   uncertainty, and the tests used `1 / uq^2` as weights as though it were a

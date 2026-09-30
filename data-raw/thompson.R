@@ -26,7 +26,7 @@ thompson <- data.frame(
   date = as.Date(substr(raw$Date..UTC.[keep], 1, 10)),
   stage = as.numeric(raw$Mean.Gauge.Height[keep]),
   discharge = as.numeric(raw$Discharge[keep]),
-  uncertainty_percent = as.numeric(raw$Uncertainty[keep])
+  uncertainty_pct = as.numeric(raw$Uncertainty[keep])
 )
 thompson <- thompson[order(thompson$stage), ]
 rownames(thompson) <- NULL

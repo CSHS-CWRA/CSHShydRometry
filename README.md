@@ -36,38 +36,56 @@ uncertainty.
 ``` r
 library(CSHShydRometry)
 head(thompson)
-#>         date stage discharge uncertainty_percent
-#> 1 2023-03-22 0.376       141                  NA
-#> 2 2023-01-11 0.399       146                 2.6
-#> 3 2014-03-05 0.526       160                  NA
-#> 4 2011-02-25 0.567       172                  NA
-#> 5 2001-04-02 0.618       187                  NA
-#> 6 1995-03-17 0.645       197                  NA
+#>         date stage discharge uncertainty_pct
+#> 1 2023-03-22 0.376       141              NA
+#> 2 2023-01-11 0.399       146             2.6
+#> 3 2014-03-05 0.526       160              NA
+#> 4 2011-02-25 0.567       172              NA
+#> 5 2001-04-02 0.618       187              NA
+#> 6 1995-03-17 0.645       197              NA
 ```
 
-Discharge rises faster than linearly with stage:
+By convention, rating curves are drawn with stage on the vertical axis.
+Discharge rises faster than stage, so the points bend over to the right:
 
 ``` r
-plot(discharge ~ stage, data = thompson)
+plot(stage ~ discharge, data = thompson)
 ```
 
 <img src="man/figures/README-plot-data-1.png" alt="" width="100%" />
 
 ## Fitting a curve
 
-The classic rating curve is a power law,
-`discharge = a * (stage - c)^b`. `rc_nls()` fits it by nonlinear least
-squares:
+The classic rating curve is a power law relating discharge $Q$ to stage
+$h$:
+
+$$
+Q = a (h - c)^b
+$$
+
+`rc_nls()` fits it by nonlinear least squares:
 
 ``` r
 fit <- rc_nls(discharge, stage, data = thompson)
+```
+
+Like the result of `lm()` or `glm()`, `fit` is a fitted-model object.
+Printing it says what kind of model it is, and it works with the usual
+tools, such as `coef()` and `predict()`. `?rating_curve` describes what
+is inside.
+
+``` r
+fit
+#> Rating curve model.
+#> - Method: rc_nls
 coef(fit)
 #>          a          b          c 
 #> 80.6686684  1.7131160 -0.9044139
 ```
 
-Here `c` is the stage at which the flow would stop, and `b` says how
-quickly the flow grows above it.
+Here $c$ is the stage at which the flow would stop, $b$ says how quickly
+the flow grows as the water rises above that, and $a$ sets the scale: it
+is the discharge when the water is one metre above $c$.
 
 ## Predicting discharge
 
@@ -102,10 +120,10 @@ handy for plotting:
 ``` r
 band <- predict(fit, conflev = 0.95, predlev = 0.95)
 
-plot(discharge ~ stage, data = thompson)
-lines(fit ~ stage, data = band)
-lines(pi_lwr ~ stage, data = band, lty = 2)
-lines(pi_upr ~ stage, data = band, lty = 2)
+plot(stage ~ discharge, data = thompson)
+lines(stage ~ fit, data = band)
+lines(stage ~ pi_lwr, data = band, lty = 2)
+lines(stage ~ pi_upr, data = band, lty = 2)
 ```
 
 <img src="man/figures/README-band-1.png" alt="" width="100%" />
@@ -184,27 +202,43 @@ its prediction limits come back as `NA`.
 
 Where the river’s control changes (say, when the water rises out of the
 channel and over a floodplain), one power law is not enough. The Ardèche
-at Sauze, from the RBaM package, is such a river. RBaM names its columns
-`H` for stage and `Q` for discharge, and gives each gauging’s standard
-uncertainty in `uQ`:
+at Sauze, from the RBaM package, is such a river. RBaM calls its columns
+`H`, `Q` and `uQ`; here we give them the names used in this package.
+Each gauging comes with its standard uncertainty, in cubic metres per
+second:
 
 ``` r
-sauze <- RBaM::SauzeGaugings
+sauze <- data.frame(
+  stage = RBaM::SauzeGaugings$H,
+  discharge = RBaM::SauzeGaugings$Q,
+  uncertainty_sd = RBaM::SauzeGaugings$uQ
+)
 head(sauze)
-#>       H    Q   uQ
-#> 1 -0.18  5.0 0.13
-#> 2 -0.16  4.8 0.12
-#> 3  0.22 24.0 0.60
-#> 4  0.22 23.4 0.59
-#> 5  0.27 24.0 0.60
-#> 6  0.27 25.0 0.63
+#>   stage discharge uncertainty_sd
+#> 1 -0.18       5.0           0.13
+#> 2 -0.16       4.8           0.12
+#> 3  0.22      24.0           0.60
+#> 4  0.22      23.4           0.59
+#> 5  0.27      24.0           0.60
+#> 6  0.27      25.0           0.63
 ```
 
-`rc_nls_2seg()` fits two power laws that meet at a breakpoint, `k`. Here
+Below about 1 m the stage climbs steeply with discharge; above about 2 m
+it climbs much more slowly. There are no gaugings in between, so where
+the control changes has to be estimated:
+
+``` r
+plot(stage ~ discharge, data = sauze)
+```
+
+<img src="man/figures/README-plot-sauze-1.png" alt="" width="100%" />
+
+`rc_nls_2seg()` fits two power laws that meet at a breakpoint, $k$. Here
 we weight each gauging by its reported uncertainty:
 
 ``` r
-fit2 <- rc_nls_2seg(Q, H, data = sauze, wts_code = "spec", wts = 1 / sauze$uQ^2)
+fit2 <- rc_nls_2seg(discharge, stage, data = sauze,
+                    wts_code = "spec", wts = 1 / sauze$uncertainty_sd^2)
 fit2$pars$k
 #> [1] 1.621688
 ```

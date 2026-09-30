@@ -4,8 +4,8 @@
 # The gaugings with a reported uncertainty, and weights from it: the
 # uncertainty is a percentage of the discharge at two standard deviations.
 spec_data <- function() {
-  d <- thompson[!is.na(thompson$uncertainty_percent), ]
-  d$wts <- 1 / (d$uncertainty_percent / 100 * d$discharge / 2)^2
+  d <- thompson[!is.na(thompson$uncertainty_pct), ]
+  d$wts <- 1 / (d$uncertainty_pct / 100 * d$discharge / 2)^2
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   d
 }
