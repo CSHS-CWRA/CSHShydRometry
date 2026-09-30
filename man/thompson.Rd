@@ -16,16 +16,17 @@ value"), or \code{NA} where none was given.}
 }
 }
 \source{
-Water Survey of Canada, station 08LF051,
-\url{https://wateroffice.ec.gc.ca}.
+Water Survey of Canada, station 08LF051 (Thompson River near
+Spences Bridge).
 }
 \usage{
 thompson
 }
 \description{
 Stage and discharge measurements from Water Survey of Canada station
-08LF051, Thompson River, used in the examples: every discharge measurement
-made at the station from 1994 to 2024, sorted by stage.
+08LF051, Thompson River near Spences Bridge, British Columbia, used in the
+examples: every discharge measurement made at the station from 1994 to
+2024, sorted by stage.
 }
 \details{
 Reported uncertainties are available for only 19 of the gaugings, so
@@ -38,15 +39,19 @@ either the subset with an uncertainty or weights from elsewhere.
 One uncertainty looks wrong: the gauging of 2018-11-01 has 0.0226, where
 the others lie between about 2.5 and 11. It was probably entered as a
 fraction (2.26\%) rather than a percentage. The value is like this in the
-file downloaded from the Water Survey, so the slip happened at the source,
-not in this package. It is kept as reported.
+records received from the Water Survey, so the slip happened at the
+source, not in this package. It is kept as reported.
 }
 \section{Getting the data yourself}{
 
-The measurements are published by the Water Survey of Canada on its Water
-Level and Flow website, \url{https://wateroffice.ec.gc.ca}: search for station
-08LF051. The download there has more rows (visits that recorded only the
-stage) and more columns than \code{thompson}.
+Individual discharge measurements (field visits) are not published on the
+Water Survey's Water Level and Flow website, \url{https://wateroffice.ec.gc.ca},
+which offers only the time series derived from them; its Frequently Asked
+Questions list field-visit observations among the data "typically not
+publicly available on this website". These records came from the Water
+Survey of Canada, and further or more recent measurements would have to be
+obtained from it directly. The station's page on the website does report
+its most recent discharge measurement.
 }
 
 \keyword{datasets}

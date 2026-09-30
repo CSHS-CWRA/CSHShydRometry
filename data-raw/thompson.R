@@ -1,7 +1,9 @@
 # Build the `thompson` dataset shipped with the package.
 #
 # Source: Water Survey of Canada gauging record for station 08LF051,
-# Thompson River, as exported from the WSC portal. The raw export carries one
+# Thompson River near Spences Bridge, as received from the Water Survey
+# (field-visit records are not published on its Water Level and Flow
+# website). The raw export carries one
 # row per field activity, including stage-only visits and a large number of
 # administrative columns; only the discharge measurements are kept, and only
 # the columns a rating curve needs.
