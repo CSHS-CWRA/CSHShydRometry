@@ -1,7 +1,7 @@
 Type: Package
 Package: CSHShydRometry
 Title: Statistical Methods for Rating Curves
-Version: 0.0.0.9000
+Version: 0.0.1.9000
 Authors@R: c(
     person("Vincenzo", "Coia",
            email = "vincenzo.coia@gmail.com",
@@ -26,21 +26,20 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends:
-    R (>= 4.1)
+    R (>= 4.0.0)
 Imports:
     checkmate,
     investr,
     nlme,
     nlraa,
-    nls2,
     rlang,
-    stats,
-    tidyr
+    stats
 Suggests:
-    MASS,
     RBaM,
     testthat (>= 3.0.0),
     tibble
 Config/testthat/edition: 3
 LazyData: true
 License: MIT + file LICENSE
+URL: https://github.com/CSHS-CWRA/CSHShydRometry
+BugReports: https://github.com/CSHS-CWRA/CSHShydRometry/issues

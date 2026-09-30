@@ -5,7 +5,7 @@
 #' Evaluates the fitted rating curve on a grid of stage values and, optionally,
 #' attaches confidence and/or prediction limits. This is a thin dispatcher: it
 #' validates the arguments common to every method, then hands off to one of the
-#' three `*_limits_2seg()` functions, which all take the same
+#' `*_limits_2seg()` functions, which all take the same
 #' `(object, hpred, conflev, predlev)` arguments and all return the same
 #' columns.
 #'
@@ -22,6 +22,12 @@
 #' So: `"delta"` for a quick look or where the breakpoint is not of interest,
 #' and `"boot"` where the interval matters.
 #'
+#' A third approach -- drawing parameter vectors from their asymptotic normal
+#' distribution and pushing each draw through the model -- was tried and
+#' dropped. When a segment is poorly identified, as the lower segment at Sauze
+#' is, the draws too often land on impossible curves: negative or
+#' astronomically large discharges, giving limits that are meaningless.
+#'
 #' @param object An `rc_nls_2seg` fit (from [rc_nls_2seg()]).
 #' @param ... Passed on to the chosen limits function.
 #' @param hpred Stage values at which to return limits. Defaults to
@@ -30,7 +36,7 @@
 #'   `NULL` to omit it.
 #' @param predlev Confidence level for the prediction interval, or `NULL` to
 #'   omit it.
-#' @param method Interval method, matched by [rlang::arg_match()]:
+#' @param method Interval method:
 #'   \itemize{
 #'     \item `"delta"` (the default): [delta_limits_2seg()], the linearised
 #'       delta method. Fast, but fixes the breakpoint at `k-hat` and so jumps
@@ -39,9 +45,6 @@
 #'       refits, and so does not rest on the asymptotic normal at all. Much the
 #'       slowest, since it refits the model `B` times, and the most trustworthy
 #'       at the breakpoint.
-#'     \item `"sim"`: [sim_limits_2seg()], which draws parameters from their
-#'       asymptotic normal distribution and pushes each through the model.
-#'       Sensitive to the parameter scale; see `space` in [sim_limits_2seg()].
 #'   }
 #' @return A data frame (tibble if \pkg{tibble} is available) with column `h`,
 #'   the fitted discharge `fit`, and, when requested, `ci_lwr`/`ci_upr` and
@@ -53,7 +56,7 @@
 #'   Named for the object's class, `rc_nls_2seg`, so `predict(object)`
 #'   dispatches here. The one-segment models define their own `predict.rc_nls`
 #'   for the `rc_nls` class; the two do not collide.
-#' @seealso [delta_limits_2seg()], [boot_limits_2seg()], [sim_limits_2seg()].
+#' @seealso [delta_limits_2seg()], [boot_limits_2seg()].
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
@@ -84,7 +87,7 @@ predict.rc_nls_2seg <- function(
   hpred = NULL,
   conflev = NULL,
   predlev = NULL,
-  method = c("delta", "boot", "sim")
+  method = c("delta", "boot")
 ) {
   method <- rlang::arg_match(method)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
@@ -94,8 +97,7 @@ predict.rc_nls_2seg <- function(
   limits_fun <- switch(
     method,
     delta = delta_limits_2seg,
-    boot = boot_limits_2seg,
-    sim = sim_limits_2seg
+    boot = boot_limits_2seg
   )
   limits_fun(
     object,
@@ -143,8 +145,8 @@ predict.rc_nls_2seg <- function(
 #' @export
 delta_limits_2seg <- function(
   object,
-  hpred = NULL,
   ...,
+  hpred = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
@@ -156,14 +158,13 @@ delta_limits_2seg <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  if (predlim && object$wts_code == "spec") {
+  if (predlim && object$settings$wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
   hpred_df <- data.frame(h = hpred)
   mod <- object[["model"]]
-  wts_code <- object$wts_code
+  wts_code <- object$settings$wts_code
   # point predictions (fitted mean discharge) at the requested stages
-  # yvec <- unname(stats::predict(mod, newdata = hpred_df, ...))
   yvec <- unname(stats::predict(mod, newdata = hpred_df))
   out_df <- data.frame(h = hpred, fit = yvec)
   # Confidence limits (uncertainty in the mean curve). Route by weighting:
@@ -192,7 +193,7 @@ delta_limits_2seg <- function(
   # Prediction limits (mean uncertainty + observation scatter). Under "spec"
   # weights the observation variances are not recoverable, so the columns are
   # returned as NA rather than dropped -- the caller gets the same shape of
-  # answer whatever the weighting, as the other three methods also do.
+  # answer whatever the weighting, as the other methods also do.
   if (predlim) {
     if (wts_code == "spec") {
       out_df$pi_lwr <- NA_real_

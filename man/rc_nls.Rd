@@ -7,6 +7,7 @@
 rc_nls(
   q,
   h,
+  ...,
   data = NULL,
   wts_code = c("none", "spec", "prop"),
   wts = NULL,
@@ -21,6 +22,9 @@ rc_nls(
 
 \item{h}{A vector of stage data.}
 
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
+
 \item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
 supplied, they may be given as bare column names.}
 
@@ -28,16 +32,19 @@ supplied, they may be given as bare column names.}
 
 \item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
 
-\item{wts_tol}{Convergence tolerance for proportional-weight iteration.}
+\item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
+reweighting stops once no fitted discharge changes by more than this
+fraction from one round to the next.}
 
-\item{wts_maxiter}{Maximum iterations for proportional-weight fitting.}
+\item{wts_maxiter}{Maximum number of reweighting rounds under
+\code{wts_code = "prop"}. Reaching it gives a warning.}
 
 \item{nls_tol}{Tolerance for nls convergence.}
 
 \item{nls_maxiter}{Maximum nls iterations.}
 }
 \value{
-An rc_nls object.
+An \code{rc_nls} object; see \link{rating_curve} for its contents.
 }
 \description{
 Fit rating curve using nls on untransformed data

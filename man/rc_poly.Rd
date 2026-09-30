@@ -7,6 +7,7 @@
 rc_poly(
   q,
   h,
+  ...,
   data = NULL,
   degree = 2,
   wts_code = c("none", "spec", "prop"),
@@ -20,6 +21,9 @@ rc_poly(
 
 \item{h}{A vector of stage data.}
 
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
+
 \item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
 supplied, they may be given as bare column names.}
 
@@ -29,12 +33,16 @@ supplied, they may be given as bare column names.}
 
 \item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
 
-\item{wts_tol}{Convergence tolerance for proportional-weight iteration.}
+\item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
+reweighting stops once no fitted discharge changes by more than this
+fraction from one round to the next.}
 
-\item{wts_maxiter}{Maximum iterations for proportional-weight fitting.}
+\item{wts_maxiter}{Maximum number of reweighting rounds under
+\code{wts_code = "prop"}. Reaching it gives a warning.}
 }
 \value{
-An rc_poly object.
+An \code{rc_poly} object; see \link{rating_curve} for its contents. The
+coefficients are named \code{b0}, \code{b1}, ... by power of \code{h}.
 }
 \description{
 Fit polynomial rating curve

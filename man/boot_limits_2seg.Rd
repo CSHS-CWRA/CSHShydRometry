@@ -6,8 +6,8 @@
 \usage{
 boot_limits_2seg(
   object,
-  hpred = NULL,
   ...,
+  hpred = NULL,
   conflev = NULL,
   predlev = NULL,
   B = 1000,
@@ -18,14 +18,14 @@ boot_limits_2seg(
 \arguments{
 \item{object}{An \code{rc_nls_2seg} fit (from \code{\link[=rc_nls_2seg]{rc_nls_2seg()}}). The gaugings are
 taken from \code{object$qh_obs} and the fitting arguments from
-\code{object$fit_args}. Under \code{wts_code = "spec"} the supplied weights are
+\code{object$settings}. Under \code{wts_code = "spec"} the supplied weights are
 resampled along with the cases.}
+
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
 
 \item{hpred}{Stage values at which to return limits. Defaults to
 \code{\link[=rc_hpred_grid]{rc_hpred_grid()}}: 1000 points spanning the observed stage range.}
-
-\item{...}{Currently unused; present so that every \verb{*_limits_2seg()}
-function takes the same arguments.}
 
 \item{conflev}{Coverage for the confidence (mean-curve) interval, or \code{NULL}.}
 
@@ -37,7 +37,9 @@ function takes the same arguments.}
 \item{seed}{Optional RNG seed for reproducibility.}
 
 \item{max_tries_factor}{Cap on total resample attempts (\code{B * factor}) so a
-run terminates even if some resamples fail to converge.}
+run terminates even if some resamples fail to converge. A resample fails
+if its fit errors or, under \code{wts_code = "prop"}, if its reweighting does
+not converge; failed resamples are redrawn.}
 }
 \value{
 A data frame (tibble if available) with \code{h}, the point-estimate
@@ -59,7 +61,7 @@ discontinuous widening of the delta-method band at the transition. The
 bootstrap makes no smoothness assumption, so comparing the two is a direct
 check on whether the widening near \code{k} is real or a delta-method artifact.
 
-Each resample is refit with the arguments recorded in \code{object$fit_args}, so
+Each resample is refit with the arguments recorded in \code{object$settings}, so
 the resamples reproduce the original call by construction rather than
 relying on the caller to restate it.
 

@@ -6,12 +6,18 @@
 #' @param h A vector of stage data.
 #' @param data Optional data frame in which to look up `q` and `h`. When
 #'   supplied, they may be given as bare column names.
+#' @param ... Must be empty. Present so that every argument after it has
+#'   to be named in full.
 #' @param degree Polynomial degree.
 #' @param wts_code Weighting scheme: `"none"`, `"spec"`, or `"prop"`.
 #' @param wts Optional vector of weights when `wts_code = "spec"`.
-#' @param wts_tol Convergence tolerance for proportional-weight iteration.
-#' @param wts_maxiter Maximum iterations for proportional-weight fitting.
-#' @return An rc_poly object.
+#' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
+#'   reweighting stops once no fitted discharge changes by more than this
+#'   fraction from one round to the next.
+#' @param wts_maxiter Maximum number of reweighting rounds under
+#'   `wts_code = "prop"`. Reaching it gives a warning.
+#' @return An `rc_poly` object; see [rating_curve] for its contents. The
+#'   coefficients are named `b0`, `b1`, ... by power of `h`.
 #' @examples
 #' fit <- rc_poly(q, h, data = thompson, degree = 2)
 #' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
@@ -19,6 +25,7 @@
 rc_poly <- function(
   q,
   h,
+  ...,
   data = NULL,
   degree = 2,
   wts_code = c("none", "spec", "prop"),
@@ -28,23 +35,31 @@ rc_poly <- function(
 ) {
   # error checks and warnings
   # q and h may name columns of `data`, or be vectors
+  rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   q <- rlang::eval_tidy(rlang::enquo(q), data)
   h <- rlang::eval_tidy(rlang::enquo(h), data)
   checkmate::assert_numeric(q, min.len = 1L)
   checkmate::assert_numeric(h, len = length(q))
+  checkmate::assert_count(degree, positive = TRUE)
   wts_code <- rlang::arg_match(wts_code)
 
   # remove missing observations
-  qh <- tidyr::drop_na(data.frame(qobs = q, hobs = h))
-  q <- qh$qobs
-  h <- qh$hobs
+  # keep user-supplied weights aligned with the gaugings that remain
+  if (length(wts) == length(q)) {
+    wts <- wts[stats::complete.cases(q, h)]
+  }
+  qh <- rc_complete(q, h)
+  q <- qh$q
+  h <- qh$h
   qh_fit <- data.frame(q = q, h = h)
+  wts_input <- wts
+  irls <- NULL
 
   # lm model formula
   lm_modform <- "q ~ h"
   term <- "h"
-  for (i in 2:degree) {
+  for (i in seq_len(degree)[-1]) {
     term <- paste0(term, "*h")
     lm_modform <- paste0(lm_modform, " + I(", term, ")")
   }
@@ -56,9 +71,7 @@ rc_poly <- function(
     mod_sum <- summary(mod_poly)
   } else if (wts_code == "spec") {
     # use specified weights
-    if (!is.numeric(wts)) {
-      stop("invalid values of specified weights")
-    }
+    checkmate::assert_numeric(wts, len = length(q), .var.name = "wts")
     mod_poly <- stats::lm(
       formula = lm_modform,
       weights = wts,
@@ -66,56 +79,61 @@ rc_poly <- function(
     )
     mod_sum <- summary(mod_poly)
   } else {
-    # fit using proportional weights - start using lm with no weights
-    mod_poly <- stats::lm(formula = lm_modform, data = qh_fit)
-    qp <- stats::predict(mod_poly)
-    wts <- 1 / qp^2
-    coefs_old <- as.numeric(mod_poly$coefficients)
+    # proportional weights, by iterative reweighting from the unweighted fit
+    mod_ols <- stats::lm(formula = lm_modform, data = qh_fit)
 
     # create model formula for nls fit
     nls_modform <- "q ~ b0 + b1*h"
-    for (i in 2:degree) {
+    for (i in seq_len(degree)[-1]) {
       nls_modform <- paste0(nls_modform, " + b", i, "*h^", i)
     }
+    nls_modform <- stats::as.formula(nls_modform)
 
-    # create list of starting values
-    startlist <- as.list(coefs_old)
+    # starting values from the unweighted fit
+    startlist <- as.list(unname(stats::coef(mod_ols)))
     names(startlist) <- paste0("b", 0:degree)
 
-    # iterate until coefficient values converge
-    for (i in 1:wts_maxiter) {
-      mod_poly <- stats::nls(
+    fit_fun <- function(wts, start) {
+      stats::nls(
         formula = nls_modform,
         weights = wts,
         data = cbind(qh_fit, wts = wts),
-        start = startlist
+        start = start
       )
-      coefs <- stats::coefficients(mod_poly)
-      max_change <- max(abs((coefs - coefs_old) / coefs_old))
-      if (max_change < wts_tol) {
-        break
-      }
-      coefs_old <- coefs
-      qp <- stats::predict(mod_poly)
-      wts <- 1 / qp^2
     }
+    res <- rc_irls(
+      fit_fun,
+      yp = as.numeric(stats::predict(mod_ols)),
+      start = startlist,
+      wts_tol = wts_tol,
+      wts_maxiter = wts_maxiter
+    )
+    mod_poly <- res$model
+    wts <- res$weights
+    irls <- res$irls
     mod_sum <- summary(mod_poly)
   }
-
-  if (wts_code == "prop") {
-    mod_form <- nls_modform
-  } else {
-    mod_form <- lm_modform
+  if (wts_code == "none") {
+    wts <- rep(1, length(q))
   }
+  coefs <- unname(stats::coef(mod_poly))
+  pars <- as.list(coefs)
+  names(pars) <- paste0("b", 0:degree)
   if (requireNamespace("tibble", quietly = TRUE)) {
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
     qh_obs = qh,
-    formula = mod_form,
-    wts_code = wts_code,
+    pars = pars,
+    settings = list(
+      degree = degree,
+      wts_code = wts_code,
+      wts = wts_input,
+      wts_tol = wts_tol,
+      wts_maxiter = wts_maxiter
+    ),
     weights = wts,
-    pars = stats::coefficients(mod_sum),
+    irls = irls,
     rse = mod_sum$sigma,
     model = mod_poly
   )
@@ -139,7 +157,8 @@ predict.rc_poly <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  if (predlim && object$wts_code == "spec") {
+  wts_code <- object$settings$wts_code
+  if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
   if (is.null(hpred)) {
@@ -148,7 +167,6 @@ predict.rc_poly <- function(
   checkmate::assert_numeric(hpred, min.len = 1, finite = TRUE)
   hpred_df <- data.frame(h = hpred)
   mod <- object[["model"]]
-  wts_code <- object$wts_code
   yvec <- unname(stats::predict(mod, newdata = hpred_df, ...))
   out_df <- data.frame(h = hpred, fit = yvec)
   if (conflim) {

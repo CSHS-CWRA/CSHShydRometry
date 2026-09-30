@@ -7,6 +7,7 @@
 rc_log_ols(
   q,
   h,
+  ...,
   data = NULL,
   c_lwr = min(h) - 10 * max(h),
   c_upr = min(h) - 1e-04
@@ -17,6 +18,9 @@ rc_log_ols(
 
 \item{h}{A vector of stage data.}
 
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
+
 \item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
 supplied, they may be given as bare column names.}
 
@@ -25,7 +29,10 @@ supplied, they may be given as bare column names.}
 \item{c_upr}{The upper bound for the c parameter.}
 }
 \value{
-An rc_log_ols object.
+An \code{rc_log_ols} object; see \link{rating_curve} for its contents. The
+back-transformed coefficient \code{a} estimates the median discharge;
+\code{a_corrected} holds two bias-corrected versions for the mean: \code{nbc},
+assuming lognormal errors, and \code{dbc}, Duan's smearing estimate.
 }
 \description{
 Fit rating curve using lm and log-log transform

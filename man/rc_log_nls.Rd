@@ -4,12 +4,15 @@
 \alias{rc_log_nls}
 \title{Fit rating curve using nls on log-transformed data}
 \usage{
-rc_log_nls(q, h, data = NULL, tol = 1e-06)
+rc_log_nls(q, h, ..., data = NULL, tol = 1e-06)
 }
 \arguments{
 \item{q}{A vector of streamflow data.}
 
 \item{h}{A vector of stage data.}
+
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
 
 \item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
 supplied, they may be given as bare column names.}
@@ -17,7 +20,10 @@ supplied, they may be given as bare column names.}
 \item{tol}{Tolerance for nls convergence.}
 }
 \value{
-An rc_log_nls object.
+An \code{rc_log_nls} object; see \link{rating_curve} for its contents. The
+back-transformed coefficient \code{a} estimates the median discharge;
+\code{a_corrected} holds two bias-corrected versions for the mean: \code{nbc},
+assuming lognormal errors, and \code{dbc}, Duan's smearing estimate.
 }
 \description{
 Fit rating curve using nls on log-transformed data
