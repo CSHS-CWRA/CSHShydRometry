@@ -6,24 +6,30 @@
 #' @param h A vector of stage data.
 #' @param data Optional data frame in which to look up `q` and `h`. When
 #'   supplied, they may be given as bare column names.
+#' @param ... Must be empty. Present so that every argument after it has
+#'   to be named in full.
 #' @param tol Tolerance for nls convergence.
-#' @return An rc_log_nls object.
+#' @return An `rc_log_nls` object; see [rating_curve] for its contents. The
+#'   back-transformed coefficient `a` estimates the median discharge;
+#'   `a_corrected` holds two bias-corrected versions for the mean: `nbc`,
+#'   assuming lognormal errors, and `dbc`, Duan's smearing estimate.
 #' @examples
 #' fit <- rc_log_nls(q, h, data = thompson)
 #' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
 #' @export
-rc_log_nls <- function(q, h, data = NULL, tol = 1e-6) {
+rc_log_nls <- function(q, h, ..., data = NULL, tol = 1e-6) {
   # q = vector of streamflow data
   # h = vector of stage data
   # q and h may name columns of `data`, or be vectors
+  rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   q <- rlang::eval_tidy(rlang::enquo(q), data)
   h <- rlang::eval_tidy(rlang::enquo(h), data)
   checkmate::assert_numeric(q, min.len = 1L)
   checkmate::assert_numeric(h, len = length(q))
-  qh <- tidyr::drop_na(data.frame(qobs = q, hobs = h))
-  q <- qh$qobs
-  h <- qh$hobs
+  qh <- rc_complete(q, h)
+  q <- qh$q
+  h <- qh$h
   # starting estimates
   cstart <- min(h) - 0.1 * (max(h) - min(h))
   lm_mod <- stats::lm(log(q) ~ log(h - cstart))
@@ -50,7 +56,9 @@ rc_log_nls <- function(q, h, data = NULL, tol = 1e-6) {
   }
   outlist <- list(
     qh_obs = qh,
-    pars = list(a = a, a_nbc = a_nbc, a_dbc = a_dbc, b = b, c = c),
+    pars = list(a = unname(a), b = unname(b), c = unname(c)),
+    a_corrected = c(nbc = unname(a_nbc), dbc = unname(a_dbc)),
+    settings = list(tol = tol),
     rse = rse,
     model = mod_nls
   )

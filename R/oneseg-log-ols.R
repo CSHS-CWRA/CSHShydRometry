@@ -6,9 +6,14 @@
 #' @param h A vector of stage data.
 #' @param data Optional data frame in which to look up `q` and `h`. When
 #'   supplied, they may be given as bare column names.
+#' @param ... Must be empty. Present so that every argument after it has
+#'   to be named in full.
 #' @param c_lwr The lower bound for the c parameter.
 #' @param c_upr The upper bound for the c parameter.
-#' @return An rc_log_ols object.
+#' @return An `rc_log_ols` object; see [rating_curve] for its contents. The
+#'   back-transformed coefficient `a` estimates the median discharge;
+#'   `a_corrected` holds two bias-corrected versions for the mean: `nbc`,
+#'   assuming lognormal errors, and `dbc`, Duan's smearing estimate.
 #' @examples
 #' fit <- rc_log_ols(q, h, data = thompson)
 #' fit
@@ -17,11 +22,13 @@
 rc_log_ols <- function(
   q,
   h,
+  ...,
   data = NULL,
   c_lwr = min(h) - 10 * max(h),
   c_upr = min(h) - 0.0001
 ) {
   # q and h may name columns of `data`, or be vectors
+  rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   q <- rlang::eval_tidy(rlang::enquo(q), data)
   h <- rlang::eval_tidy(rlang::enquo(h), data)
@@ -32,9 +39,9 @@ rc_log_ols <- function(
     mod <- stats::lm(log(q) ~ log(h - c))
     summary(mod)$sigma
   }
-  qh <- tidyr::drop_na(data.frame(qobs = q, hobs = h))
-  q <- qh$qobs
-  h <- qh$hobs
+  qh <- rc_complete(q, h)
+  q <- qh$q
+  h <- qh$h
   mod_opt <- stats::optim(
     par = c_lwr,
     fn = opt_fun,
@@ -57,7 +64,9 @@ rc_log_ols <- function(
   }
   outlist <- list(
     qh_obs = qh,
-    pars = list(a = a, a_nbc = a_nbc, a_dbc = a_dbc, b = b, c = c),
+    pars = list(a = unname(a), b = unname(b), c = unname(c)),
+    a_corrected = c(nbc = unname(a_nbc), dbc = unname(a_dbc)),
+    settings = list(c_lwr = c_lwr, c_upr = c_upr),
     rse = rse,
     model = mod
   )
@@ -99,14 +108,14 @@ predict.rc_log_ols <- function(
   checkmate::assert_numeric(hpred, min.len = 1, finite = TRUE)
   hpred_df <- data.frame(h = hpred)
   mod <- object[["model"]]
-  yvec <- unname(exp(stats::predict(mod, new = hpred_df, ...)))
+  yvec <- unname(exp(stats::predict(mod, newdata = hpred_df, ...)))
   out_df <- data.frame(h = hpred, fit = yvec)
   if (conflim) {
     ci_mat <- exp(stats::predict(
       mod,
       interval = "confidence",
       level = conflev,
-      new = hpred_df,
+      newdata = hpred_df,
       ...
     ))
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -118,7 +127,7 @@ predict.rc_log_ols <- function(
       mod,
       interval = "prediction",
       level = predlev,
-      new = hpred_df,
+      newdata = hpred_df,
       ...
     ))
     pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]

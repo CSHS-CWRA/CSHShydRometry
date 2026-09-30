@@ -7,8 +7,8 @@
 rc_nls_2seg(
   q,
   h,
-  data = NULL,
   ...,
+  data = NULL,
   config = c("piecewise", "compound"),
   contcons = c("a", "c"),
   kfixed = FALSE,
@@ -19,9 +19,7 @@ rc_nls_2seg(
   wts_tol = 1e-06,
   wts_maxiter = 100,
   nls_tol = 1e-06,
-  nls_maxiter = 1000,
-  conflev = 0.95,
-  predlev = 0.95
+  nls_maxiter = 1000
 )
 }
 \arguments{
@@ -29,26 +27,28 @@ rc_nls_2seg(
 
 \item{h}{Stage. A vector, or a column of \code{data}.}
 
-\item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
-supplied, they may be given as bare column names.}
-
 \item{...}{Must be empty. Present so that every argument after it has
 to be named, which keeps calls readable and guards against
 positional mistakes.}
 
+\item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
+supplied, they may be given as bare column names.}
+
 \item{config}{Segment configuration, \code{"piecewise"} or \code{"compound"}.
-Matched by \code{\link[rlang:arg_match]{rlang::arg_match()}}, so the first is the default.}
+Defaults to the first.}
 
 \item{contcons}{Parameter carrying the continuity constraint, \code{"a"} or
-\code{"c"}. Matched by \code{\link[rlang:arg_match]{rlang::arg_match()}}; \code{"c"} is not implemented.}
+\code{"c"}. \code{"c"} is not implemented.}
 
-\item{kfixed}{Use a specified constant value of k: \code{"FALSE"} or \code{"TRUE"}.}
+\item{kfixed}{If \code{TRUE}, hold the breakpoint \code{k} fixed at \code{kstart}.}
 
-\item{kstart}{Specified starting value for k parameter: \code{"NULL"} or a numeric value.}
+\item{kstart}{Starting value for the breakpoint \code{k}, or \code{NULL} for the
+midpoint of the default search range.}
 
-\item{kbounds}{Lower and upper boundaries for k: \code{"NULL"} or a numeric vector of length 2.}
+\item{kbounds}{Lower and upper bounds for \code{k}, or \code{NULL} to keep at least
+three gaugings in each segment.}
 
-\item{wts_code}{Weighting scheme, matched by \code{\link[rlang:arg_match]{rlang::arg_match()}}:
+\item{wts_code}{Weighting scheme:
 \code{"none"} (ordinary least squares, the default),
 \code{"spec"} (user-supplied weights via \code{wts}, e.g. \code{1/uq^2} from reported
 discharge uncertainties), or \code{"prop"} (proportional / constant-CV error,
@@ -56,28 +56,25 @@ fit by iteratively reweighting with weights \code{1/fitted^2}).}
 
 \item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
 
-\item{wts_tol}{Convergence tolerance for proportional-weight iteration.}
+\item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
+reweighting stops once no fitted discharge changes by more than this
+fraction from one round to the next.}
 
-\item{wts_maxiter}{Maximum iterations for proportional-weight fitting.}
+\item{wts_maxiter}{Maximum number of reweighting rounds under
+\code{wts_code = "prop"}. Reaching it gives a warning.}
 
 \item{nls_tol}{Tolerance for nls convergence.}
 
 \item{nls_maxiter}{Maximum nls iterations.}
-
-\item{conflev}{Confidence level (0-1) carried on the fit as metadata for
-downstream prediction/plotting. Default \code{0.95}. Does not affect the fit.}
-
-\item{predlev}{Prediction level (0-1) carried on the fit as metadata for
-downstream prediction/plotting. Default \code{0.95}. Does not affect the fit.}
 }
 \value{
-An object of class \code{c("rc_nls_2seg", "rating_curve")}: a list with
-the cleaned data (\code{qh_obs}), \code{configuration}, the confidence/prediction
-levels, fitted parameters (\code{pars}), residual scale (\code{rse}), the weighting
-scheme and weights, and the underlying \code{nls} \code{model}.
-
-\code{conflev} and \code{predlev} are carried on the object as metadata (default
-0.95) for downstream prediction/plotting; they do not affect the fit.
+An object of class \code{c("rc_nls_2seg", "rating_curve")}; see
+\link{rating_curve} for its contents. \code{pars} holds the estimated parameters by
+type, one value per segment: under \code{"piecewise"}, \code{a} has a single value
+because the upper segment's coefficient is fixed by continuity, and under
+\code{"compound"}, \code{c} has a single value because the upper segment is
+measured from \code{k}. \code{coef()} gives the same estimates by their model
+names (\code{a1}, \code{b1}, \code{c1}, ...).
 }
 \description{
 Fit two-segment power-law rating curve using nls on untransformed data
@@ -92,10 +89,11 @@ segment).
 data at \code{kstart} and fitting a linear model to each segment on the
 log-log scale (\verb{log q ~ log(h - c)}); \code{a = exp(intercept)},
 \code{b = slope}.
-\item Fit all parameters jointly with \code{\link[nls2:nls2]{nls2::nls2()}} using the "port"
+\item Fit all parameters jointly with \code{\link[stats:nls]{stats::nls()}} using the "port"
 algorithm (which supports the box constraints in \code{lower}/\code{upper}).
 For \code{wts_code = "prop"} this fit is repeated, updating the weights
-from the current fitted values, until the coefficients stabilise.
+from the current fitted values and starting from the previous
+estimates, until the fitted discharges stabilise.
 }
 }
 \examples{
@@ -109,7 +107,7 @@ fit <- rc_nls_2seg(
   kstart = 2
 )
 fit
-stats::coef(fit$model)
+coef(fit)
 
 predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
 

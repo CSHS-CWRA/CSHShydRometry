@@ -10,26 +10,27 @@
 #'   to be named, which keeps calls readable and guards against
 #'   positional mistakes.
 #' @param config Segment configuration, `"piecewise"` or `"compound"`.
-#'   Matched by [rlang::arg_match()], so the first is the default.
+#'   Defaults to the first.
 #' @param contcons Parameter carrying the continuity constraint, `"a"` or
-#'   `"c"`. Matched by [rlang::arg_match()]; `"c"` is not implemented.
-#' @param kfixed Use a specified constant value of k: `"FALSE"` or `"TRUE"`.
-#' @param kstart Specified starting value for k parameter: `"NULL"` or a numeric value.
-#' @param kbounds Lower and upper boundaries for k: `"NULL"` or a numeric vector of length 2.
-#' @param wts_code Weighting scheme, matched by [rlang::arg_match()]:
+#'   `"c"`. `"c"` is not implemented.
+#' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
+#' @param kstart Starting value for the breakpoint `k`, or `NULL` for the
+#'   midpoint of the default search range.
+#' @param kbounds Lower and upper bounds for `k`, or `NULL` to keep at least
+#'   three gaugings in each segment.
+#' @param wts_code Weighting scheme:
 #'   `"none"` (ordinary least squares, the default),
 #'   `"spec"` (user-supplied weights via `wts`, e.g. `1/uq^2` from reported
 #'   discharge uncertainties), or `"prop"` (proportional / constant-CV error,
 #'   fit by iteratively reweighting with weights `1/fitted^2`).
 #' @param wts Optional vector of weights when `wts_code = "spec"`.
-#' @param wts_tol Convergence tolerance for proportional-weight iteration.
-#' @param wts_maxiter Maximum iterations for proportional-weight fitting.
+#' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
+#'   reweighting stops once no fitted discharge changes by more than this
+#'   fraction from one round to the next.
+#' @param wts_maxiter Maximum number of reweighting rounds under
+#'   `wts_code = "prop"`. Reaching it gives a warning.
 #' @param nls_tol Tolerance for nls convergence.
 #' @param nls_maxiter Maximum nls iterations.
-#' @param conflev Confidence level (0-1) carried on the fit as metadata for
-#'   downstream prediction/plotting. Default `0.95`. Does not affect the fit.
-#' @param predlev Prediction level (0-1) carried on the fit as metadata for
-#'   downstream prediction/plotting. Default `0.95`. Does not affect the fit.
 #'
 #' @details
 #' Fitting proceeds in three steps:
@@ -41,19 +42,20 @@
 #'         data at `kstart` and fitting a linear model to each segment on the
 #'         log-log scale (`log q ~ log(h - c)`); `a = exp(intercept)`,
 #'         `b = slope`.
-#'   \item Fit all parameters jointly with [nls2::nls2()] using the "port"
+#'   \item Fit all parameters jointly with [stats::nls()] using the "port"
 #'         algorithm (which supports the box constraints in `lower`/`upper`).
 #'         For `wts_code = "prop"` this fit is repeated, updating the weights
-#'         from the current fitted values, until the coefficients stabilise.
+#'         from the current fitted values and starting from the previous
+#'         estimates, until the fitted discharges stabilise.
 #' }
 #'
-#' @return An object of class `c("rc_nls_2seg", "rating_curve")`: a list with
-#'   the cleaned data (`qh_obs`), `configuration`, the confidence/prediction
-#'   levels, fitted parameters (`pars`), residual scale (`rse`), the weighting
-#'   scheme and weights, and the underlying `nls` `model`.
-#'
-#'   `conflev` and `predlev` are carried on the object as metadata (default
-#'   0.95) for downstream prediction/plotting; they do not affect the fit.
+#' @return An object of class `c("rc_nls_2seg", "rating_curve")`; see
+#'   [rating_curve] for its contents. `pars` holds the estimated parameters by
+#'   type, one value per segment: under `"piecewise"`, `a` has a single value
+#'   because the upper segment's coefficient is fixed by continuity, and under
+#'   `"compound"`, `c` has a single value because the upper segment is
+#'   measured from `k`. `coef()` gives the same estimates by their model
+#'   names (`a1`, `b1`, `c1`, ...).
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs a
 #' # starting breakpoint and proportional weights to converge.
@@ -65,7 +67,7 @@
 #'   kstart = 2
 #' )
 #' fit
-#' stats::coef(fit$model)
+#' coef(fit)
 #'
 #' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
 #'
@@ -92,8 +94,8 @@
 rc_nls_2seg <- function(
   q,
   h,
-  data = NULL,
   ...,
+  data = NULL,
   config = c("piecewise", "compound"),
   contcons = c("a", "c"),
   kfixed = FALSE,
@@ -104,12 +106,11 @@ rc_nls_2seg <- function(
   wts_tol = 1e-6,
   wts_maxiter = 100,
   nls_tol = 1e-6,
-  nls_maxiter = 1000,
-  conflev = 0.95,
-  predlev = 0.95
+  nls_maxiter = 1000
 ) {
   # -- 1. Inputs: tidy evaluation, checks, missing values ----
   # q and h may name columns of `data`, or be vectors
+  rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   q <- rlang::eval_tidy(rlang::enquo(q), data)
   h <- rlang::eval_tidy(rlang::enquo(h), data)
@@ -118,7 +119,6 @@ rc_nls_2seg <- function(
   config <- rlang::arg_match(config)
   contcons <- rlang::arg_match(contcons)
   wts_code <- rlang::arg_match(wts_code)
-  rlang::check_dots_empty()
   checkmate::assert_numeric(q, min.len = 1L)
   checkmate::assert_numeric(h, len = length(q))
   checkmate::assert_flag(kfixed)
@@ -128,14 +128,17 @@ rc_nls_2seg <- function(
   checkmate::assert_count(wts_maxiter, positive = TRUE)
   checkmate::assert_number(nls_tol, lower = 0)
   checkmate::assert_count(nls_maxiter, positive = TRUE)
-  checkmate::assert_number(conflev, lower = 0, upper = 1, null.ok = TRUE)
-  checkmate::assert_number(predlev, lower = 0, upper = 1, null.ok = TRUE)
-  # Keep the weights exactly as supplied. `wts` is overwritten below (unit
-  # weights for "none", the converged IRLS weights for "prop"), and refitting
-  # methods such as boot_limits_2seg need the original to reproduce the fit.
+  # remove missing values, keeping user-supplied weights aligned with the
+  # gaugings that remain, and check the number of observations
+  if (length(wts) == length(q)) {
+    wts <- wts[stats::complete.cases(q, h)]
+  }
+  qh <- rc_complete(q, h)
+  # Keep the weights as supplied. `wts` is overwritten below (unit weights for
+  # "none", the converged IRLS weights for "prop"), and refitting methods such
+  # as boot_limits_2seg need the original to reproduce the fit.
   wts_input <- wts
-  # remove missing values, check number of observations
-  qh <- tidyr::drop_na(data.frame(q = q, h = h))
+  irls <- NULL
   q <- qh$q
   h <- qh$h
   hsort <- sort(h)
@@ -151,7 +154,7 @@ rc_nls_2seg <- function(
   if (kfixed) {
     # hold k fixed at the supplied value (lower == upper bound)
     if (is.null(kstart)) {
-      stop("Error: kfixed == TRUE and is.null(kstart)")
+      stop("`kstart` must be supplied when `kfixed = TRUE`")
     }
     klwr <- kstart
     kupr <- kstart
@@ -163,7 +166,7 @@ rc_nls_2seg <- function(
         kstart < kbounds[1] ||
         kstart > kbounds[2]
     ) {
-      stop("Error: invalid kstart or kbounds")
+      stop("invalid `kstart` or `kbounds`: need hsort[3] < kbounds[1] <= kstart <= kbounds[2] < hsort[n - 2]")
     }
     # use the supplied bounds as the k search range (kstart kept as given)
     klwr <- kbounds[1]
@@ -181,7 +184,7 @@ rc_nls_2seg <- function(
   } else if (!is.null(kstart) && is.null(kbounds)) {
     klwr <- hsort[3] + 0.001
     kupr <- hsort[n - 2] - 0.001
-    if (kstart < klwr || kstart > kupr) stop("Error: kstart outside klwr:kupr")
+    if (kstart < klwr || kstart > kupr) stop("`kstart` must leave at least 3 gaugings in each segment")
   }
   # -- 3. Starting values, from a log-log fit to each segment ----
   # Starting values for the nls fit. Split the data at kstart and fit each
@@ -211,7 +214,7 @@ rc_nls_2seg <- function(
     # remaining "excess" discharge q2 against depth above k, (h - k). Keep only
     # positive residuals so the log is defined.
     if (kstart < c1start) {
-      stop("Error: kstart < c1start")
+      stop("`kstart` is below the starting value of `c1`")
     }
     qh2$q2 <- qh2$q - a1start * (kstart - c1start)^b1start
     qh2 <- qh2[which(qh2$q2 > 0), , drop = FALSE]
@@ -227,18 +230,22 @@ rc_nls_2seg <- function(
   # a1*(k - c1)^b1 / (k - c2)^b2 is exactly what makes the two branches equal
   # at h = k, enforcing continuity through the `a` parameter (contcons = "a").
   if (config == "piecewise" && contcons == "a") {
-    modform <- paste(
-      "q ~ ifelse(h < k,",
-      "a1*(h - c1)^b1,",
-      "(a1*(k - c1)^b1/(k - c2)^b2)*(h - c2)^b2)"
+    modform <- q ~ ifelse(
+      h < k,
+      a1 * (h - c1)^b1,
+      (a1 * (k - c1)^b1 / (k - c2)^b2) * (h - c2)^b2
     )
   } else if (config == "piecewise" && contcons == "c") {
     stop(
-      "Error: continuity constraint based on c parameter not yet implemented"
+      "`contcons = \"c\"` is not implemented yet"
     )
   } else if (config == "compound") {
     # Upper branch adds an extra power law to the low-flow discharge at k.
-    modform <- "q ~ ifelse(h < k, a1*(h - c1)^b1, a1*(k - c1)^b1 + a2*(h - k)^b2)"
+    modform <- q ~ ifelse(
+      h < k,
+      a1 * (h - c1)^b1,
+      a1 * (k - c1)^b1 + a2 * (h - k)^b2
+    )
   }
 
   # -- 5. Assemble start values and bounds for the port algorithm ----
@@ -304,19 +311,17 @@ rc_nls_2seg <- function(
     # create wts vector
     if (wts_code == "none") {
       wts <- rep(1, length(q))
-    } else {
-      wts <- wts
     }
     checkmate::assert_numeric(wts, len = length(q), .var.name = "wts")
     # fit model
-    mod_nls <- nls2::nls2(
+    mod_nls <- stats::nls(
       formula = modform,
       data = data.frame(q, h),
       weights = wts,
       start = start_list,
-      lower = lwr_list,
-      upper = upr_list,
-      control = list(tol = nls_tol),
+      lower = unlist(lwr_list),
+      upper = unlist(upr_list),
+      control = list(tol = nls_tol, maxiter = nls_maxiter),
       algorithm = "port"
     )
     # Path 2: proportional weights (constant coefficient of variation). The
@@ -339,51 +344,56 @@ rc_nls_2seg <- function(
         a1start * (kstart - c1start)^b1start + a2start * (h - kstart)^b2start
       )
     }
-    wts <- 1 / yp^2
-    if (config == "piecewise") {
-      coefs_old <- c(a1start, b1start, c1start, b2start, c2start, kstart)
-    } else {
-      coefs_old <- c(a1start, b1start, c1start, a2start, b2start, kstart)
-    }
-
-    for (i in 1:wts_maxiter) {
-      mod_nls <- nls2::nls2(
+    fit_fun <- function(wts, start) {
+      stats::nls(
         formula = modform,
-        data = data.frame(q, h),
+        data = data.frame(q, h, wts),
         weights = wts,
-        start = start_list,
-        lower = lwr_list,
-        upper = upr_list,
-        control = list(tol = nls_tol),
+        start = start,
+        lower = unlist(lwr_list),
+        upper = unlist(upr_list),
+        control = list(tol = nls_tol, maxiter = nls_maxiter),
         algorithm = "port"
       )
-      coefs <- as.numeric(stats::coef(mod_nls))
-      max_change <- max(abs((coefs - coefs_old) / coefs_old))
-      if (max_change < wts_tol) {
-        break
-      }
-      coefs_old <- coefs
-      yp <- stats::predict(mod_nls)
-      wts <- 1 / yp^2
     }
+    res <- rc_irls(
+      fit_fun,
+      yp = yp,
+      start = start_list,
+      wts_tol = wts_tol,
+      wts_maxiter = wts_maxiter
+    )
+    mod_nls <- res$model
+    wts <- res$weights
+    irls <- res$irls
   }
   if (requireNamespace("tibble", quietly = TRUE)) {
     qh <- tibble::as_tibble(qh)
   }
   mod_sum <- summary(mod_nls)
+  th <- stats::coef(mod_nls)
+  pars <- if (config == "piecewise") {
+    list(
+      a = th[["a1"]],
+      b = unname(th[c("b1", "b2")]),
+      c = unname(th[c("c1", "c2")]),
+      k = th[["k"]]
+    )
+  } else {
+    list(
+      a = unname(th[c("a1", "a2")]),
+      b = unname(th[c("b1", "b2")]),
+      c = th[["c1"]],
+      k = th[["k"]]
+    )
+  }
   outlist <- list(
     qh_obs = qh,
-    configuration = config,
-    conflev = conflev,
-    predlev = predlev,
-    pars = stats::coef(mod_nls),
-    rse = mod_sum$sigma,
-    wts_code = wts_code,
-    weights = wts,
+    pars = pars,
     # Everything needed to refit these data from scratch. boot_limits_2seg()
     # resamples and refits, so it has to reproduce the original call exactly;
     # without this it would silently fall back on the argument defaults.
-    fit_args = list(
+    settings = list(
       config = config,
       contcons = contcons,
       kfixed = kfixed,
@@ -396,6 +406,9 @@ rc_nls_2seg <- function(
       nls_tol = nls_tol,
       nls_maxiter = nls_maxiter
     ),
+    weights = wts,
+    irls = irls,
+    rse = mod_sum$sigma,
     model = mod_nls
   )
   structure(outlist, class = c("rc_nls_2seg", "rating_curve"))

@@ -10,7 +10,7 @@
   hpred = NULL,
   conflev = NULL,
   predlev = NULL,
-  method = c("delta", "boot", "sim")
+  method = c("delta", "boot")
 )
 }
 \arguments{
@@ -27,7 +27,7 @@
 \item{predlev}{Confidence level for the prediction interval, or \code{NULL} to
 omit it.}
 
-\item{method}{Interval method, matched by \code{\link[rlang:arg_match]{rlang::arg_match()}}:
+\item{method}{Interval method:
 \itemize{
 \item \code{"delta"} (the default): \code{\link[=delta_limits_2seg]{delta_limits_2seg()}}, the linearised
 delta method. Fast, but fixes the breakpoint at \code{k-hat} and so jumps
@@ -36,9 +36,6 @@ there; see the section above.
 refits, and so does not rest on the asymptotic normal at all. Much the
 slowest, since it refits the model \code{B} times, and the most trustworthy
 at the breakpoint.
-\item \code{"sim"}: \code{\link[=sim_limits_2seg]{sim_limits_2seg()}}, which draws parameters from their
-asymptotic normal distribution and pushes each through the model.
-Sensitive to the parameter scale; see \code{space} in \code{\link[=sim_limits_2seg]{sim_limits_2seg()}}.
 }}
 }
 \value{
@@ -57,7 +54,7 @@ for the \code{rc_nls} class; the two do not collide.
 Evaluates the fitted rating curve on a grid of stage values and, optionally,
 attaches confidence and/or prediction limits. This is a thin dispatcher: it
 validates the arguments common to every method, then hands off to one of the
-three \verb{*_limits_2seg()} functions, which all take the same
+\verb{*_limits_2seg()} functions, which all take the same
 \verb{(object, hpred, conflev, predlev)} arguments and all return the same
 columns.
 }
@@ -74,6 +71,12 @@ normally.
 
 So: \code{"delta"} for a quick look or where the breakpoint is not of interest,
 and \code{"boot"} where the interval matters.
+
+A third approach -- drawing parameter vectors from their asymptotic normal
+distribution and pushing each draw through the model -- was tried and
+dropped. When a segment is poorly identified, as the lower segment at Sauze
+is, the draws too often land on impossible curves: negative or
+astronomically large discharges, giving limits that are meaningless.
 }
 
 \examples{
@@ -101,5 +104,5 @@ rbind(
 )
 }
 \seealso{
-\code{\link[=delta_limits_2seg]{delta_limits_2seg()}}, \code{\link[=boot_limits_2seg]{boot_limits_2seg()}}, \code{\link[=sim_limits_2seg]{sim_limits_2seg()}}.
+\code{\link[=delta_limits_2seg]{delta_limits_2seg()}}, \code{\link[=boot_limits_2seg]{boot_limits_2seg()}}.
 }

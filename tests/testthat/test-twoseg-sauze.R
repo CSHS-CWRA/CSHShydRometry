@@ -82,7 +82,7 @@ test_that("the delta band jumps at the breakpoint and the bootstrap does not", {
   expect_lt(b_ratio, 2)
 })
 
-test_that("all three methods agree on the fitted curve", {
+test_that("both methods agree on the fitted curve", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("piecewise", "spec")
   hp <- c(0.5, 1, 2, 4)
@@ -90,9 +90,7 @@ test_that("all three methods agree on the fitted curve", {
   b <- suppressWarnings(
     boot_limits_2seg(fit, hpred = hp, B = 25, seed = 1)
   )
-  s <- sim_limits_2seg(fit, hpred = hp, M = 100, seed = 1)
   expect_equal(d$fit, b$fit)
-  expect_equal(d$fit, s$fit)
 })
 
 test_that("the compound configuration is continuous at the breakpoint", {

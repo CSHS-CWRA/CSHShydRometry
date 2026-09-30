@@ -33,7 +33,7 @@ nlspw_limits <- function(
   ## compute fitted values, se and residual scale for hpred values
   nlsw_predfit <- investr::predFit(
     mod,
-    new = data.frame(h = hpred),
+    newdata = data.frame(h = hpred),
     se.fit = TRUE
   )
   nlsw_se <- nlsw_predfit$se.fit
@@ -73,9 +73,76 @@ nlspw_limits <- function(
 #' @return Numeric vector of stage values.
 #' @keywords internal
 rc_hpred_grid <- function(object, n = 1000) {
-  qh <- object[["qh_obs"]]
-  # the two-segment fits name the column "h", the one-segment fits "hobs"
-  h <- if ("h" %in% names(qh)) qh[["h"]] else qh[["hobs"]]
+  h <- object[["qh_obs"]][["h"]]
   checkmate::assert_numeric(h, min.len = 1L, any.missing = FALSE)
   seq(min(h), max(h), length.out = n)
+}
+
+
+#' Drop gaugings with a missing stage or discharge
+#'
+#' @param q,h Discharge and stage vectors of equal length.
+#' @return A data frame with columns `q` and `h`, holding the complete cases.
+#' @keywords internal
+rc_complete <- function(q, h) {
+  keep <- stats::complete.cases(q, h)
+  data.frame(q = q[keep], h = h[keep])
+}
+
+
+
+#' Fit with proportional weights by iterative reweighting
+#'
+#' Under `wts_code = "prop"` the error standard deviation is proportional to
+#' the mean discharge, so the weights `1 / fitted^2` depend on the fit itself.
+#' The fit is therefore repeated in rounds: fit with the current weights,
+#' recompute the weights from the new fitted values, refit. Each round starts
+#' from the previous round's estimates. The rounds stop once no fitted
+#' discharge changes by more than a fraction `wts_tol` between successive
+#' rounds, or after `wts_maxiter` rounds, with a warning.
+#'
+#' @param fit_fun Function of `(wts, start)` returning a fitted model with
+#'   `predict()` and `coef()` methods.
+#' @param yp Initial fitted discharges, from which the first weights are
+#'   computed. Must be positive.
+#' @param start Named list of starting values for the first round.
+#' @param wts_tol,wts_maxiter Convergence tolerance and maximum number of
+#'   rounds.
+#' @return A list with the final `model`, the `weights` it was fitted with,
+#'   and `irls`: a list of the number of `iterations` (rounds) and whether
+#'   the rounds `converged`.
+#' @keywords internal
+rc_irls <- function(fit_fun, yp, start, wts_tol, wts_maxiter) {
+  converged <- FALSE
+  for (i in seq_len(wts_maxiter)) {
+    wts <- 1 / yp^2
+    mod <- fit_fun(wts, start)
+    yp_new <- as.numeric(stats::predict(mod))
+    change <- max(abs(yp_new - yp) / abs(yp))
+    start <- as.list(stats::coef(mod))
+    yp <- yp_new
+    if (change < wts_tol) {
+      converged <- TRUE
+      break
+    }
+  }
+  if (!converged) {
+    warning(
+      sprintf(
+        paste(
+          "Proportional weights did not converge in %d rounds (the fitted",
+          "discharges still changed by up to %.2g%% in the last); the fit",
+          "may not be reliable. Consider increasing `wts_maxiter`."
+        ),
+        wts_maxiter,
+        100 * change
+      ),
+      call. = FALSE
+    )
+  }
+  list(
+    model = mod,
+    weights = wts,
+    irls = list(iterations = i, converged = converged)
+  )
 }

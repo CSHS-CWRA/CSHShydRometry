@@ -6,12 +6,15 @@
 #' @param h A vector of stage data.
 #' @param data Optional data frame in which to look up `q` and `h`. When
 #'   supplied, they may be given as bare column names.
+#' @param ... Must be empty. Present so that every argument after it has
+#'   to be named in full.
 #' @param degree Degree of local polynomials (1 or 2).
 #' @param span Smoothing parameter.
 #' @param extrapolate Allow extrapolation beyond observed h range.
 #' @param wts_code Weighting scheme: `"none"`, `"spec"`, or `"prop"`.
 #' @param wts Optional vector of weights when `wts_code = "spec"`.
-#' @return An rc_loess object.
+#' @return An `rc_loess` object; see [rating_curve] for its contents. A loess
+#'   curve has no parameters, so `pars` is an empty list.
 #' @examples
 #' fit <- rc_loess(q, h, data = thompson)
 #' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
@@ -19,6 +22,7 @@
 rc_loess <- function(
   q,
   h,
+  ...,
   data = NULL,
   degree = 2,
   span = 0.75,
@@ -28,29 +32,29 @@ rc_loess <- function(
 ) {
   # error checks
   # q and h may name columns of `data`, or be vectors
+  rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   q <- rlang::eval_tidy(rlang::enquo(q), data)
   h <- rlang::eval_tidy(rlang::enquo(h), data)
   checkmate::assert_numeric(q, min.len = 1L)
   checkmate::assert_numeric(h, len = length(q))
   wts_code <- rlang::arg_match(wts_code)
-  if (wts_code == "spec" && !is.numeric(wts)) {
-    stop("invalid values of wts")
-  }
   # remove missing observations
-  qh <- tidyr::drop_na(data.frame(qobs = q, hobs = h))
-  q <- qh$qobs
-  h <- qh$hobs
+  # keep user-supplied weights aligned with the gaugings that remain
+  if (length(wts) == length(q)) {
+    wts <- wts[stats::complete.cases(q, h)]
+  }
+  qh <- rc_complete(q, h)
+  q <- qh$q
+  h <- qh$h
+  wts_input <- wts
   # compute weights
   if (wts_code != "prop") {
     # weights equal or specified
     if (wts_code == "none") {
       wts <- rep(1, length(q))
     }
-    if (wts_code == "spec" && !is.numeric(wts)) {
-      stop("specified wts are not numeric")
-    }
-    if (length(wts) != length(q)) warning("length of wts != length of q")
+    checkmate::assert_numeric(wts, len = length(q), .var.name = "wts")
   } else {
     # compute proportional weights - start using loess with no weights
     mod_lo <- stats::loess(q ~ h)
@@ -69,18 +73,22 @@ rc_loess <- function(
   } else {
     mod_lo <- stats::loess(q ~ h, weights = wts, degree = degree, span = span)
   }
-  mod_sum <- summary(mod_lo)
   if (requireNamespace("tibble", quietly = TRUE)) {
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
     qh_obs = qh,
-    formula = "q ~ h",
-    pars = list(degree = degree, span = span, extrapolate = extrapolate),
-    df = mod_sum$df,
-    wts_code = wts_code,
+    pars = list(),
+    settings = list(
+      degree = degree,
+      span = span,
+      extrapolate = extrapolate,
+      wts_code = wts_code,
+      wts = wts_input
+    ),
     weights = wts,
-    rse = mod_sum$sigma,
+    enp = mod_lo$enp,
+    rse = mod_lo$s,
     model = mod_lo
   )
   structure(outlist, class = c("rc_loess", "rating_curve"))

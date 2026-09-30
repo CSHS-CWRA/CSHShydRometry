@@ -6,24 +6,28 @@
 #' @param h A vector of stage data.
 #' @param data Optional data frame in which to look up `q` and `h`. When
 #'   supplied, they may be given as bare column names.
+#' @param ... Must be empty. Present so that every argument after it has
+#'   to be named in full.
 #' @param var_type Variance function for gnls weights (default `nlme::varPower()`).
-#' @return An rc_gnls object.
+#' @return An `rc_gnls` object; see [rating_curve] for its contents. The
+#'   estimated parameters of the variance function are in `var_pars`.
 #' @examples
 #' fit <- rc_gnls(q, h, data = thompson)
 #' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
 #' @export
-rc_gnls <- function(q, h, data = NULL, var_type = nlme::varPower()) {
+rc_gnls <- function(q, h, ..., data = NULL, var_type = nlme::varPower()) {
   ## error checks
   # q and h may name columns of `data`, or be vectors
+  rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   q <- rlang::eval_tidy(rlang::enquo(q), data)
   h <- rlang::eval_tidy(rlang::enquo(h), data)
   checkmate::assert_numeric(q, min.len = 1L)
   checkmate::assert_numeric(h, len = length(q))
   ## remove missing observations
-  qh <- tidyr::drop_na(data.frame(qobs = q, hobs = h))
-  q <- qh$qobs
-  h <- qh$hobs
+  qh <- rc_complete(q, h)
+  q <- qh$q
+  h <- qh$h
   ## generate starting values using lm on log-transformed data
   cstart <- min(h) - 0.1 * (max(h) - min(h))
   start_lm <- stats::lm(log(q) ~ log(h - cstart))
@@ -37,18 +41,15 @@ rc_gnls <- function(q, h, data = NULL, var_type = nlme::varPower()) {
     start = list(a = astart, b = bstart, c = cstart)
   )
   coefs <- as.numeric(stats::coef(mod_gnls))
-  t_gnls <- as.numeric(mod_gnls$modelStruct$varStruct)
+  var_pars <- stats::coef(mod_gnls$modelStruct$varStruct, unconstrained = FALSE)
   if (requireNamespace("tibble", quietly = TRUE)) {
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
     qh_obs = qh,
-    pars = list(
-      a = coefs[1],
-      b = coefs[2],
-      c = coefs[3],
-      t_gnls = t_gnls
-    ),
+    pars = list(a = coefs[1], b = coefs[2], c = coefs[3]),
+    var_pars = as.list(var_pars),
+    settings = list(var_type = var_type),
     rse = summary(mod_gnls)$sigma,
     model = mod_gnls
   )

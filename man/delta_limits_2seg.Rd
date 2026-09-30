@@ -4,16 +4,16 @@
 \alias{delta_limits_2seg}
 \title{Delta-method confidence and prediction limits for a two-segment fit}
 \usage{
-delta_limits_2seg(object, hpred = NULL, ..., conflev = NULL, predlev = NULL)
+delta_limits_2seg(object, ..., hpred = NULL, conflev = NULL, predlev = NULL)
 }
 \arguments{
 \item{object}{An \code{rc_nls_2seg} fit (from \code{\link[=rc_nls_2seg]{rc_nls_2seg()}}).}
 
-\item{hpred}{Stage values at which to return limits. Defaults to
-\code{\link[=rc_hpred_grid]{rc_hpred_grid()}}: 1000 points spanning the observed stage range.}
-
 \item{...}{Passed on to \code{\link[investr:predFit]{investr::predFit()}} for the \code{"none"}/\code{"spec"}
 cases.}
+
+\item{hpred}{Stage values at which to return limits. Defaults to
+\code{\link[=rc_hpred_grid]{rc_hpred_grid()}}: 1000 points spanning the observed stage range.}
 
 \item{conflev, predlev}{Levels for the confidence and prediction intervals,
 or \code{NULL} to omit either.}

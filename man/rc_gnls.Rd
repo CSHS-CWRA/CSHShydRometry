@@ -4,12 +4,15 @@
 \alias{rc_gnls}
 \title{Fit rating curve using gnls}
 \usage{
-rc_gnls(q, h, data = NULL, var_type = nlme::varPower())
+rc_gnls(q, h, ..., data = NULL, var_type = nlme::varPower())
 }
 \arguments{
 \item{q}{A vector of streamflow data.}
 
 \item{h}{A vector of stage data.}
+
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
 
 \item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
 supplied, they may be given as bare column names.}
@@ -17,7 +20,8 @@ supplied, they may be given as bare column names.}
 \item{var_type}{Variance function for gnls weights (default \code{nlme::varPower()}).}
 }
 \value{
-An rc_gnls object.
+An \code{rc_gnls} object; see \link{rating_curve} for its contents. The
+estimated parameters of the variance function are in \code{var_pars}.
 }
 \description{
 Fit rating curve using gnls

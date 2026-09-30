@@ -19,12 +19,13 @@ test_that("predict() defaults to the delta method", {
   )
 })
 
-test_that("the k-averaged method is not part of this package", {
+test_that("the k-averaged and simulation methods are not part of this package", {
   fit <- two_seg_fit()
   expect_error(
-    predict(fit, hpred = 3, conflev = 0.95, method = "kavg"),
-    class = "rlang_error"
+    predict(fit, hpred = 3, conflev = 0.95, method = "kavg")
   )
+  expect_error(predict(fit, hpred = 3, conflev = 0.95, method = "sim"))
+  expect_false(exists("sim_limits_2seg", where = asNamespace("CSHShydRometry")))
   expect_false(exists("kavg_limits_2seg", where = asNamespace("CSHShydRometry")))
 })
 
@@ -38,11 +39,6 @@ test_that("every interval method returns the same columns", {
       boot_limits_2seg(fit, hpred = hp, conflev = 0.95, predlev = NULL,
                        B = 25, seed = 1)
     ),
-    want
-  )
-  expect_named(
-    sim_limits_2seg(fit, hpred = hp, conflev = 0.95, predlev = NULL,
-                    M = 100, seed = 1),
     want
   )
 })
@@ -71,9 +67,9 @@ test_that("both configurations fit and predict", {
 
 test_that("the bootstrap refits with the arguments the fit was made with", {
   fit <- two_seg_fit()
-  expect_equal(fit$fit_args$config, "piecewise")
-  expect_equal(fit$fit_args$wts_code, "prop")
-  expect_equal(fit$fit_args$kstart, 2)
+  expect_equal(fit$settings$config, "piecewise")
+  expect_equal(fit$settings$wts_code, "prop")
+  expect_equal(fit$settings$kstart, 2)
 })
 
 test_that("hpred defaults to the observed stage range everywhere", {
@@ -86,9 +82,8 @@ test_that("hpred defaults to the observed stage range everywhere", {
 test_that("predict() and the limits functions agree at their defaults", {
   fit <- two_seg_fit()
   hp <- c(1, 3)
-  # all four default to computing no intervals at all, so the bare call
+  # they all default to computing no intervals at all, so the bare call
   # returns the curve and nothing else
   expect_named(predict(fit, hpred = hp), c("h", "fit"))
   expect_named(delta_limits_2seg(fit, hpred = hp), c("h", "fit"))
-  expect_named(sim_limits_2seg(fit, hpred = hp, M = 50), c("h", "fit"))
 })

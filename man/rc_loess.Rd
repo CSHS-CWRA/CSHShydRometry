@@ -7,6 +7,7 @@
 rc_loess(
   q,
   h,
+  ...,
   data = NULL,
   degree = 2,
   span = 0.75,
@@ -19,6 +20,9 @@ rc_loess(
 \item{q}{A vector of streamflow data.}
 
 \item{h}{A vector of stage data.}
+
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
 
 \item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
 supplied, they may be given as bare column names.}
@@ -34,7 +38,8 @@ supplied, they may be given as bare column names.}
 \item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
 }
 \value{
-An rc_loess object.
+An \code{rc_loess} object; see \link{rating_curve} for its contents. A loess
+curve has no parameters, so \code{pars} is an empty list.
 }
 \description{
 Fit rating curve using loess smoother

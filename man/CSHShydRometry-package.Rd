@@ -4,9 +4,17 @@
 \name{CSHShydRometry-package}
 \alias{CSHShydRometry}
 \alias{CSHShydRometry-package}
-\title{CSHShydRometry: Frequentist Rating Curve Methods}
+\title{CSHShydRometry: Statistical Methods for Rating Curves}
 \description{
-Fits stage-discharge rating curves by a range of frequentist methods, and attaches confidence and prediction limits to the fitted curve. Single-segment curves may be fitted as a power law (by ordinary or nonlinear least squares, on the log-log or the natural scale, or by generalised nonlinear least squares), as a polynomial, or by loess. Two-segment power-law curves, joined either continuously or additively at an estimated breakpoint, are also supported. Every fit is given a 'predict()' method returning the same columns, so results from different approaches can be combined directly.
+Fits stage-discharge rating curves by a range of statistical methods, and attaches confidence and prediction limits to the fitted curve. Single-segment curves may be fitted as a power law (by ordinary or nonlinear least squares, on the log-log or the natural scale, or by generalised nonlinear least squares), as a polynomial, or by loess. Two-segment power-law curves, joined either continuously or additively at an estimated breakpoint, are also supported. Every fit is given a 'predict()' method returning the same columns, so results from different approaches can be combined directly.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/CSHS-CWRA/CSHShydRometry}
+  \item Report bugs at \url{https://github.com/CSHS-CWRA/CSHShydRometry/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Vincenzo Coia \email{vincenzo.coia@gmail.com}
