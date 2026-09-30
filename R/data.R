@@ -14,11 +14,10 @@
 #' Fits using `wts_code = "spec"` need a complete weight vector, and so need
 #' either the subset with an uncertainty or weights from elsewhere.
 #'
-#' One uncertainty looks wrong: the gauging of 2018-11-01 has 0.0226, where
-#' the others lie between about 2.5 and 11. It was probably entered as a
-#' fraction (2.26%) rather than a percentage. The value is like this in the
-#' records received from the Water Survey, so the slip happened at the
-#' source, not in this package. It is kept as reported.
+#' One uncertainty may be incorrect: the gauging of 2018-11-01 has 0.0226,
+#' where the others lie between about 2.5 and 11. It may have been entered as
+#' a fraction (2.26%) rather than a percentage. It is kept as it appears in
+#' the records.
 #'
 #' @section Getting the data yourself:
 #' Individual discharge measurements (field visits) are not published on the
