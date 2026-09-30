@@ -22,8 +22,10 @@
   find a better one, at a different breakpoint. What each start led to is
   recorded in `kstart_search`, and `settings$kstart` records `kstart` as
   supplied, so that `boot_limits_2seg()` repeats the same search for every
-  resample (at a cost of one fit per start; pass a single `kstart` for
-  speed).
+  resample. That costs one fit per start per resample, but shortcuts that
+  start each resample only from the original estimate turned out to miss the
+  resample's best fit too often, which would understate the uncertainty in
+  the breakpoint.
 
 * `rc_nls_2seg()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.

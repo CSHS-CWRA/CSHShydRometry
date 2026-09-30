@@ -61,9 +61,13 @@
 #' whose reweighting converged are preferred. What each start led to is
 #' recorded in `kstart_search`.
 #'
-#' Each start costs a full fit, and [boot_limits_2seg()] refits with the same
-#' starts for every resample. Pass a single `kstart` for speed once you know
-#' where the breakpoint lies.
+#' Each start costs a full fit, and [boot_limits_2seg()] repeats the same
+#' search for every resample. That is deliberate: a resample's best fit is
+#' often found from a different start than the original's, so starting the
+#' resamples only from the original estimate, or only from the optima the
+#' original search found, would understate the uncertainty in the breakpoint.
+#' A single `kstart` makes both the fit and the bootstrap faster, but both
+#' then rest on that one start.
 #'
 #' @return An object of class `c("rc_nls_2seg", "rating_curve")`; see
 #'   [rating_curve] for its contents. `pars` holds the estimated parameters by

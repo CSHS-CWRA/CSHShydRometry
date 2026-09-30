@@ -110,9 +110,13 @@ with standard deviation proportional to the mean). Under \code{"prop"}, fits
 whose reweighting converged are preferred. What each start led to is
 recorded in \code{kstart_search}.
 
-Each start costs a full fit, and \code{\link[=boot_limits_2seg]{boot_limits_2seg()}} refits with the same
-starts for every resample. Pass a single \code{kstart} for speed once you know
-where the breakpoint lies.
+Each start costs a full fit, and \code{\link[=boot_limits_2seg]{boot_limits_2seg()}} repeats the same
+search for every resample. That is deliberate: a resample's best fit is
+often found from a different start than the original's, so starting the
+resamples only from the original estimate, or only from the optima the
+original search found, would understate the uncertainty in the breakpoint.
+A single \code{kstart} makes both the fit and the bootstrap faster, but both
+then rest on that one start.
 }
 \examples{
 # The Thompson is close to a single control, so its two-segment fit needs
