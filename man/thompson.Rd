@@ -8,39 +8,45 @@
 A data frame with 93 rows and 4 columns:
 \describe{
 \item{date}{Date of the measurement.}
-\item{stage}{Stage, in metres (the mean gauge height for the activity).}
-\item{discharge}{Discharge, in cubic metres per second.}
+\item{stage}{Stage, in meters (the mean gauge height for the visit).}
+\item{discharge}{Discharge, in cubic meters per second.}
 \item{uncertainty_pct}{Reported uncertainty of the discharge, as a
 percentage of it at two standard deviations (the "IVE method, 2-sigma
 value"), or \code{NA} where none was given.}
 }
 }
 \source{
-Water Survey of Canada, station 08LF051. Built by
-\code{data-raw/thompson.R}.
+Water Survey of Canada, station 08LF051,
+\url{https://wateroffice.ec.gc.ca}.
 }
 \usage{
 thompson
 }
 \description{
 Stage and discharge measurements from Water Survey of Canada station
-08LF051, Thompson River, used in the examples. The raw export carries one
-row per field activity, including stage-only visits; this is the subset with
-a discharge measurement, reduced to the columns a rating curve needs and
-sorted by stage.
+08LF051, Thompson River, used in the examples: every discharge measurement
+made at the station from 1994 to 2024, sorted by stage.
 }
 \details{
 Reported uncertainties are available for only 19 of the gaugings, so
 \code{uncertainty_pct} is mostly \code{NA}. It is a percentage of the discharge at
 two standard deviations, so the standard uncertainty of a discharge, in
-cubic metres per second, is \code{uncertainty_pct / 100 * discharge / 2}.
+cubic meters per second, is \code{uncertainty_pct / 100 * discharge / 2}.
 Fits using \code{wts_code = "spec"} need a complete weight vector, and so need
 either the subset with an uncertainty or weights from elsewhere.
 
-One value, for the gauging of 2018-11-01, is 0.0226 where the others lie
-between about 2.5 and 11; it may have been recorded as a fraction rather
-than a percentage. It is in the export as downloaded, on the one record
-whose only remark is "Sources:Import", which suggests it arrived from an
-earlier system. It is kept as reported.
+One uncertainty looks wrong: the gauging of 2018-11-01 has 0.0226, where
+the others lie between about 2.5 and 11. It was probably entered as a
+fraction (2.26\%) rather than a percentage. The value is like this in the
+file downloaded from the Water Survey, so the slip happened at the source,
+not in this package. It is kept as reported.
 }
+\section{Getting the data yourself}{
+
+The measurements are published by the Water Survey of Canada on its Water
+Level and Flow website, \url{https://wateroffice.ec.gc.ca}: search for station
+08LF051. The download there has more rows (visits that recorded only the
+stage) and more columns than \code{thompson}.
+}
+
 \keyword{datasets}

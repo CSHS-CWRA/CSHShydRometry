@@ -33,8 +33,8 @@ library(CSHShydRometry)
 ```
 
 The package comes with 93 gaugings from the Thompson River (Water Survey
-of Canada station 08LF051). `stage` is in metres and `discharge` in
-cubic metres per second. A few gaugings also carry a reported
+of Canada station 08LF051). `stage` is in meters and `discharge` in
+cubic meters per second. A few gaugings also carry a reported
 uncertainty.
 
 ``` r
@@ -87,7 +87,7 @@ coef(fit)
 
 Here $c$ is the stage at which the flow would stop, $b$ says how quickly
 the flow grows as the water rises above that, and $a$ sets the scale: it
-is the discharge when the water is one metre above $c$.
+is the discharge when the water is one meter above $c$.
 
 ## Predicting discharge
 
@@ -180,7 +180,7 @@ Where the river’s control changes (say, when the water rises out of the
 channel and over a floodplain), one power law is not enough. The Ardèche
 at Sauze, from the RBaM package, is such a river. RBaM calls its columns
 `H`, `Q` and `uQ`; here we give them the names used in this package.
-Each gauging comes with its standard uncertainty, in cubic metres per
+Each gauging comes with its standard uncertainty, in cubic meters per
 second:
 
 ``` r

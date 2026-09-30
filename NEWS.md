@@ -22,7 +22,7 @@
   percentage of the discharge at two standard deviations, as reported by the
   Water Survey of Canada. It was previously described as a discharge
   uncertainty, and the tests used `1 / uq^2` as weights as though it were a
-  standard deviation in cubic metres per second.
+  standard deviation in cubic meters per second.
 
 * The `"sim"` interval method is removed, along with `sim_limits_2seg()`.
   Drawing parameters from their asymptotic normal distribution and pushing
