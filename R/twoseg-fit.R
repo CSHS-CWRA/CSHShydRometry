@@ -14,10 +14,10 @@
 #' @param config Segment configuration, `"piecewise"` or `"compound"`.
 #'   Defaults to the first. Under `"piecewise"` the two power laws meet at the
 #'   breakpoint, the upper segment's coefficient being set so that they do.
-#' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
 #' @param kstart Starting value(s) for the breakpoint `k`. `NULL`, the
 #'   default, tries 10 values spread evenly across the search range; a
 #'   numeric vector tries each of its values. See Details.
+#' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
 #' @param kbounds Lower and upper bounds for `k`, or `NULL` to keep at least
 #'   three gaugings in each segment.
 #' @param wts_code Weighting scheme:
@@ -119,8 +119,8 @@ rc_2seg_nls <- function(
   ...,
   data = NULL,
   config = c("piecewise", "compound"),
-  kfixed = FALSE,
   kstart = NULL,
+  kfixed = FALSE,
   kbounds = NULL,
   wts_code = c("none", "spec", "prop"),
   wts = NULL,
@@ -454,8 +454,8 @@ rc_2seg_nls <- function(
     # without this it would silently fall back on the argument defaults.
     settings = list(
       config = config,
-      kfixed = kfixed,
       kstart = kstart_input,
+      kfixed = kfixed,
       kbounds = kbounds,
       wts_code = wts_code,
       wts = wts_input,

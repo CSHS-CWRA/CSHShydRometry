@@ -10,8 +10,8 @@ rc_2seg_nls(
   ...,
   data = NULL,
   config = c("piecewise", "compound"),
-  kfixed = FALSE,
   kstart = NULL,
+  kfixed = FALSE,
   kbounds = NULL,
   wts_code = c("none", "spec", "prop"),
   wts = NULL,
@@ -39,11 +39,11 @@ are evaluated.}
 Defaults to the first. Under \code{"piecewise"} the two power laws meet at the
 breakpoint, the upper segment's coefficient being set so that they do.}
 
-\item{kfixed}{If \code{TRUE}, hold the breakpoint \code{k} fixed at \code{kstart}.}
-
 \item{kstart}{Starting value(s) for the breakpoint \code{k}. \code{NULL}, the
 default, tries 10 values spread evenly across the search range; a
 numeric vector tries each of its values. See Details.}
+
+\item{kfixed}{If \code{TRUE}, hold the breakpoint \code{k} fixed at \code{kstart}.}
 
 \item{kbounds}{Lower and upper bounds for \code{k}, or \code{NULL} to keep at least
 three gaugings in each segment.}
