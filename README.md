@@ -257,7 +257,8 @@ The name of this R package is in recognition of the support provided by
 the [Canadian Society for Hydrological Sciences
 (CSHS)](https://cwra.org/en/affiliates-programs/cshs/) which is an
 affiliated society of the Canadian Water Resources Association (CWRA).
-\## Contributing
+
+## Contributing
 
 Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 Please note that this project is released with a [Contributor Code of
