@@ -2,17 +2,19 @@
 
 #' Fit polynomial rating curve
 #'
-#' @param discharge Discharge: a vector, or a column of `data`.
-#' @param stage Stage: a vector, or a column of `data`.
-#' @param data Optional data frame in which to look up `discharge`, `stage`
-#'   and `wts`. When supplied, they may be given as bare column names or
-#'   expressions of them.
+#' @param discharge <[`data-masking`][rlang::args_data_masking]> Discharge: a
+#'   vector, or an expression evaluated in `data`, such as a column name.
+#' @param stage <[`data-masking`][rlang::args_data_masking]> Stage: a vector,
+#'   or an expression evaluated in `data`, such as a column name.
+#' @param data Optional data frame in which `discharge`, `stage` and `wts`
+#'   are evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param degree Polynomial degree.
 #' @param wts_code Weighting scheme: `"none"`, `"spec"`, or `"prop"`.
-#' @param wts Weights when `wts_code = "spec"`, one per gauging: a vector, or
-#'   an expression using columns of `data`, such as `1 / uncertainty_sd^2`.
+#' @param wts <[`data-masking`][rlang::args_data_masking]> Weights when
+#'   `wts_code = "spec"`, one per gauging: a vector, or an expression
+#'   evaluated in `data`, such as `1 / uncertainty_sd^2`.
 #' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
 #'   reweighting stops once no fitted discharge changes by more than this
 #'   fraction from one round to the next.

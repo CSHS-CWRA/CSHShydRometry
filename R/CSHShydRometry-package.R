@@ -2,7 +2,7 @@
 "_PACKAGE"
 
 #' @section Fitting a rating curve:
-#' Every model is fitted by a `rc_*()` constructor and summarised by a
+#' Every model is fitted by a `rc_*()` constructor and evaluated by a
 #' `predict()` method. The constructors take discharge and stage — as vectors,
 #' or as column names with a `data` argument — and return an object carrying
 #' `"rating_curve"` as its second class.

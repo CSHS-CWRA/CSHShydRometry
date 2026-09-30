@@ -2,10 +2,12 @@
 
 #' Fit rating curve using gnls
 #'
-#' @param discharge Discharge: a vector, or a column of `data`.
-#' @param stage Stage: a vector, or a column of `data`.
-#' @param data Optional data frame in which to look up `discharge` and `stage`. When
-#'   supplied, they may be given as bare column names.
+#' @param discharge <[`data-masking`][rlang::args_data_masking]> Discharge: a
+#'   vector, or an expression evaluated in `data`, such as a column name.
+#' @param stage <[`data-masking`][rlang::args_data_masking]> Stage: a vector,
+#'   or an expression evaluated in `data`, such as a column name.
+#' @param data Optional data frame in which `discharge` and `stage` are
+#'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param var_type Variance function for gnls weights (default `nlme::varPower()`).

@@ -7,15 +7,17 @@
 rc_log_nls(discharge, stage, ..., data = NULL, tol = 1e-06)
 }
 \arguments{
-\item{discharge}{Discharge: a vector, or a column of \code{data}.}
+\item{discharge}{<\code{\link[rlang:args_data_masking]{data-masking}}> Discharge: a
+vector, or an expression evaluated in \code{data}, such as a column name.}
 
-\item{stage}{Stage: a vector, or a column of \code{data}.}
+\item{stage}{<\code{\link[rlang:args_data_masking]{data-masking}}> Stage: a vector,
+or an expression evaluated in \code{data}, such as a column name.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
-supplied, they may be given as bare column names.}
+\item{data}{Optional data frame in which \code{discharge} and \code{stage} are
+evaluated.}
 
 \item{tol}{Tolerance for nls convergence.}
 }

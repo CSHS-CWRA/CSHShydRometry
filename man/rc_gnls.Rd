@@ -7,15 +7,17 @@
 rc_gnls(discharge, stage, ..., data = NULL, var_type = nlme::varPower())
 }
 \arguments{
-\item{discharge}{Discharge: a vector, or a column of \code{data}.}
+\item{discharge}{<\code{\link[rlang:args_data_masking]{data-masking}}> Discharge: a
+vector, or an expression evaluated in \code{data}, such as a column name.}
 
-\item{stage}{Stage: a vector, or a column of \code{data}.}
+\item{stage}{<\code{\link[rlang:args_data_masking]{data-masking}}> Stage: a vector,
+or an expression evaluated in \code{data}, such as a column name.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
-supplied, they may be given as bare column names.}
+\item{data}{Optional data frame in which \code{discharge} and \code{stage} are
+evaluated.}
 
 \item{var_type}{Variance function for gnls weights (default \code{nlme::varPower()}).}
 }
