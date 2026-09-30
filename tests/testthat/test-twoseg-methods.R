@@ -1,12 +1,12 @@
 # The two-segment interval methods, and the dispatcher over them.
 
-two_seg_fit <- function(config = "piecewise") {
+two_seg_fit <- function(config = "piecewise", kstart = 2) {
   rc_nls_2seg(
     thompson$q,
     thompson$h,
     config = config,
     wts_code = "prop",
-    kstart = 2
+    kstart = kstart
   )
 }
 
@@ -55,9 +55,9 @@ test_that("the fitted curve is the same whichever method is asked for", {
 })
 
 test_that("both configurations fit and predict", {
+  # the compound fit needs the default search over starting breakpoints
   for (cfg in c("piecewise", "compound")) {
-    fit <- tryCatch(two_seg_fit(cfg), error = function(e) NULL)
-    skip_if(is.null(fit), paste(cfg, "did not converge on these gaugings"))
+    fit <- two_seg_fit(cfg, kstart = NULL)
     expect_s3_class(fit, "rc_nls_2seg")
     expect_s3_class(fit, "rating_curve")
     p <- predict(fit, hpred = c(1, 3), conflev = 0.95)

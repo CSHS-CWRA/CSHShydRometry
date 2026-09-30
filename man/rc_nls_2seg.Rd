@@ -42,8 +42,9 @@ Defaults to the first.}
 
 \item{kfixed}{If \code{TRUE}, hold the breakpoint \code{k} fixed at \code{kstart}.}
 
-\item{kstart}{Starting value for the breakpoint \code{k}, or \code{NULL} for the
-midpoint of the default search range.}
+\item{kstart}{Starting value(s) for the breakpoint \code{k}. \code{NULL}, the
+default, tries 10 values spread evenly across the search range; a
+numeric vector tries each of its values. See Details.}
 
 \item{kbounds}{Lower and upper bounds for \code{k}, or \code{NULL} to keep at least
 three gaugings in each segment.}
@@ -74,40 +75,54 @@ type, one value per segment: under \code{"piecewise"}, \code{a} has a single val
 because the upper segment's coefficient is fixed by continuity, and under
 \code{"compound"}, \code{c} has a single value because the upper segment is
 measured from \code{k}. \code{coef()} gives the same estimates by their model
-names (\code{a1}, \code{b1}, \code{c1}, ...).
+names (\code{a1}, \code{b1}, \code{c1}, ...). \code{kstart_search} is a data frame with a row
+per starting breakpoint tried: the estimated breakpoint \code{k} it led to and
+the log-likelihood \code{loglik} of that fit, both \code{NA} where the fit failed.
 }
 \description{
 Fit two-segment power-law rating curve using nls on untransformed data
 }
 \details{
-Fitting proceeds in three steps:
+Fitting proceeds in three steps, the last two repeated for each starting
+breakpoint:
 \enumerate{
-\item Choose the breakpoint search range and a starting value for \code{k}
-(from \code{kstart}/\code{kbounds}, or defaults that leave >= 3 points per
-segment).
+\item Choose the breakpoint search range (from \code{kbounds}, or a default
+that leaves at least three gaugings in each segment) and the
+starting breakpoints to try.
 \item Derive starting values for the segment parameters by splitting the
-data at \code{kstart} and fitting a linear model to each segment on the
-log-log scale (\verb{log q ~ log(h - c)}); \code{a = exp(intercept)},
-\code{b = slope}.
+data at the starting breakpoint and fitting a linear model to each
+segment on the log-log scale (\verb{log q ~ log(h - c)});
+\code{a = exp(intercept)}, \code{b = slope}.
 \item Fit all parameters jointly with \code{\link[stats:nls]{stats::nls()}} using the "port"
 algorithm (which supports the box constraints in \code{lower}/\code{upper}).
 For \code{wts_code = "prop"} this fit is repeated, updating the weights
 from the current fitted values and starting from the previous
 estimates, until the fitted discharges stabilise.
 }
+
+The two-segment fit is sensitive to where it starts: from some starting
+breakpoints \code{nls()} fails outright, and from others it settles on a
+local optimum. Trying several starts guards against both. Of the fits that
+succeed, the one kept has the highest log-likelihood under the error model
+(for \code{"none"} and \code{"spec"}, the smallest weighted residual sum of squares;
+for \code{"prop"}, where the weights depend on the fit, the normal likelihood
+with standard deviation proportional to the mean). Under \code{"prop"}, fits
+whose reweighting converged are preferred. What each start led to is
+recorded in \code{kstart_search}.
+
+Each start costs a full fit, and \code{\link[=boot_limits_2seg]{boot_limits_2seg()}} refits with the same
+starts for every resample. Pass a single \code{kstart} for speed once you know
+where the breakpoint lies.
 }
 \examples{
-# The Thompson is close to a single control, so its two-segment fit needs a
-# starting breakpoint and proportional weights to converge.
-fit <- rc_nls_2seg(
-  q,
-  h,
-  data = thompson,
-  wts_code = "prop",
-  kstart = 2
-)
+# The Thompson is close to a single control, so its two-segment fit needs
+# proportional weights to converge.
+fit <- rc_nls_2seg(q, h, data = thompson, wts_code = "prop")
 fit
 coef(fit)
+
+# what each starting breakpoint led to
+fit$kstart_search
 
 predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
 

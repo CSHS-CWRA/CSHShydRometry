@@ -13,6 +13,18 @@
   astronomically large discharges) where a segment is poorly identified,
   making the limits meaningless. Use `method = "boot"` instead.
 
+* By default, `rc_nls_2seg()` now tries 10 starting breakpoints spread across
+  the search range and keeps the most likely fit, rather than starting once
+  from the middle of the range. `kstart` may also be a vector of starting
+  values to try. The fit is sensitive to where it starts: from some starts
+  `nls()` fails, from others it stops at a local optimum. So fits that used
+  to fail may now succeed, and fits that stopped at a local optimum may now
+  find a better one, at a different breakpoint. What each start led to is
+  recorded in `kstart_search`, and `settings$kstart` records `kstart` as
+  supplied, so that `boot_limits_2seg()` repeats the same search for every
+  resample (at a cost of one fit per start; pass a single `kstart` for
+  speed).
+
 * `rc_nls_2seg()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
 

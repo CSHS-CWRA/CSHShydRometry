@@ -12,12 +12,13 @@ coverage](https://codecov.io/gh/CSHS-CWRA/CSHShydRometry/graph/badge.svg)](https
 MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.org/web/licenses/MIT)
 <!-- badges: end -->
 
-Frequentist methods for fitting stage–discharge rating curves, with
-confidence and prediction limits.
+A rating curve turns a river’s stage (its water level, which is easy to
+record continuously) into discharge (the flow, which is not). It is
+fitted to gaugings: occasions when both were measured. This package fits
+rating curves by a range of statistical methods, and puts confidence and
+prediction limits on them.
 
-Derived from work by Dan Moore on rating-curve methods, restructured
-into a model–predict form: every model is fitted by a `rc_*()`
-constructor and summarised by a `predict()` method.
+It is derived from work by Dan Moore on rating-curve methods.
 
 ## Installation
 
@@ -25,16 +26,65 @@ constructor and summarised by a `predict()` method.
 remotes::install_github("CSHS-CWRA/CSHShydRometry")
 ```
 
-## Fitting a curve
+## The data
+
+The package comes with 93 gaugings from the Thompson River (Water Survey
+of Canada station 08LF051). `h` is the stage in metres, `q` the
+discharge in cubic metres per second.
 
 ``` r
 library(CSHShydRometry)
+head(thompson)
+#>         date     h   q  uq
+#> 1 2023-03-22 0.376 141  NA
+#> 2 2023-01-11 0.399 146 2.6
+#> 3 2014-03-05 0.526 160  NA
+#> 4 2011-02-25 0.567 172  NA
+#> 5 2001-04-02 0.618 187  NA
+#> 6 1995-03-17 0.645 197  NA
+```
 
+Discharge rises faster than linearly with stage:
+
+``` r
+plot(q ~ h, data = thompson)
+```
+
+<img src="man/figures/README-plot-data-1.png" alt="" width="100%" />
+
+## Fitting a curve
+
+The classic rating curve is a power law, `q = a * (h - c)^b`. `rc_nls()`
+fits it by nonlinear least squares:
+
+``` r
 fit <- rc_nls(q, h, data = thompson)
-fit
-#> Rating curve model.
-#> - Method: rc_nls
+coef(fit)
+#>          a          b          c 
+#> 80.6686684  1.7131160 -0.9044139
+```
 
+Here `c` is the stage at which the flow would stop, and `b` says how
+quickly the flow grows above it.
+
+## Predicting discharge
+
+`predict()` evaluates the curve at the stages you give it:
+
+``` r
+predict(fit, hpred = c(1, 3, 6))
+#> # A tibble: 3 × 2
+#>       h   fit
+#>   <dbl> <dbl>
+#> 1     1  243.
+#> 2     3  832.
+#> 3     6 2209.
+```
+
+Ask for a confidence level to get limits for the curve itself, and a
+prediction level to get limits for a new gauging:
+
+``` r
 predict(fit, hpred = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
 #> # A tibble: 3 × 6
 #>       h   fit ci_lwr ci_upr pi_lwr pi_upr
@@ -44,135 +94,157 @@ predict(fit, hpred = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
 #> 3     6 2209.  2188.  2230.  2084.  2334.
 ```
 
-Leave out `hpred` and `predict()` evaluates the curve over the observed
-stage range, which is handy for plotting:
+Leave out `hpred` to cover the whole range of the gaugings, which is
+handy for plotting:
 
 ``` r
 band <- predict(fit, conflev = 0.95, predlev = 0.95)
-plot(q ~ h, data = thompson, pch = 16, col = "grey40",
-     xlab = "Stage (m)", ylab = expression(Discharge ~ (m^3 ~ s^-1)))
-polygon(c(band$h, rev(band$h)), c(band$pi_lwr, rev(band$pi_upr)),
-        col = adjustcolor("steelblue", 0.2), border = NA)
-polygon(c(band$h, rev(band$h)), c(band$ci_lwr, rev(band$ci_upr)),
-        col = adjustcolor("steelblue", 0.4), border = NA)
-lines(fit ~ h, data = band, col = "steelblue", lwd = 2)
+
+plot(q ~ h, data = thompson)
+lines(fit ~ h, data = band)
+lines(pi_lwr ~ h, data = band, lty = 2)
+lines(pi_upr ~ h, data = band, lty = 2)
 ```
 
-<img src="man/figures/README-plot-1.png" alt="" width="100%" />
+<img src="man/figures/README-band-1.png" alt="" width="100%" />
 
-Single-segment models: `rc_log_ols()` and `rc_log_nls()` fit a power law
-on the log–log scale, `rc_nls()` on the natural scale, `rc_gnls()`
-estimates the error variance as a power of the mean, and `rc_poly()` and
-`rc_loess()` offer non-power-law alternatives.
+The dashed lines are the 95% prediction limits. The confidence limits
+are there too, in `ci_lwr` and `ci_upr`, but on this scale they sit
+almost on the curve.
 
-Two-segment curves are fitted by `rc_nls_2seg()`, joined either
-continuously (`config = "piecewise"`) or additively
-(`config = "compound"`) at an estimated breakpoint.
+## Other models
 
-## Consistent output
+Every model has an `rc_*()` function and a `predict()` method:
 
-`predict()` returns the same columns whatever the model, method or
-weighting: `h`, `fit`, and — when asked for — `ci_lwr`/`ci_upr` and
-`pi_lwr`/`pi_upr`. Quantities that cannot be computed come back as `NA`
-rather than as missing columns, so a batch of approaches stacks
-directly:
+- `rc_nls()`: power law, fitted on the natural scale.
+- `rc_log_ols()`, `rc_log_nls()`: power law, fitted on the log–log
+  scale.
+- `rc_gnls()`: power law, with the scatter estimated as a power of the
+  flow.
+- `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
+- `rc_nls_2seg()`: two power laws joined at a breakpoint (more below).
+
+Swapping one model for another changes one line:
 
 ``` r
-fits <- list(
-  log_ols = rc_log_ols(q, h, data = thompson),
-  nls     = rc_nls(q, h, data = thompson),
-  nls_cv  = rc_nls(q, h, data = thompson, wts_code = "prop"),
-  poly    = rc_poly(q, h, data = thompson),
-  loess   = rc_loess(q, h, data = thompson)
+fit_poly <- rc_poly(q, h, data = thompson)
+predict(fit_poly, hpred = c(1, 3, 6))
+#> # A tibble: 3 × 2
+#>       h   fit
+#>   <dbl> <dbl>
+#> 1     1  244.
+#> 2     3  835.
+#> 3     6 2201.
+```
+
+`predict()` always gives back the same columns, so results from
+different models can be stacked with `rbind()`:
+
+``` r
+rbind(
+  predict(fit, hpred = 3, conflev = 0.95),
+  predict(fit_poly, hpred = 3, conflev = 0.95)
 )
-do.call(rbind, lapply(names(fits), function(nm) {
-  cbind(model = nm, predict(fits[[nm]], hpred = 3, conflev = 0.95))
-}))
-#>     model h      fit   ci_lwr   ci_upr
-#> 1 log_ols 3 815.1458 808.4432 821.9040
-#> 2     nls 3 831.9720 813.7141 850.2299
-#> 3  nls_cv 3 815.8217 805.8467 825.7967
-#> 4    poly 3 835.1210 815.6177 854.6244
-#> 5   loess 3 823.3323 796.4079 850.2566
+#> # A tibble: 2 × 4
+#>       h   fit ci_lwr ci_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>
+#> 1     3  832.   814.   850.
+#> 2     3  835.   816.   855.
 ```
 
 ## Weighting
 
-Constructors taking `wts_code` offer three error models:
+Gaugings of big flows usually scatter more than gaugings of small ones.
+`wts_code` says how to allow for that:
 
-| `wts_code` | assumption |
-|----|----|
-| `"none"` | constant variance |
-| `"prop"` | constant coefficient of variation, fitted by IRLS |
-| `"spec"` | variances supplied by the user, e.g. from reported gauging uncertainties |
+| `wts_code`         | the scatter is…                            |
+|--------------------|--------------------------------------------|
+| `"none"` (default) | the same at every flow                     |
+| `"prop"`           | proportional to the flow                   |
+| `"spec"`           | known for each gauging, and given in `wts` |
 
-Under `"spec"` a new observation’s scatter is not identified by the fit,
-so prediction limits are returned as `NA`.
+With `"prop"`, the prediction limits widen as the flow grows:
 
-## Intervals for two-segment curves
+``` r
+fit_prop <- rc_nls(q, h, data = thompson, wts_code = "prop")
+predict(fit_prop, hpred = c(1, 6), predlev = 0.95)
+#> # A tibble: 2 × 4
+#>       h   fit pi_lwr pi_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>
+#> 1     1  252.   232.   272.
+#> 2     6 2205.  2027.  2383.
+```
 
-`predict.rc_nls_2seg()` takes a `method`:
+With `"spec"` the fit does not estimate the scatter of a new gauging, so
+its prediction limits come back as `NA`.
 
-| method | notes |
-|----|----|
-| `"delta"` (default) | linearised, fast, **unreliable near the breakpoint** |
-| `"boot"` | resamples the gaugings and refits; slow, but trustworthy at the breakpoint |
+## Two-segment curves
 
-The default warrants a word. A two-segment mean function is not
-differentiable at the breakpoint, so the delta method’s linearisation
-switches form there and the interval jumps. On one fitted curve the band
-widened from 29 to 242 m³ s⁻¹ across the breakpoint, and in a simulation
-study a nominal 95% delta interval covered the true curve only about
-two-thirds of the time just above it, against roughly 97% for the
-bootstrap. Away from the breakpoint the delta method behaves normally.
-
-You can see it at Sauze, either side of the fitted breakpoint, with
-weights from the reported gauging uncertainties:
+Where the river’s control changes (say, when the water rises out of the
+channel and over a floodplain), one power law is not enough. The Ardèche
+at Sauze, from the RBaM package, is such a river. Its gaugings come with
+a reported uncertainty, `uQ`:
 
 ``` r
 sauze <- RBaM::SauzeGaugings
-fit2 <- rc_nls_2seg(Q, H, data = sauze, kstart = 1,
-                    wts_code = "spec", wts = 1 / sauze$uQ^2)
-k <- fit2$pars[["k"]]
-k
-#> [1] 1.621688
-
-hp <- k + c(-0.05, 0.05)
-delta <- predict(fit2, hpred = hp, conflev = 0.95)
-boot <- predict(fit2, hpred = hp, conflev = 0.95, method = "boot",
-                B = 200, seed = 1)
-data.frame(
-  h = hp,
-  delta_width = delta$ci_upr - delta$ci_lwr,
-  boot_width = boot$ci_upr - boot$ci_lwr
-)
-#>          h delta_width boot_width
-#> 1 1.571688    29.02079   52.25745
-#> 2 1.671688   237.71489   58.78946
+head(sauze)
+#>       H    Q   uQ
+#> 1 -0.18  5.0 0.13
+#> 2 -0.16  4.8 0.12
+#> 3  0.22 24.0 0.60
+#> 4  0.22 23.4 0.59
+#> 5  0.27 24.0 0.60
+#> 6  0.27 25.0 0.63
 ```
 
-So `"delta"` for a quick look, and `"boot"` where the interval matters.
+`rc_nls_2seg()` fits two power laws that meet at a breakpoint, `k`. Here
+we weight each gauging by its reported uncertainty:
 
-## Data
+``` r
+fit2 <- rc_nls_2seg(Q, H, data = sauze, wts_code = "spec", wts = 1 / sauze$uQ^2)
+fit2$pars$k
+#> [1] 1.621688
+```
 
-`thompson` ships with the package: 93 gaugings from Water Survey of
-Canada station 08LF051, Thompson River. It is close to a single control,
-so it suits the single-segment models; its two-segment fit converges
-only with care.
+The fit is sensitive to where the breakpoint search starts, so by
+default it tries several starting points and keeps the best.
 
-For the two-segment models the examples and tests prefer the Ardeche at
-Sauze, `RBaM::SauzeGaugings`, which has a clear change of control and a
-reported uncertainty for every gauging. RBaM is a suggested dependency,
-used only as a source of that data — none of the fitting here is
-Bayesian, and the BaM engine is not needed.
+### Limits near the breakpoint
+
+For two-segment curves, `predict()` offers two ways to compute the
+limits. The default, `method = "delta"`, is fast but unreliable near the
+breakpoint: the curve has a corner there, and the method’s straight-line
+approximation jumps across it. `method = "boot"` refits the curve to
+resampled gaugings; it is slow, but it behaves at the breakpoint.
+
+Just either side of the breakpoint, the delta band jumps and the
+bootstrap band does not:
+
+``` r
+hp <- fit2$pars$k + c(-0.05, 0.05)
+delta <- predict(fit2, hpred = hp, conflev = 0.95)
+boot <- predict(fit2, hpred = hp, conflev = 0.95, method = "boot", B = 200,
+                seed = 1)
+
+delta$ci_upr - delta$ci_lwr
+#> [1]  29.02078 237.71491
+boot$ci_upr - boot$ci_lwr
+#> [1] 70.12559 77.24494
+```
+
+In a simulation study, a nominal 95% delta interval covered the true
+curve only about two-thirds of the time just above the breakpoint,
+against roughly 97% for the bootstrap. Away from the breakpoint the two
+agree. So use `"delta"` for a quick look, and `"boot"` where the
+interval matters.
 
 ## Scope
 
-This package covers the frequentist methods only. Bayesian rating-curve
+The package covers frequentist methods only. Bayesian rating-curve
 estimation, and a breakpoint-averaged interval method that removes the
-jump described above, are deliberately left out for now.
+jump described above, are left out for now.
 
-An interval method that draws parameters from their asymptotic normal
+An interval method that draws parameters from their estimated sampling
 distribution and pushes each draw through the model was tried and
 dropped: where a segment is poorly identified, the sampled parameters
 too often give impossible curves (negative or astronomically large

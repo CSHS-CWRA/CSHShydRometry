@@ -146,3 +146,23 @@ rc_irls <- function(fit_fun, yp, start, wts_tol, wts_maxiter) {
     irls = list(iterations = i, converged = converged)
   )
 }
+
+
+#' Profile log-likelihood of a fit under its error model
+#'
+#' The normal log-likelihood, up to a constant, with the error variance of
+#' each observation proportional to `1 / w` and the common scale profiled
+#' out. Used to choose between fits of the same model from different starting
+#' values: with fixed weights it orders fits exactly as the weighted residual
+#' sum of squares does, and it stays comparable when, as under proportional
+#' weights, the weights themselves depend on the fit.
+#'
+#' @param q Observed discharges.
+#' @param mu Fitted discharges.
+#' @param w Weights, the reciprocal of each observation's relative variance.
+#' @return A single number.
+#' @keywords internal
+rc_loglik <- function(q, mu, w) {
+  n <- length(q)
+  0.5 * sum(log(w)) - 0.5 * n * log(mean(w * (q - mu)^2))
+}
