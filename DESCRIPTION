@@ -1,19 +1,19 @@
 Type: Package
 Package: CSHShydRometry
-Title: Frequentist Rating Curve Methods
+Title: Statistical Methods for Rating Curves
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Daniel", "Moore",
-           email = "dan.moore@ubc.ca",
-           role = "aut"),
     person("Vincenzo", "Coia",
            email = "vincenzo.coia@gmail.com",
            role = c("aut", "cre")),
+    person("Daniel", "Moore",
+           email = "dan.moore@ubc.ca",
+           role = "aut"),
     person("Paul", "Whitfield",
            email = "paul.h.whitfield@gmail.com",
            role = "aut")
   )
-Description: Fits stage-discharge rating curves by a range of frequentist
+Description: Fits stage-discharge rating curves by a range of statistical
     methods, and attaches confidence and prediction limits to the fitted
     curve. Single-segment curves may be fitted as a power law (by ordinary
     or nonlinear least squares, on the log-log or the natural scale, or by
