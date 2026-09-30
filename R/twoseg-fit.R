@@ -4,8 +4,9 @@
 #'
 #' @param discharge Discharge: a vector, or a column of `data`.
 #' @param stage Stage: a vector, or a column of `data`.
-#' @param data Optional data frame in which to look up `discharge` and `stage`. When
-#'   supplied, they may be given as bare column names.
+#' @param data Optional data frame in which to look up `discharge`, `stage`
+#'   and `wts`. When supplied, they may be given as bare column names or
+#'   expressions of them.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named, which keeps calls readable and guards against
 #'   positional mistakes.
@@ -24,7 +25,8 @@
 #'   `"spec"` (user-supplied weights via `wts`, e.g. `1 / sd^2`, where `sd` is
 #'   the reported standard uncertainty of each discharge), or `"prop"` (proportional / constant-CV error,
 #'   fit by iteratively reweighting with weights `1/fitted^2`).
-#' @param wts Optional vector of weights when `wts_code = "spec"`.
+#' @param wts Weights when `wts_code = "spec"`, one per gauging: a vector, or
+#'   an expression using columns of `data`, such as `1 / uncertainty_sd^2`.
 #' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
 #'   reweighting stops once no fitted discharge changes by more than this
 #'   fraction from one round to the next.
@@ -105,7 +107,7 @@
 #'     H,
 #'     data = sauze,
 #'     wts_code = "spec",
-#'     wts = 1 / sauze$uQ^2,
+#'     wts = 1 / uQ^2,
 #'     kstart = 1
 #'   )
 #' }
@@ -128,11 +130,12 @@ rc_nls_2seg <- function(
   nls_maxiter = 1000
 ) {
   # -- 1. Inputs: tidy evaluation, checks, missing values ----
-  # discharge and stage may name columns of `data`, or be vectors
+  # discharge, stage and wts may use columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
+  wts <- rlang::eval_tidy(rlang::enquo(wts), data)
 
   # error checks
   config <- rlang::arg_match(config)

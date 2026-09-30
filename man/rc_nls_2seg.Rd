@@ -31,8 +31,9 @@ rc_nls_2seg(
 to be named, which keeps calls readable and guards against
 positional mistakes.}
 
-\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
-supplied, they may be given as bare column names.}
+\item{data}{Optional data frame in which to look up \code{discharge}, \code{stage}
+and \code{wts}. When supplied, they may be given as bare column names or
+expressions of them.}
 
 \item{config}{Segment configuration, \code{"piecewise"} or \code{"compound"}.
 Defaults to the first.}
@@ -55,7 +56,8 @@ three gaugings in each segment.}
 the reported standard uncertainty of each discharge), or \code{"prop"} (proportional / constant-CV error,
 fit by iteratively reweighting with weights \code{1/fitted^2}).}
 
-\item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
+\item{wts}{Weights when \code{wts_code = "spec"}, one per gauging: a vector, or
+an expression using columns of \code{data}, such as \code{1 / uncertainty_sd^2}.}
 
 \item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
 reweighting stops once no fitted discharge changes by more than this
@@ -145,7 +147,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
     H,
     data = sauze,
     wts_code = "spec",
-    wts = 1 / sauze$uQ^2,
+    wts = 1 / uQ^2,
     kstart = 1
   )
 }

@@ -24,8 +24,9 @@ rc_loess(
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
-supplied, they may be given as bare column names.}
+\item{data}{Optional data frame in which to look up \code{discharge}, \code{stage}
+and \code{wts}. When supplied, they may be given as bare column names or
+expressions of them.}
 
 \item{degree}{Degree of local polynomials (1 or 2).}
 
@@ -35,7 +36,8 @@ supplied, they may be given as bare column names.}
 
 \item{wts_code}{Weighting scheme: \code{"none"}, \code{"spec"}, or \code{"prop"}.}
 
-\item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
+\item{wts}{Weights when \code{wts_code = "spec"}, one per gauging: a vector, or
+an expression using columns of \code{data}, such as \code{1 / uncertainty_sd^2}.}
 }
 \value{
 An \code{rc_loess} object; see \link{rating_curve} for its contents. A loess

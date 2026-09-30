@@ -81,6 +81,17 @@ test_that("kstart must leave three gaugings in each segment", {
   )
 })
 
+test_that("two-segment weights may be an expression using columns of data", {
+  d <- sauze()
+  masked <- rc_nls_2seg(Q, H, data = d, wts_code = "spec", wts = 1 / uQ^2,
+                        kstart = 1)
+  vector <- rc_nls_2seg(Q, H, data = d, wts_code = "spec",
+                        wts = 1 / d$uQ^2, kstart = 1)
+  expect_equal(coef(masked), coef(vector))
+  # the bootstrap refits with the evaluated weights
+  expect_equal(masked$settings$wts, 1 / d$uQ^2)
+})
+
 test_that("specified weights stay aligned when gaugings are dropped", {
   d <- sauze()
   w <- 1 / d$uQ^2

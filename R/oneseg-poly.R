@@ -4,13 +4,15 @@
 #'
 #' @param discharge Discharge: a vector, or a column of `data`.
 #' @param stage Stage: a vector, or a column of `data`.
-#' @param data Optional data frame in which to look up `discharge` and `stage`. When
-#'   supplied, they may be given as bare column names.
+#' @param data Optional data frame in which to look up `discharge`, `stage`
+#'   and `wts`. When supplied, they may be given as bare column names or
+#'   expressions of them.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param degree Polynomial degree.
 #' @param wts_code Weighting scheme: `"none"`, `"spec"`, or `"prop"`.
-#' @param wts Optional vector of weights when `wts_code = "spec"`.
+#' @param wts Weights when `wts_code = "spec"`, one per gauging: a vector, or
+#'   an expression using columns of `data`, such as `1 / uncertainty_sd^2`.
 #' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
 #'   reweighting stops once no fitted discharge changes by more than this
 #'   fraction from one round to the next.
@@ -34,11 +36,12 @@ rc_poly <- function(
   wts_maxiter = 100
 ) {
   # error checks and warnings
-  # discharge and stage may name columns of `data`, or be vectors
+  # discharge, stage and wts may use columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
+  wts <- rlang::eval_tidy(rlang::enquo(wts), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_count(degree, positive = TRUE)

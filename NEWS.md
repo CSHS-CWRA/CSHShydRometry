@@ -67,6 +67,9 @@
 
 ## New features
 
+* `wts` is looked up in `data` like `discharge` and `stage`, so weights can
+  be written in terms of its columns: `wts = 1 / uncertainty_sd^2`.
+
 * `coef()` returns the estimated parameters as a flat named vector.
 
 * Proportional weights (`wts_code = "prop"`) are fitted more robustly:

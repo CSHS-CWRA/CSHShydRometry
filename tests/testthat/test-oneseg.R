@@ -42,6 +42,33 @@ test_that("gaugings with a missing stage or discharge are dropped", {
   expect_false(anyNA(fit$gaugings))
 })
 
+test_that("weights may be an expression using columns of data", {
+  d <- spec_data()
+  d$sd <- d$uncertainty_pct / 100 * d$discharge / 2
+  masked <- list(
+    rc_nls(discharge, stage, data = d, wts_code = "spec", wts = 1 / sd^2),
+    rc_poly(discharge, stage, data = d, wts_code = "spec", wts = 1 / sd^2),
+    rc_loess(discharge, stage, data = d, wts_code = "spec", wts = 1 / sd^2,
+             span = 1)
+  )
+  vectors <- list(
+    rc_nls(discharge, stage, data = d, wts_code = "spec", wts = d$wts),
+    rc_poly(discharge, stage, data = d, wts_code = "spec", wts = d$wts),
+    rc_loess(discharge, stage, data = d, wts_code = "spec", wts = d$wts,
+             span = 1)
+  )
+  for (i in seq_along(masked)) {
+    expect_equal(masked[[i]]$weights, vectors[[i]]$weights)
+    expect_equal(masked[[i]]$rse, vectors[[i]]$rse)
+  }
+  # a variable outside the data still works
+  w <- d$wts
+  expect_equal(
+    rc_nls(discharge, stage, data = d, wts_code = "spec", wts = w)$rse,
+    vectors[[1]]$rse
+  )
+})
+
 test_that("specified weights stay aligned when gaugings are dropped", {
   d <- spec_data()
   w <- d$wts
