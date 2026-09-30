@@ -3,9 +3,9 @@
 #' Confidence and prediction limits for an NLS fit with proportional weights
 #'
 #' `nlspw` is short for "NLS, proportional weights": these are the limits
-#' used when `wts_code = "prop"`.
+#' used under [wts_prop()].
 #'
-#' Builds pointwise interval limits for the `wts_code = "prop"` case, where the
+#' Builds pointwise interval limits for the [wts_prop()] case, where the
 #' error standard deviation is taken to be proportional to the mean discharge
 #' (constant coefficient of variation). Standard errors of the fitted mean come
 #' from the delta method via [investr::predFit()]; the interval half-width uses
@@ -94,35 +94,37 @@ rc_complete <- function(discharge, stage) {
 
 #' Fit with proportional weights by iterative reweighting
 #'
-#' Under `wts_code = "prop"` the error standard deviation is proportional to
+#' Under [wts_prop()] the error standard deviation is proportional to
 #' the mean discharge, so the weights `1 / fitted^2` depend on the fit itself.
 #' The fit is therefore repeated in rounds: fit with the current weights,
 #' recompute the weights from the new fitted values, refit. Each round starts
 #' from the previous round's estimates. The rounds stop once no fitted
-#' discharge changes by more than a fraction `wts_tol` between successive
-#' rounds, or after `wts_maxiter` rounds, with a warning.
+#' discharge changes by more than a fraction `tol` between successive
+#' rounds, or after `maxiter` rounds, with a warning.
 #'
-#' @param fit_fun Function of `(wts, start)` returning a fitted model with
-#'   `predict()` and `coef()` methods.
+#' @param fit_fun Function of `(wts, start)` returning a fitted model with a
+#'   `predict()` method, and a `coef()` method unless `start` is `NULL`.
 #' @param yp Initial fitted discharges, from which the first weights are
 #'   computed. Must be positive.
-#' @param start Named list of starting values for the first round.
-#' @param wts_tol,wts_maxiter Convergence tolerance and maximum number of
-#'   rounds.
+#' @param start Named list of starting values for the first round, or
+#'   `NULL` for a model, such as loess, that needs none.
+#' @param tol,maxiter Convergence tolerance and maximum number of rounds.
 #' @return A list with the final `model`, the `weights` it was fitted with,
 #'   and `irls`: a list of the number of `iterations` (rounds) and whether
 #'   the rounds `converged`.
 #' @keywords internal
-rc_irls <- function(fit_fun, yp, start, wts_tol, wts_maxiter) {
+rc_irls <- function(fit_fun, yp, start, tol, maxiter) {
   converged <- FALSE
-  for (i in seq_len(wts_maxiter)) {
+  for (i in seq_len(maxiter)) {
     wts <- 1 / yp^2
     mod <- fit_fun(wts, start)
     yp_new <- as.numeric(stats::predict(mod))
     change <- max(abs(yp_new - yp) / abs(yp))
-    start <- as.list(stats::coef(mod))
+    if (!is.null(start)) {
+      start <- as.list(stats::coef(mod))
+    }
     yp <- yp_new
-    if (change < wts_tol) {
+    if (change < tol) {
       converged <- TRUE
       break
     }
@@ -133,9 +135,9 @@ rc_irls <- function(fit_fun, yp, start, wts_tol, wts_maxiter) {
         paste(
           "Proportional weights did not converge in %d rounds (the fitted",
           "discharges still changed by up to %.2g%% in the last); the fit",
-          "may not be reliable. Consider increasing `wts_maxiter`."
+          "may not be reliable. Consider increasing `maxiter` in `wts_prop()`."
         ),
-        wts_maxiter,
+        maxiter,
         100 * change
       ),
       call. = FALSE

@@ -75,7 +75,7 @@
 #' # the columns returned never depend on the model or the method, so results
 #' # from different approaches stack directly
 #' one <- rc_nls(discharge, stage, data = thompson)
-#' two <- rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
+#' two <- rc_2seg_nls(discharge, stage, data = thompson, wts = "prop", kstart = 2)
 #' rbind(
 #'   predict(one, stage = 3, conflev = 0.95),
 #'   predict(two, stage = 3, conflev = 0.95)
@@ -114,8 +114,8 @@ predict.rc_2seg_nls <- function(
 #' Linearises the fitted curve about `theta-hat` and propagates the parameter
 #' covariance through that linearisation. Routed by weighting:
 #' \itemize{
-#'   \item `"none"` / `"spec"`: [investr::predFit()].
-#'   \item `"prop"`: [nlspw_limits()], which accounts for the proportional
+#'   \item [wts_none()] / [wts_spec()]: [investr::predFit()].
+#'   \item [wts_prop()]: [nlspw_limits()], which accounts for the proportional
 #'     error structure.
 #' }
 #' The linearisation holds the breakpoint fixed at `k-hat`, so the gradient
@@ -130,7 +130,7 @@ predict.rc_2seg_nls <- function(
 #' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]).
 #' @param stage Stages at which to return limits. Defaults to
 #'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
-#' @param ... Passed on to [investr::predFit()] for the `"none"`/`"spec"`
+#' @param ... Passed on to [investr::predFit()] for the [wts_none()]/[wts_spec()]
 #'   cases.
 #' @param conflev,predlev Levels for the confidence and prediction intervals,
 #'   or `NULL` to omit either.
@@ -158,12 +158,12 @@ delta_limits_2seg <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  if (predlim && object$settings$wts_code == "spec") {
+  if (predlim && object$settings$wts$type == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  wts_code <- object$settings$wts_code
+  wts_code <- object$settings$wts$type
   # point predictions (fitted mean discharge) at the requested stages
   yvec <- unname(stats::predict(mod, newdata = stage_df))
   out_df <- data.frame(stage = stage, fit = yvec)

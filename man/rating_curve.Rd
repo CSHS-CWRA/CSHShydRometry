@@ -16,7 +16,7 @@ installed.}
 \item{\code{pars}}{The estimated parameters of the curve, as a named list with
 one element per parameter type. For a multi-segment curve an element
 holds one value per segment (for \code{k}, per breakpoint); elements may
-differ in length where a parameter is fixed by the configuration. Empty
+differ in length where a parameter is fixed by how the segments join. Empty
 for \code{\link[=rc_loess]{rc_loess()}}, which has no parameters. \code{\link[=coef]{coef()}} returns the same
 estimates as a flat named vector.}
 \item{\code{settings}}{The arguments the fit was made with, including any
@@ -26,9 +26,9 @@ log-scale fits).}
 \item{\code{model}}{The underlying model object, e.g. from \code{\link[stats:nls]{stats::nls()}}.}
 }
 
-Constructors with a \code{wts_code} argument also return \code{weights}, the
+Constructors with a \code{wts} argument also return \code{weights}, the
 weights the final model was fitted with, and \code{irls}: \code{NULL}, or under
-\code{wts_code = "prop"} a list giving the number of reweighting rounds
+\code{\link[=wts_prop]{wts_prop()}} a list giving the number of reweighting rounds
 (\code{iterations}) and whether they \code{converged}. Some constructors carry
 further elements, documented on their own help pages.
 }

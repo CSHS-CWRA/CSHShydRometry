@@ -13,7 +13,7 @@
 #'   \item{`pars`}{The estimated parameters of the curve, as a named list with
 #'     one element per parameter type. For a multi-segment curve an element
 #'     holds one value per segment (for `k`, per breakpoint); elements may
-#'     differ in length where a parameter is fixed by the configuration. Empty
+#'     differ in length where a parameter is fixed by how the segments join. Empty
 #'     for [rc_loess()], which has no parameters. [coef()] returns the same
 #'     estimates as a flat named vector.}
 #'   \item{`settings`}{The arguments the fit was made with, including any
@@ -23,9 +23,9 @@
 #'   \item{`model`}{The underlying model object, e.g. from [stats::nls()].}
 #' }
 #'
-#' Constructors with a `wts_code` argument also return `weights`, the
+#' Constructors with a `wts` argument also return `weights`, the
 #' weights the final model was fitted with, and `irls`: `NULL`, or under
-#' `wts_code = "prop"` a list giving the number of reweighting rounds
+#' [wts_prop()] a list giving the number of reweighting rounds
 #' (`iterations`) and whether they `converged`. Some constructors carry
 #' further elements, documented on their own help pages.
 #'

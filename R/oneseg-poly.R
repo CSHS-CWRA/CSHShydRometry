@@ -11,15 +11,9 @@
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param degree Polynomial degree.
-#' @param wts_code Weighting scheme: `"none"`, `"spec"`, or `"prop"`.
-#' @param wts <[`data-masking`][rlang::args_data_masking]> Weights when
-#'   `wts_code = "spec"`, one per gauging: a vector, or an expression
-#'   evaluated in `data`, such as `1 / uncertainty_sd^2`.
-#' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
-#'   reweighting stops once no fitted discharge changes by more than this
-#'   fraction from one round to the next.
-#' @param wts_maxiter Maximum number of reweighting rounds under
-#'   `wts_code = "prop"`. Reaching it gives a warning.
+#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
+#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
+#'   with the weights. See [wts].
 #' @return An `rc_poly` object; see [rating_curve] for its contents. The
 #'   coefficients are named `b0`, `b1`, ... by power of `stage`.
 #' @examples
@@ -32,10 +26,7 @@ rc_poly <- function(
   ...,
   data = NULL,
   degree = 2,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL,
-  wts_tol = 1e-6,
-  wts_maxiter = 100
+  wts = wts_none()
 ) {
   # error checks and warnings
   # discharge, stage and wts may use columns of `data`, or be vectors
@@ -43,22 +34,24 @@ rc_poly <- function(
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
-  wts <- rlang::eval_tidy(rlang::enquo(wts), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_count(degree, positive = TRUE)
-  wts_code <- rlang::arg_match(wts_code)
+  # the weighting scheme; specified weights are evaluated in `data`, and
+  # kept aligned with the gaugings that remain
+  weighting <- rc_resolve_wts(
+    wts,
+    data,
+    keep = stats::complete.cases(discharge, stage)
+  )
+  wts_code <- weighting$type
+  wts <- weighting$values
 
   # remove missing observations
-  # keep user-supplied weights aligned with the gaugings that remain
-  if (length(wts) == length(discharge)) {
-    wts <- wts[stats::complete.cases(discharge, stage)]
-  }
   qh <- rc_complete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
   qh_fit <- data.frame(discharge = discharge, stage = stage)
-  wts_input <- wts
   irls <- NULL
 
   # lm model formula
@@ -110,8 +103,8 @@ rc_poly <- function(
       fit_fun,
       yp = as.numeric(stats::predict(mod_ols)),
       start = startlist,
-      wts_tol = wts_tol,
-      wts_maxiter = wts_maxiter
+      tol = weighting$tol,
+      maxiter = weighting$maxiter
     )
     mod_poly <- res$model
     wts <- res$weights
@@ -130,13 +123,7 @@ rc_poly <- function(
   outlist <- list(
     gaugings = qh,
     pars = pars,
-    settings = list(
-      degree = degree,
-      wts_code = wts_code,
-      wts = wts_input,
-      wts_tol = wts_tol,
-      wts_maxiter = wts_maxiter
-    ),
+    settings = list(degree = degree, wts = weighting),
     weights = wts,
     irls = irls,
     rse = mod_sum$sigma,
@@ -162,7 +149,7 @@ predict.rc_poly <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  wts_code <- object$settings$wts_code
+  wts_code <- object$settings$wts$type
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }

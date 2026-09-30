@@ -10,7 +10,7 @@
 #'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
-#' @param tol Tolerance for nls convergence.
+#' @param control Settings for [stats::nls()], as from [stats::nls.control()].
 #' @return An `rc_log_nls` object; see [rating_curve] for its contents. The
 #'   back-transformed coefficient `a` estimates the median discharge;
 #'   `a_corrected` holds two bias-corrected versions for the mean: `nbc`,
@@ -19,7 +19,13 @@
 #' fit <- rc_log_nls(discharge, stage, data = thompson)
 #' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
-rc_log_nls <- function(discharge, stage, ..., data = NULL, tol = 1e-6) {
+rc_log_nls <- function(
+  discharge,
+  stage,
+  ...,
+  data = NULL,
+  control = stats::nls.control(maxiter = 1000, tol = 1e-6)
+) {
   # discharge and stage may name columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
@@ -27,6 +33,7 @@ rc_log_nls <- function(discharge, stage, ..., data = NULL, tol = 1e-6) {
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
+  checkmate::assert_list(control, names = "named")
   qh <- rc_complete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
@@ -40,7 +47,7 @@ rc_log_nls <- function(discharge, stage, ..., data = NULL, tol = 1e-6) {
     log(discharge) ~ b0 + b1 * log(stage - c),
     data = data.frame(discharge = discharge, stage = stage),
     start = list(b0 = b0start, b1 = b1start, c = cstart),
-    control = list(tol = tol, maxiter = 1000)
+    control = control
   )
   pars <- stats::coefficients(mod_nls)
   rse <- summary(mod_nls)$sigma
@@ -58,7 +65,7 @@ rc_log_nls <- function(discharge, stage, ..., data = NULL, tol = 1e-6) {
     gaugings = qh,
     pars = list(a = unname(a), b = unname(b), c = unname(c)),
     a_corrected = c(nbc = unname(a_nbc), dbc = unname(a_dbc)),
-    settings = list(tol = tol),
+    settings = list(control = control),
     rse = rse,
     model = mod_nls
   )

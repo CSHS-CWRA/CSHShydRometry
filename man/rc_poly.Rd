@@ -4,17 +4,7 @@
 \alias{rc_poly}
 \title{Fit polynomial rating curve}
 \usage{
-rc_poly(
-  discharge,
-  stage,
-  ...,
-  data = NULL,
-  degree = 2,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL,
-  wts_tol = 1e-06,
-  wts_maxiter = 100
-)
+rc_poly(discharge, stage, ..., data = NULL, degree = 2, wts = wts_none())
 }
 \arguments{
 \item{discharge}{<\code{\link[rlang:args_data_masking]{data-masking}}> Discharge: a
@@ -31,18 +21,9 @@ are evaluated.}
 
 \item{degree}{Polynomial degree.}
 
-\item{wts_code}{Weighting scheme: \code{"none"}, \code{"spec"}, or \code{"prop"}.}
-
-\item{wts}{<\code{\link[rlang:args_data_masking]{data-masking}}> Weights when
-\code{wts_code = "spec"}, one per gauging: a vector, or an expression
-evaluated in \code{data}, such as \code{1 / uncertainty_sd^2}.}
-
-\item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
-reweighting stops once no fitted discharge changes by more than this
-fraction from one round to the next.}
-
-\item{wts_maxiter}{Maximum number of reweighting rounds under
-\code{wts_code = "prop"}. Reaching it gives a warning.}
+\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
+\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
+with the weights. See \link{wts}.}
 }
 \value{
 An \code{rc_poly} object; see \link{rating_curve} for its contents. The

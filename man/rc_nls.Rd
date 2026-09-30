@@ -9,12 +9,8 @@ rc_nls(
   stage,
   ...,
   data = NULL,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL,
-  wts_tol = 1e-06,
-  wts_maxiter = 100,
-  nls_tol = 1e-06,
-  nls_maxiter = 1000
+  wts = wts_none(),
+  control = stats::nls.control(maxiter = 1000, tol = 1e-06)
 )
 }
 \arguments{
@@ -30,22 +26,11 @@ to be named in full.}
 \item{data}{Optional data frame in which \code{discharge}, \code{stage} and \code{wts}
 are evaluated.}
 
-\item{wts_code}{Weighting scheme: \code{"none"}, \code{"spec"}, or \code{"prop"}.}
+\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
+\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
+with the weights. See \link{wts}.}
 
-\item{wts}{<\code{\link[rlang:args_data_masking]{data-masking}}> Weights when
-\code{wts_code = "spec"}, one per gauging: a vector, or an expression
-evaluated in \code{data}, such as \code{1 / uncertainty_sd^2}.}
-
-\item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
-reweighting stops once no fitted discharge changes by more than this
-fraction from one round to the next.}
-
-\item{wts_maxiter}{Maximum number of reweighting rounds under
-\code{wts_code = "prop"}. Reaching it gives a warning.}
-
-\item{nls_tol}{Tolerance for nls convergence.}
-
-\item{nls_maxiter}{Maximum nls iterations.}
+\item{control}{Settings for \code{\link[stats:nls]{stats::nls()}}, as from \code{\link[stats:nls.control]{stats::nls.control()}}.}
 }
 \value{
 An \code{rc_nls} object; see \link{rating_curve} for its contents.
@@ -58,6 +43,6 @@ fit <- rc_nls(discharge, stage, data = thompson)
 predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 
 # constant coefficient of variation instead of constant variance
-fit_prop <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
+fit_prop <- rc_nls(discharge, stage, data = thompson, wts = "prop")
 predict(fit_prop, stage = c(1, 3, 6), conflev = 0.95)
 }

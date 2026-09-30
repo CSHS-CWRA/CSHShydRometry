@@ -214,7 +214,7 @@ we weight each gauging by its reported uncertainty:
 
 ``` r
 fit2 <- rc_2seg_nls(discharge, stage, data = sauze,
-                    wts_code = "spec", wts = 1 / uncertainty_sd^2)
+                    wts = wts_spec(1 / uncertainty_sd^2))
 fit2$pars$k
 #> [1] 1.621688
 ```

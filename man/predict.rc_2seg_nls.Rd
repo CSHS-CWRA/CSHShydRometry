@@ -97,7 +97,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
 # the columns returned never depend on the model or the method, so results
 # from different approaches stack directly
 one <- rc_nls(discharge, stage, data = thompson)
-two <- rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
+two <- rc_2seg_nls(discharge, stage, data = thompson, wts = "prop", kstart = 2)
 rbind(
   predict(one, stage = 3, conflev = 0.95),
   predict(two, stage = 3, conflev = 0.95)

@@ -12,8 +12,7 @@ rc_loess(
   degree = 2,
   span = 0.75,
   extrapolate = TRUE,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL
+  wts = wts_none()
 )
 }
 \arguments{
@@ -35,11 +34,10 @@ are evaluated.}
 
 \item{extrapolate}{Allow extrapolation beyond the observed stage range.}
 
-\item{wts_code}{Weighting scheme: \code{"none"}, \code{"spec"}, or \code{"prop"}.}
-
-\item{wts}{<\code{\link[rlang:args_data_masking]{data-masking}}> Weights when
-\code{wts_code = "spec"}, one per gauging: a vector, or an expression
-evaluated in \code{data}, such as \code{1 / uncertainty_sd^2}.}
+\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
+\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
+with the weights. See \link{wts}. Under \code{wts_prop()}
+the loess curve is refitted in rounds, like the parametric fits.}
 }
 \value{
 An \code{rc_loess} object; see \link{rating_curve} for its contents. A loess

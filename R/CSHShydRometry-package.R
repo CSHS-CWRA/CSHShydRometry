@@ -19,18 +19,18 @@
 #'
 #' Two segments, joined at an estimated breakpoint:
 #' \itemize{
-#'   \item [rc_2seg_nls()] — `config = "piecewise"` forces the two power laws
-#'     to meet at the breakpoint; `config = "compound"` adds the upper segment
+#'   \item [rc_2seg_nls()] — `controls = "successive"`: the upper power law
+#'     takes over from the lower at the breakpoint; `controls = "additive"`: it adds
 #'     to the discharge carried at the breakpoint.
 #' }
 #'
 #' @section Weighting:
-#' The constructors that take `wts_code` offer three error models: `"none"`
-#' (constant variance), `"prop"` (constant coefficient of variation, fitted by
-#' iteratively reweighted least squares), and `"spec"` (variances supplied by
-#' the user, typically from reported gauging uncertainties). Under `"spec"` a
-#' new observation's scatter is not identified by the fit, so prediction limits
-#' are returned as `NA`.
+#' The constructors that take `wts` offer three error models: [wts_none()]
+#' (constant variance), [wts_prop()] (constant coefficient of variation, fitted by
+#' iteratively reweighted least squares), and [wts_spec()] (variances supplied
+#' by the user, typically from reported gauging uncertainties). Under
+#' [wts_spec()] a new observation's scatter is not identified by the fit, so
+#' prediction limits are returned as `NA`. See [wts].
 #'
 #' @section Confidence and prediction limits:
 #' `predict()` returns the same columns whatever the model, the method or the

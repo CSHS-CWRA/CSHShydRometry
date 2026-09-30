@@ -11,30 +11,25 @@
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named, which keeps calls readable and guards against
 #'   positional mistakes.
-#' @param config Segment configuration, `"piecewise"` or `"compound"`.
-#'   Defaults to the first. Under `"piecewise"` the two power laws meet at the
-#'   breakpoint, the upper segment's coefficient being set so that they do.
+#' @param controls How the two hydraulic controls combine above the
+#'   breakpoint. `"successive"` (the default): the upper power law takes over
+#'   from the lower one, with its coefficient set so that the two meet at the
+#'   breakpoint. `"additive"`: the upper power law adds to the discharge the
+#'   lower one carries at the breakpoint, as when flow spills onto a
+#'   floodplain.
 #' @param kstart Starting value(s) for the breakpoint `k`. `NULL`, the
 #'   default, tries 10 values spread evenly across the search range; a
 #'   numeric vector tries each of its values. See Details.
 #' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
 #' @param kbounds Lower and upper bounds for `k`, or `NULL` to keep at least
 #'   three gaugings in each segment.
-#' @param wts_code Weighting scheme:
-#'   `"none"` (ordinary least squares, the default),
-#'   `"spec"` (user-supplied weights via `wts`, e.g. `1 / sd^2`, where `sd` is
-#'   the reported standard uncertainty of each discharge), or `"prop"` (proportional / constant-CV error,
-#'   fit by iteratively reweighting with weights `1/fitted^2`).
-#' @param wts <[`data-masking`][rlang::args_data_masking]> Weights when
-#'   `wts_code = "spec"`, one per gauging: a vector, or an expression
-#'   evaluated in `data`, such as `1 / uncertainty_sd^2`.
-#' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
-#'   reweighting stops once no fitted discharge changes by more than this
-#'   fraction from one round to the next.
-#' @param wts_maxiter Maximum number of reweighting rounds under
-#'   `wts_code = "prop"`. Reaching it gives a warning.
-#' @param nls_tol Tolerance for nls convergence.
-#' @param nls_maxiter Maximum nls iterations.
+#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
+#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
+#'   with the weights. See [wts].
+#' @param control Settings for [stats::nls()], as from [stats::nls.control()].
+#'   The fit uses the `"port"` algorithm, which ignores `tol`; its own
+#'   settings, such as `rel.tol`, can be added to the list (see
+#'   [stats::nls()]).
 #'
 #' @details
 #' Fitting proceeds in three steps, the last two repeated for each starting
@@ -49,7 +44,7 @@
 #'         `a = exp(intercept)`, `b = slope`.
 #'   \item Fit all parameters jointly with [stats::nls()] using the "port"
 #'         algorithm (which supports the box constraints in `lower`/`upper`).
-#'         For `wts_code = "prop"` this fit is repeated, updating the weights
+#'         Under `wts_prop()` this fit is repeated, updating the weights
 #'         from the current fitted values and starting from the previous
 #'         estimates, until the fitted discharges stabilise.
 #' }
@@ -74,9 +69,9 @@
 #'
 #' @return An object of class `c("rc_2seg_nls", "rating_curve")`; see
 #'   [rating_curve] for its contents. `pars` holds the estimated parameters by
-#'   type, one value per segment: under `"piecewise"`, `a` has a single value
+#'   type, one value per segment: under `"successive"`, `a` has a single value
 #'   because the upper segment's coefficient is fixed by continuity, and under
-#'   `"compound"`, `c` has a single value because the upper segment is
+#'   `"additive"`, `c` has a single value because the upper segment is
 #'   measured from `k`. `coef()` gives the same estimates by their model
 #'   names (`a1`, `b1`, `c1`, ...). `kstart_search` is a data frame with a row
 #'   per starting breakpoint tried: the estimated breakpoint `k` it led to and
@@ -84,7 +79,7 @@
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs
 #' # proportional weights to converge.
-#' fit <- rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop")
+#' fit <- rc_2seg_nls(discharge, stage, data = thompson, wts = "prop")
 #' fit
 #' coef(fit)
 #'
@@ -94,21 +89,20 @@
 #' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # A river with a clearer change of control is far less fussy. The Ardeche
-#' # at Sauze, in the RBaM package, fits under either configuration and
+#' # at Sauze, in the RBaM package, fits however the controls combine, and
 #' # carries a reported uncertainty for every gauging.
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   pw <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
-#'   cp <- rc_2seg_nls(Q, H, data = sauze, config = "compound", kstart = 1)
-#'   c(piecewise = pw$pars[["k"]], compound = cp$pars[["k"]])
+#'   succ <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
+#'   add <- rc_2seg_nls(Q, H, data = sauze, controls = "additive", kstart = 1)
+#'   c(successive = succ$pars[["k"]], additive = add$pars[["k"]])
 #'
 #'   # weights from the reported gauging uncertainties
 #'   rc_2seg_nls(
 #'     Q,
 #'     H,
 #'     data = sauze,
-#'     wts_code = "spec",
-#'     wts = 1 / uQ^2,
+#'     wts = wts_spec(1 / uQ^2),
 #'     kstart = 1
 #'   )
 #' }
@@ -118,16 +112,12 @@ rc_2seg_nls <- function(
   stage,
   ...,
   data = NULL,
-  config = c("piecewise", "compound"),
+  controls = c("successive", "additive"),
   kstart = NULL,
   kfixed = FALSE,
   kbounds = NULL,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL,
-  wts_tol = 1e-6,
-  wts_maxiter = 100,
-  nls_tol = 1e-6,
-  nls_maxiter = 1000
+  wts = wts_none(),
+  control = stats::nls.control(maxiter = 1000)
 ) {
   # -- 1. Inputs: tidy evaluation, checks, missing values ----
   # discharge, stage and wts may use columns of `data`, or be vectors
@@ -135,30 +125,26 @@ rc_2seg_nls <- function(
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
-  wts <- rlang::eval_tidy(rlang::enquo(wts), data)
 
   # error checks
-  config <- rlang::arg_match(config)
-  wts_code <- rlang::arg_match(wts_code)
+  controls <- rlang::arg_match(controls)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_flag(kfixed)
   checkmate::assert_numeric(kstart, min.len = 1L, finite = TRUE, null.ok = TRUE)
   checkmate::assert_numeric(kbounds, len = 2L, null.ok = TRUE)
-  checkmate::assert_number(wts_tol, lower = 0)
-  checkmate::assert_count(wts_maxiter, positive = TRUE)
-  checkmate::assert_number(nls_tol, lower = 0)
-  checkmate::assert_count(nls_maxiter, positive = TRUE)
-  # remove missing values, keeping user-supplied weights aligned with the
-  # gaugings that remain, and check the number of observations
-  if (length(wts) == length(discharge)) {
-    wts <- wts[stats::complete.cases(discharge, stage)]
-  }
+  checkmate::assert_list(control, names = "named")
+  # the weighting scheme; specified weights are evaluated in `data`, and
+  # kept aligned with the gaugings that remain
+  weighting <- rc_resolve_wts(
+    wts,
+    data,
+    keep = stats::complete.cases(discharge, stage)
+  )
+  wts_code <- weighting$type
+  wts <- weighting$values
+  # remove missing values, and check the number of observations
   qh <- rc_complete(discharge, stage)
-  # Keep the weights as supplied. `wts` is overwritten below (unit weights for
-  # "none", the converged IRLS weights for "prop"), and refitting methods such
-  # as boot_limits_2seg need the original to reproduce the fit.
-  wts_input <- wts
   discharge <- qh$discharge
   stage <- qh$stage
   hsort <- sort(stage)
@@ -204,16 +190,16 @@ rc_2seg_nls <- function(
 
   # -- 4. Model formula ----
   # Model formula (see the header for the full derivation). The upper branch
-  # of the piecewise form has no free a2: the leading coefficient
+  # of the successive form has no free a2: the leading coefficient
   # a1*(k - c1)^b1 / (k - c2)^b2 is exactly what makes the two branches equal
   # at stage = k, enforcing continuity through the `a` parameter.
-  if (config == "piecewise") {
+  if (controls == "successive") {
     modform <- discharge ~ ifelse(
       stage < k,
       a1 * (stage - c1)^b1,
       (a1 * (k - c1)^b1 / (k - c2)^b2) * (stage - c2)^b2
     )
-  } else if (config == "compound") {
+  } else if (controls == "additive") {
     # Upper branch adds an extra power law to the low-flow discharge at k.
     modform <- discharge ~ ifelse(
       stage < k,
@@ -248,14 +234,14 @@ rc_2seg_nls <- function(
     b1start <- pars_1[2]
 
     # Upper segment: starting values depend on how the segments are joined.
-    if (config == "piecewise") {
+    if (controls == "successive") {
       # Independent power law on the upper data; offset c2 placed between c1 and k.
       c2start <- 0.5 * (kstart + c1start)
       lm_mod <- stats::lm(log(qh2$discharge) ~ log(qh2$stage - c2start))
       pars_2 <- as.numeric(stats::coefficients(lm_mod))
       a2start <- exp(pars_2[1])
       b2start <- pars_2[2]
-    } else if (config == "compound") {
+    } else if (controls == "additive") {
       # Remove the low-flow discharge carried up to the breakpoint, then fit the
       # remaining "excess" discharge against depth above k, (stage - k). Keep only
       # positive residuals so the log is defined.
@@ -272,7 +258,7 @@ rc_2seg_nls <- function(
 
     # -- 5. Assemble start values and bounds for the port algorithm ----
     # starting values and bounds for nls arguments
-    if (config == "piecewise") {
+    if (controls == "successive") {
       start_list <- list(
         a1 = a1start,
         b1 = b1start,
@@ -297,7 +283,7 @@ rc_2seg_nls <- function(
         c2 = max(stage),
         k = kupr
       )
-    } else if (config == "compound") {
+    } else if (controls == "additive") {
       start_list <- list(
         a1 = a1start,
         b1 = b1start,
@@ -337,23 +323,23 @@ rc_2seg_nls <- function(
         start = start_list,
         lower = unlist(lwr_list),
         upper = unlist(upr_list),
-        control = list(tol = nls_tol, maxiter = nls_maxiter),
+        control = control,
         algorithm = "port"
       )
       # Path 2: proportional weights (constant coefficient of variation). The
       # weights 1/fitted^2 depend on the (unknown) fitted discharge, so we iterate:
       # fit -> recompute weights from the new fitted values -> refit, stopping when
-      # the coefficients change by less than wts_tol (or after wts_maxiter). The
+      # the fitted discharges change by less than tol (or after maxiter). The
       # initial weights use the log-log starting-value curve.
     } else if (wts_code == "prop") {
-      if (config == "piecewise") {
+      if (controls == "successive") {
         yp <- ifelse(
           stage < kstart,
           a1start * (stage - c1start)^b1start,
           a2start * (stage - c2start)^b2start
         )
       } else {
-        # config = "compound"
+        # controls = "additive"
         yp <- ifelse(
           stage < kstart,
           a1start * (stage - c1start)^b1start,
@@ -368,7 +354,7 @@ rc_2seg_nls <- function(
           start = start,
           lower = unlist(lwr_list),
           upper = unlist(upr_list),
-          control = list(tol = nls_tol, maxiter = nls_maxiter),
+          control = control,
           algorithm = "port"
         )
       }
@@ -376,8 +362,8 @@ rc_2seg_nls <- function(
         fit_fun,
         yp = yp,
         start = start_list,
-        wts_tol = wts_tol,
-        wts_maxiter = wts_maxiter
+        tol = weighting$tol,
+        maxiter = weighting$maxiter
       )
       return(res)
     }
@@ -420,9 +406,9 @@ rc_2seg_nls <- function(
   irls <- fits[[best]]$irls
   if (isFALSE(irls$converged)) {
     warning(
-      "Proportional weights did not converge in ", wts_maxiter, " rounds ",
+      "Proportional weights did not converge in ", weighting$maxiter, " rounds ",
       "from any starting breakpoint; the fit may not be reliable. ",
-      "Consider increasing `wts_maxiter`.",
+      "Consider increasing `maxiter` in `wts_prop()`.",
       call. = FALSE
     )
   }
@@ -431,7 +417,7 @@ rc_2seg_nls <- function(
   }
   mod_sum <- summary(mod_nls)
   th <- stats::coef(mod_nls)
-  pars <- if (config == "piecewise") {
+  pars <- if (controls == "successive") {
     list(
       a = th[["a1"]],
       b = unname(th[c("b1", "b2")]),
@@ -453,16 +439,12 @@ rc_2seg_nls <- function(
     # resamples and refits, so it has to reproduce the original call exactly;
     # without this it would silently fall back on the argument defaults.
     settings = list(
-      config = config,
+      controls = controls,
       kstart = kstart_input,
       kfixed = kfixed,
       kbounds = kbounds,
-      wts_code = wts_code,
-      wts = wts_input,
-      wts_tol = wts_tol,
-      wts_maxiter = wts_maxiter,
-      nls_tol = nls_tol,
-      nls_maxiter = nls_maxiter
+      wts = weighting,
+      control = control
     ),
     weights = wts,
     irls = irls,

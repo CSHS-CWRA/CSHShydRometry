@@ -13,10 +13,10 @@
 #' @param degree Degree of local polynomials (1 or 2).
 #' @param span Smoothing parameter.
 #' @param extrapolate Allow extrapolation beyond the observed stage range.
-#' @param wts_code Weighting scheme: `"none"`, `"spec"`, or `"prop"`.
-#' @param wts <[`data-masking`][rlang::args_data_masking]> Weights when
-#'   `wts_code = "spec"`, one per gauging: a vector, or an expression
-#'   evaluated in `data`, such as `1 / uncertainty_sd^2`.
+#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
+#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
+#'   with the weights. See [wts]. Under `wts_prop()`
+#'   the loess curve is refitted in rounds, like the parametric fits.
 #' @return An `rc_loess` object; see [rating_curve] for its contents. A loess
 #'   curve has no parameters, so `pars` is an empty list.
 #' @examples
@@ -31,8 +31,7 @@ rc_loess <- function(
   degree = 2,
   span = 0.75,
   extrapolate = TRUE,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL
+  wts = wts_none()
 ) {
   # error checks
   # discharge, stage and wts may use columns of `data`, or be vectors
@@ -40,43 +39,53 @@ rc_loess <- function(
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
-  wts <- rlang::eval_tidy(rlang::enquo(wts), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
-  wts_code <- rlang::arg_match(wts_code)
+  # the weighting scheme; specified weights are evaluated in `data`, and
+  # kept aligned with the gaugings that remain
+  weighting <- rc_resolve_wts(
+    wts,
+    data,
+    keep = stats::complete.cases(discharge, stage)
+  )
+  wts_code <- weighting$type
+  wts <- weighting$values
   # remove missing observations
-  # keep user-supplied weights aligned with the gaugings that remain
-  if (length(wts) == length(discharge)) {
-    wts <- wts[stats::complete.cases(discharge, stage)]
-  }
   qh <- rc_complete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
-  wts_input <- wts
-  # compute weights
-  if (wts_code != "prop") {
-    # weights equal or specified
-    if (wts_code == "none") {
-      wts <- rep(1, length(discharge))
-    }
-    checkmate::assert_numeric(wts, len = length(discharge), .var.name = "wts")
-  } else {
-    # compute proportional weights - start using loess with no weights
-    mod_lo <- stats::loess(discharge ~ stage)
-    qp <- stats::predict(mod_lo)
-    wts <- 1 / qp^2
-  }
-  # fit model
-  if (extrapolate) {
-    mod_lo <- stats::loess(
+  # fit a loess curve with the given weights (the reweighting helper passes
+  # starting values too, which loess does not need)
+  surface <- if (extrapolate) "direct" else "interpolate"
+  fit_lo <- function(wts, start = NULL) {
+    stats::loess(
       discharge ~ stage,
+      data = data.frame(discharge = discharge, stage = stage, wts = wts),
       weights = wts,
       degree = degree,
       span = span,
-      control = stats::loess.control(surface = "direct")
+      control = stats::loess.control(surface = surface)
     )
+  }
+  irls <- NULL
+  if (wts_code == "prop") {
+    # proportional weights, by iterative reweighting from the unweighted fit
+    unweighted <- fit_lo(rep(1, length(discharge)))
+    res <- rc_irls(
+      fit_lo,
+      yp = as.numeric(stats::predict(unweighted)),
+      start = NULL,
+      tol = weighting$tol,
+      maxiter = weighting$maxiter
+    )
+    mod_lo <- res$model
+    wts <- res$weights
+    irls <- res$irls
   } else {
-    mod_lo <- stats::loess(discharge ~ stage, weights = wts, degree = degree, span = span)
+    if (wts_code == "none") {
+      wts <- rep(1, length(discharge))
+    }
+    mod_lo <- fit_lo(wts)
   }
   if (requireNamespace("tibble", quietly = TRUE)) {
     qh <- tibble::as_tibble(qh)
@@ -88,10 +97,10 @@ rc_loess <- function(
       degree = degree,
       span = span,
       extrapolate = extrapolate,
-      wts_code = wts_code,
-      wts = wts_input
+      wts = weighting
     ),
     weights = wts,
+    irls = irls,
     enp = mod_lo$enp,
     rse = mod_lo$s,
     model = mod_lo

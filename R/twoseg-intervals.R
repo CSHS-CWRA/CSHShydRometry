@@ -21,7 +21,7 @@
 #'
 #' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]). The gaugings are
 #'   taken from `object$gaugings` and the fitting arguments from
-#'   `object$settings`. Under `wts_code = "spec"` the supplied weights are
+#'   `object$settings`. Under `wts_spec()` the supplied weights are
 #'   resampled along with the cases.
 #' @param stage Stages at which to return limits. Defaults to
 #'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
@@ -34,7 +34,7 @@
 #' @param seed Optional RNG seed for reproducibility.
 #' @param max_tries_factor Cap on total resample attempts (`B * factor`) so a
 #'   run terminates even if some resamples fail to converge. A resample fails
-#'   if its fit errors or, under `wts_code = "prop"`, if its reweighting does
+#'   if its fit errors or, under `wts_prop()`, if its reweighting does
 #'   not converge; failed resamples are redrawn.
 #'
 #' @details
@@ -45,10 +45,10 @@
 #' quadrature, using a t-quantile on the fit's residual degrees of freedom. The
 #' observation-noise sd follows the error model:
 #' \itemize{
-#'   \item `"none"`: homoscedastic, `sd(discharge - fitted)`.
-#'   \item `"prop"`: constant coefficient of variation,
+#'   \item [wts_none()]: homoscedastic, `sd(discharge - fitted)`.
+#'   \item [wts_prop()]: constant coefficient of variation,
 #'         `fit * sd((discharge - fitted) / fitted)`.
-#'   \item `"spec"`: a new observation's uncertainty is not identified by the
+#'   \item [wts_spec()]: a new observation's uncertainty is not identified by the
 #'         fit, so `pi_lwr`/`pi_upr` are returned as `NA`, as in every other
 #'         method.
 #' }
@@ -96,14 +96,14 @@ boot_limits_2seg <- function(
   # The arguments the fit was made with. Refitting with anything else would
   # bootstrap a different model from the one being reported on.
   fit_args <- object$settings
-  wts_code <- object$settings$wts_code
+  wts_code <- object$settings$wts$type
 
   mod0 <- object$model
   qh <- object$gaugings
   qc <- qh$discharge
   hc <- qh$stage
   n <- length(hc)
-  wts_full <- fit_args$wts
+  wts_full <- if (wts_code == "spec") fit_args$wts$values
   if (wts_code == "spec" && (is.null(wts_full) || length(wts_full) != n)) {
     stop(
       "boot_limits_2seg: spec weights must be supplied and aligned with the ",
@@ -131,8 +131,8 @@ boot_limits_2seg <- function(
     tries <- tries + 1L
     s <- sample.int(n, n, replace = TRUE)
     args_b <- fit_args
-    if (!is.null(wts_full)) {
-      args_b$wts <- wts_full[s]
+    if (wts_code == "spec") {
+      args_b$wts <- new_wts("spec", values = wts_full[s])
     }
     # a resample whose reweighting does not converge counts as a failure,
     # like one whose fit errors, rather than warning once per resample

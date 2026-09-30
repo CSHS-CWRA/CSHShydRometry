@@ -9,16 +9,12 @@ rc_2seg_nls(
   stage,
   ...,
   data = NULL,
-  config = c("piecewise", "compound"),
+  controls = c("successive", "additive"),
   kstart = NULL,
   kfixed = FALSE,
   kbounds = NULL,
-  wts_code = c("none", "spec", "prop"),
-  wts = NULL,
-  wts_tol = 1e-06,
-  wts_maxiter = 100,
-  nls_tol = 1e-06,
-  nls_maxiter = 1000
+  wts = wts_none(),
+  control = stats::nls.control(maxiter = 1000)
 )
 }
 \arguments{
@@ -35,9 +31,12 @@ positional mistakes.}
 \item{data}{Optional data frame in which \code{discharge}, \code{stage} and \code{wts}
 are evaluated.}
 
-\item{config}{Segment configuration, \code{"piecewise"} or \code{"compound"}.
-Defaults to the first. Under \code{"piecewise"} the two power laws meet at the
-breakpoint, the upper segment's coefficient being set so that they do.}
+\item{controls}{How the two hydraulic controls combine above the
+breakpoint. \code{"successive"} (the default): the upper power law takes over
+from the lower one, with its coefficient set so that the two meet at the
+breakpoint. \code{"additive"}: the upper power law adds to the discharge the
+lower one carries at the breakpoint, as when flow spills onto a
+floodplain.}
 
 \item{kstart}{Starting value(s) for the breakpoint \code{k}. \code{NULL}, the
 default, tries 10 values spread evenly across the search range; a
@@ -48,33 +47,21 @@ numeric vector tries each of its values. See Details.}
 \item{kbounds}{Lower and upper bounds for \code{k}, or \code{NULL} to keep at least
 three gaugings in each segment.}
 
-\item{wts_code}{Weighting scheme:
-\code{"none"} (ordinary least squares, the default),
-\code{"spec"} (user-supplied weights via \code{wts}, e.g. \code{1 / sd^2}, where \code{sd} is
-the reported standard uncertainty of each discharge), or \code{"prop"} (proportional / constant-CV error,
-fit by iteratively reweighting with weights \code{1/fitted^2}).}
+\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
+\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
+with the weights. See \link{wts}.}
 
-\item{wts}{<\code{\link[rlang:args_data_masking]{data-masking}}> Weights when
-\code{wts_code = "spec"}, one per gauging: a vector, or an expression
-evaluated in \code{data}, such as \code{1 / uncertainty_sd^2}.}
-
-\item{wts_tol}{Convergence tolerance under \code{wts_code = "prop"}: the
-reweighting stops once no fitted discharge changes by more than this
-fraction from one round to the next.}
-
-\item{wts_maxiter}{Maximum number of reweighting rounds under
-\code{wts_code = "prop"}. Reaching it gives a warning.}
-
-\item{nls_tol}{Tolerance for nls convergence.}
-
-\item{nls_maxiter}{Maximum nls iterations.}
+\item{control}{Settings for \code{\link[stats:nls]{stats::nls()}}, as from \code{\link[stats:nls.control]{stats::nls.control()}}.
+The fit uses the \code{"port"} algorithm, which ignores \code{tol}; its own
+settings, such as \code{rel.tol}, can be added to the list (see
+\code{\link[stats:nls]{stats::nls()}}).}
 }
 \value{
 An object of class \code{c("rc_2seg_nls", "rating_curve")}; see
 \link{rating_curve} for its contents. \code{pars} holds the estimated parameters by
-type, one value per segment: under \code{"piecewise"}, \code{a} has a single value
+type, one value per segment: under \code{"successive"}, \code{a} has a single value
 because the upper segment's coefficient is fixed by continuity, and under
-\code{"compound"}, \code{c} has a single value because the upper segment is
+\code{"additive"}, \code{c} has a single value because the upper segment is
 measured from \code{k}. \code{coef()} gives the same estimates by their model
 names (\code{a1}, \code{b1}, \code{c1}, ...). \code{kstart_search} is a data frame with a row
 per starting breakpoint tried: the estimated breakpoint \code{k} it led to and
@@ -96,7 +83,7 @@ segment on the log-log scale (\code{log(discharge) ~ log(stage - c)});
 \code{a = exp(intercept)}, \code{b = slope}.
 \item Fit all parameters jointly with \code{\link[stats:nls]{stats::nls()}} using the "port"
 algorithm (which supports the box constraints in \code{lower}/\code{upper}).
-For \code{wts_code = "prop"} this fit is repeated, updating the weights
+Under \code{wts_prop()} this fit is repeated, updating the weights
 from the current fitted values and starting from the previous
 estimates, until the fitted discharges stabilise.
 }
@@ -122,7 +109,7 @@ then rest on that one start.
 \examples{
 # The Thompson is close to a single control, so its two-segment fit needs
 # proportional weights to converge.
-fit <- rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop")
+fit <- rc_2seg_nls(discharge, stage, data = thompson, wts = "prop")
 fit
 coef(fit)
 
@@ -132,21 +119,20 @@ fit$kstart_search
 predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 
 # A river with a clearer change of control is far less fussy. The Ardeche
-# at Sauze, in the RBaM package, fits under either configuration and
+# at Sauze, in the RBaM package, fits however the controls combine, and
 # carries a reported uncertainty for every gauging.
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
-  pw <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
-  cp <- rc_2seg_nls(Q, H, data = sauze, config = "compound", kstart = 1)
-  c(piecewise = pw$pars[["k"]], compound = cp$pars[["k"]])
+  succ <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
+  add <- rc_2seg_nls(Q, H, data = sauze, controls = "additive", kstart = 1)
+  c(successive = succ$pars[["k"]], additive = add$pars[["k"]])
 
   # weights from the reported gauging uncertainties
   rc_2seg_nls(
     Q,
     H,
     data = sauze,
-    wts_code = "spec",
-    wts = 1 / uQ^2,
+    wts = wts_spec(1 / uQ^2),
     kstart = 1
   )
 }

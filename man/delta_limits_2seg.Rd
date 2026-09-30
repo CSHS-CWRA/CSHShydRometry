@@ -9,7 +9,7 @@ delta_limits_2seg(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
 \arguments{
 \item{object}{An \code{rc_2seg_nls} fit (from \code{\link[=rc_2seg_nls]{rc_2seg_nls()}}).}
 
-\item{...}{Passed on to \code{\link[investr:predFit]{investr::predFit()}} for the \code{"none"}/\code{"spec"}
+\item{...}{Passed on to \code{\link[investr:predFit]{investr::predFit()}} for the \code{\link[=wts_none]{wts_none()}}/\code{\link[=wts_spec]{wts_spec()}}
 cases.}
 
 \item{stage}{Stages at which to return limits. Defaults to
@@ -26,8 +26,8 @@ A data frame (tibble if \pkg{tibble} is available); see
 Linearises the fitted curve about \code{theta-hat} and propagates the parameter
 covariance through that linearisation. Routed by weighting:
 \itemize{
-\item \code{"none"} / \code{"spec"}: \code{\link[investr:predFit]{investr::predFit()}}.
-\item \code{"prop"}: \code{\link[=nlspw_limits]{nlspw_limits()}}, which accounts for the proportional
+\item \code{\link[=wts_none]{wts_none()}} / \code{\link[=wts_spec]{wts_spec()}}: \code{\link[investr:predFit]{investr::predFit()}}.
+\item \code{\link[=wts_prop]{wts_prop()}}: \code{\link[=nlspw_limits]{nlspw_limits()}}, which accounts for the proportional
 error structure.
 }
 The linearisation holds the breakpoint fixed at \code{k-hat}, so the gradient

@@ -6,12 +6,12 @@ all_fits <- function() {
     rc_log_ols = rc_log_ols(discharge, stage, data = thompson),
     rc_log_nls = rc_log_nls(discharge, stage, data = thompson),
     rc_nls = rc_nls(discharge, stage, data = thompson),
-    rc_nls_prop = rc_nls(discharge, stage, data = thompson, wts_code = "prop"),
+    rc_nls_prop = rc_nls(discharge, stage, data = thompson, wts = "prop"),
     rc_gnls = rc_gnls(discharge, stage, data = thompson),
     rc_poly = rc_poly(discharge, stage, data = thompson),
-    rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts_code = "prop"),
+    rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts = "prop"),
     rc_loess = rc_loess(discharge, stage, data = thompson),
-    rc_2seg_nls = rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop",
+    rc_2seg_nls = rc_2seg_nls(discharge, stage, data = thompson, wts = "prop",
                               kstart = 2)
   )
 }
@@ -53,13 +53,13 @@ test_that("two-segment pars hold one value per segment", {
   expect_named(coef(pw), c("a1", "b1", "c1", "b2", "c2", "k"))
   expect_equal(unname(coef(pw)[["b2"]]), pw$pars$b[2])
 
-  cp <- rc_2seg_nls(Q, H, data = d, config = "compound", kstart = 1)
+  cp <- rc_2seg_nls(Q, H, data = d, controls = "additive", kstart = 1)
   expect_equal(lengths(cp$pars), c(a = 2L, b = 2L, c = 1L, k = 1L))
   expect_named(coef(cp), c("a1", "b1", "c1", "a2", "b2", "k"))
 })
 
 test_that("settings are enough to refit", {
-  fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
+  fit <- rc_nls(discharge, stage, data = thompson, wts = "prop")
   refit <- do.call(rc_nls, c(list(thompson$discharge, thompson$stage), fit$settings))
   expect_equal(coef(refit), coef(fit))
   fit2 <- rc_poly(discharge, stage, data = thompson, degree = 3)
@@ -69,7 +69,7 @@ test_that("settings are enough to refit", {
 
 test_that("the two-segment fit no longer takes conflev or predlev", {
   expect_error(
-    rc_2seg_nls(discharge, stage, data = thompson, kstart = 2, wts_code = "prop",
+    rc_2seg_nls(discharge, stage, data = thompson, kstart = 2, wts = "prop",
                 conflev = 0.9),
     class = "rlib_error_dots_nonempty"
   )
@@ -90,9 +90,9 @@ test_that("gnls records its variance parameters", {
 
 test_that("converged reweighting is recorded", {
   for (fit in list(
-    rc_nls(discharge, stage, data = thompson, wts_code = "prop"),
-    rc_poly(discharge, stage, data = thompson, wts_code = "prop"),
-    rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
+    rc_nls(discharge, stage, data = thompson, wts = "prop"),
+    rc_poly(discharge, stage, data = thompson, wts = "prop"),
+    rc_2seg_nls(discharge, stage, data = thompson, wts = "prop", kstart = 2)
   )) {
     expect_true(fit$irls$converged)
     expect_gt(fit$irls$iterations, 1L)
@@ -104,25 +104,24 @@ test_that("converged reweighting is recorded", {
 
 test_that("reweighting that runs out of rounds warns and says so", {
   expect_warning(
-    fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop", wts_maxiter = 1),
+    fit <- rc_nls(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1)),
     "did not converge in 1 rounds"
   )
   expect_false(fit$irls$converged)
   expect_equal(fit$irls$iterations, 1L)
   expect_warning(
-    rc_poly(discharge, stage, data = thompson, wts_code = "prop", wts_maxiter = 1),
+    rc_poly(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1)),
     "did not converge"
   )
   expect_warning(
-    rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2,
-                wts_maxiter = 1),
+    rc_2seg_nls(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1), kstart = 2),
     "did not converge"
   )
 })
 
 test_that("reweighting stops on the change in fitted discharge", {
-  fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop", wts_tol = 1e-3)
-  tight <- rc_nls(discharge, stage, data = thompson, wts_code = "prop", wts_tol = 1e-10)
+  fit <- rc_nls(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-3))
+  tight <- rc_nls(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-10))
   expect_lte(fit$irls$iterations, tight$irls$iterations)
   expect_equal(stats::fitted(fit$model), stats::fitted(tight$model),
                tolerance = 1e-2)

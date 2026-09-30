@@ -8,7 +8,25 @@
   two-segment curves are `rc_2seg_*()`, leaving room for more two-segment
   methods and for curves with more segments.
 
-* Every argument after the mandatory ones (`q` and `h`, or `object`) must now
+* Weighting is chosen by a single argument, `wts`, in `rc_nls()`, `rc_poly()`,
+  `rc_loess()` and `rc_2seg_nls()`. It replaces `wts_code`, `wts`, `wts_tol`
+  and `wts_maxiter`, whose meanings depended on one another. `wts` takes
+  `wts_none()` (the default), `wts_prop(tol, maxiter)` or `wts_spec(values)`,
+  or the shorthand `"none"` or `"prop"`; see `?wts`. The values given to
+  `wts_spec()` are evaluated in `data`, so they can refer to its columns, as
+  in `wts = wts_spec(1 / uncertainty_sd^2)`.
+
+* The settings passed to `nls()` are given as a single `control` argument,
+  as from `stats::nls.control()`, like `nls()` itself. It replaces `nls_tol`
+  and `nls_maxiter` in `rc_nls()` and `rc_2seg_nls()`, and `tol` in
+  `rc_log_nls()`.
+
+* `rc_2seg_nls()`'s `config` argument is renamed `controls`, since it says
+  how the two hydraulic controls combine above the breakpoint, and its values
+  `"piecewise"` and `"compound"` are renamed `"successive"` (the upper power
+  law takes over from the lower) and `"additive"` (it adds to the lower).
+
+* Every argument after the mandatory ones (`discharge` and `stage`, or `object`) must now
   be named in full: `...` sits between them, and the constructors reject
   anything passed through it. In particular `data` must be named, as in
   `rc_nls(discharge, stage, data = thompson)`.
@@ -52,7 +70,7 @@
 
 * `rc_2seg_nls()` no longer takes `contcons`, which chose the parameter
   carrying the continuity constraint. Only `"a"` was implemented, and that
-  is what `config = "piecewise"` does.
+  is what `controls = "successive"` does.
 
 * `rc_2seg_nls()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
@@ -66,8 +84,9 @@
   * `settings` holds the arguments the fit was made with. It replaces
     `fit_args` and the separate `wts_code`, `formula` and `configuration`
     elements, and the loess tuning values formerly in `pars`.
-  * `qh_obs` has columns `q` and `h` for every model (formerly `qobs` and
-    `hobs` for the one-segment models).
+  * `gaugings` has the same columns, `discharge` and `stage`, for every model
+    (formerly `qh_obs`, with `qobs` and `hobs` for the one-segment models and
+    `q` and `h` for the two-segment one).
   * The bias-corrected coefficients of the log-scale fits move from `pars` to
     `a_corrected`, and the `rc_gnls()` variance parameter from `pars$t_gnls`
     to `var_pars$power`.
@@ -77,21 +96,20 @@
 
 ## New features
 
-* `wts` is looked up in `data` like `discharge` and `stage`, so weights can
-  be written in terms of its columns: `wts = 1 / uncertainty_sd^2`.
-
 * `coef()` returns the estimated parameters as a flat named vector.
 
-* Proportional weights (`wts_code = "prop"`) are fitted more robustly:
+* Proportional weights (`wts_prop()`) are fitted more robustly:
   * each reweighting round starts from the previous round's estimates, rather
     than from the initial starting values;
-  * the rounds stop when no fitted discharge changes by more than `wts_tol`
+  * the rounds stop when no fitted discharge changes by more than `tol`
     (relative), rather than when no coefficient does, which was unstable for
     an offset near zero;
-  * running out of rounds (`wts_maxiter`) gives a warning, and every fit
+  * running out of rounds (`maxiter`) gives a warning, and every fit
     records the number of rounds and whether they converged in `irls`.
     `boot_limits_2seg()` treats a resample that does not converge as failed,
-    and redraws it.
+    and redraws it;
+  * `rc_loess()` now reweights in rounds too. It used to reweight once, from
+    an unweighted fit, so its weights did not match its own fitted values.
 
   Fits change only at the level of the tolerance: by at most about 2e-6,
   relative, on the Thompson and Sauze gaugings.
@@ -100,7 +118,10 @@
 
 * `rc_poly(degree = 1)` fitted spurious quadratic and cubic terms.
 * `rc_2seg_nls()` ignored `nls_maxiter`.
-* User-supplied weights (`wts_code = "spec"`) fell out of step with the
+* `nls_tol` had no effect in `rc_2seg_nls()`: its `"port"` algorithm ignores
+  `tol`. `control` now says so, and passes on the port algorithm's own
+  settings, such as `rel.tol`.
+* User-supplied weights (now `wts_spec()`) fell out of step with the
   gaugings when any gauging had a missing stage or discharge.
 * `rc_loess()` stored `NULL` for its residual standard error and degrees of
   freedom; it now stores `rse` and `enp`, the equivalent number of

@@ -20,7 +20,7 @@ two_seg_fit <- function() {
   rc_2seg_nls(
     thompson$discharge,
     thompson$stage,
-    wts_code = "prop",
+    wts = "prop",
     kstart = 2
   )
 }
@@ -80,7 +80,7 @@ test_that("specified weights give NA prediction limits, not missing columns", {
   d <- thompson[keep, ]
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   sd <- d$uncertainty_pct / 100 * d$discharge / 2
-  fit <- rc_nls(d$discharge, d$stage, wts_code = "spec", wts = 1 / sd^2)
+  fit <- rc_nls(d$discharge, d$stage, wts = wts_spec(1 / sd^2))
   p <- suppressMessages(
     predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
   )

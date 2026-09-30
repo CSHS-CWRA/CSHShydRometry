@@ -46,15 +46,15 @@ test_that("weights may be an expression using columns of data", {
   d <- spec_data()
   d$sd <- d$uncertainty_pct / 100 * d$discharge / 2
   masked <- list(
-    rc_nls(discharge, stage, data = d, wts_code = "spec", wts = 1 / sd^2),
-    rc_poly(discharge, stage, data = d, wts_code = "spec", wts = 1 / sd^2),
-    rc_loess(discharge, stage, data = d, wts_code = "spec", wts = 1 / sd^2,
+    rc_nls(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
+    rc_poly(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
+    rc_loess(discharge, stage, data = d, wts = wts_spec(1 / sd^2),
              span = 1)
   )
   vectors <- list(
-    rc_nls(discharge, stage, data = d, wts_code = "spec", wts = d$wts),
-    rc_poly(discharge, stage, data = d, wts_code = "spec", wts = d$wts),
-    rc_loess(discharge, stage, data = d, wts_code = "spec", wts = d$wts,
+    rc_nls(discharge, stage, data = d, wts = wts_spec(d$wts)),
+    rc_poly(discharge, stage, data = d, wts = wts_spec(d$wts)),
+    rc_loess(discharge, stage, data = d, wts = wts_spec(d$wts),
              span = 1)
   )
   for (i in seq_along(masked)) {
@@ -64,7 +64,7 @@ test_that("weights may be an expression using columns of data", {
   # a variable outside the data still works
   w <- d$wts
   expect_equal(
-    rc_nls(discharge, stage, data = d, wts_code = "spec", wts = w)$rse,
+    rc_nls(discharge, stage, data = d, wts = wts_spec(w))$rse,
     vectors[[1]]$rse
   )
 })
@@ -73,14 +73,14 @@ test_that("specified weights stay aligned when gaugings are dropped", {
   d <- spec_data()
   w <- d$wts
   d$discharge[2] <- NA
-  fit <- rc_nls(discharge, stage, data = d, wts_code = "spec", wts = w)
+  fit <- rc_nls(discharge, stage, data = d, wts = wts_spec(w))
   expect_equal(fit$weights, w[-2])
 })
 
 test_that("weights of the wrong length are an error", {
-  expect_error(rc_nls(discharge, stage, data = thompson, wts_code = "spec", wts = 1:3))
-  expect_error(rc_poly(discharge, stage, data = thompson, wts_code = "spec", wts = 1:3))
-  expect_error(rc_loess(discharge, stage, data = thompson, wts_code = "spec", wts = 1:3))
+  expect_error(rc_nls(discharge, stage, data = thompson, wts = wts_spec(1:3)))
+  expect_error(rc_poly(discharge, stage, data = thompson, wts = wts_spec(1:3)))
+  expect_error(rc_loess(discharge, stage, data = thompson, wts = wts_spec(1:3)))
 })
 
 test_that("invalid levels are rejected", {
@@ -90,7 +90,7 @@ test_that("invalid levels are rejected", {
 })
 
 test_that("an unknown weighting scheme is an error", {
-  expect_error(rc_nls(discharge, stage, data = thompson, wts_code = "bogus"))
+  expect_error(rc_nls(discharge, stage, data = thompson, wts = "bogus"))
 })
 
 test_that("predict() defaults to the observed stage range", {
@@ -110,8 +110,8 @@ test_that("print() describes the fit and returns it invisibly", {
 # -- rc_nls --------------------------------------------------------------------
 
 test_that("rc_nls: proportional weights give sensible limits", {
-  fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
-  expect_equal(fit$settings$wts_code, "prop")
+  fit <- rc_nls(discharge, stage, data = thompson, wts = "prop")
+  expect_equal(fit$settings$wts$type, "prop")
   p <- predict(fit, stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
   expect_true(all(p$ci_lwr < p$fit & p$fit < p$ci_upr))
   expect_true(all(p$pi_lwr < p$ci_lwr & p$ci_upr < p$pi_upr))
@@ -121,7 +121,7 @@ test_that("rc_nls: proportional weights give sensible limits", {
 
 test_that("rc_nls: specified weights give NA prediction limits with a note", {
   d <- spec_data()
-  fit <- rc_nls(discharge, stage, data = d, wts_code = "spec", wts = d$wts)
+  fit <- rc_nls(discharge, stage, data = d, wts = wts_spec(d$wts))
   expect_message(
     p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95),
     "specified weights"
@@ -147,7 +147,7 @@ test_that("rc_poly: a straight line matches lm()", {
 })
 
 test_that("rc_poly: proportional weights fit and give limits", {
-  fit <- rc_poly(discharge, stage, data = thompson, wts_code = "prop")
+  fit <- rc_poly(discharge, stage, data = thompson, wts = "prop")
   expect_s3_class(fit$model, "nls")
   p <- predict(fit, stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
   expect_named(p, c("stage", "fit", "ci_lwr", "ci_upr", "pi_lwr", "pi_upr"))
@@ -157,8 +157,8 @@ test_that("rc_poly: proportional weights fit and give limits", {
 
 test_that("rc_poly: specified weights give NA prediction limits with a note", {
   d <- spec_data()
-  fit <- rc_poly(discharge, stage, data = d, wts_code = "spec", wts = d$wts)
-  expect_equal(fit$settings$wts_code, "spec")
+  fit <- rc_poly(discharge, stage, data = d, wts = wts_spec(d$wts))
+  expect_equal(fit$settings$wts$type, "spec")
   expect_message(
     p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95),
     "specified weights"
@@ -173,8 +173,8 @@ test_that("rc_loess: every weighting fits", {
   d <- spec_data()
   fits <- list(
     none = rc_loess(discharge, stage, data = thompson),
-    prop = rc_loess(discharge, stage, data = thompson, wts_code = "prop"),
-    spec = rc_loess(discharge, stage, data = d, wts_code = "spec", wts = d$wts,
+    prop = rc_loess(discharge, stage, data = thompson, wts = "prop"),
+    spec = rc_loess(discharge, stage, data = d, wts = wts_spec(d$wts),
                     span = 1)
   )
   for (nm in names(fits)) {

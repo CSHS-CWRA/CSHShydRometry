@@ -21,10 +21,10 @@ A data frame with columns \code{fit}, \code{lwr}, \code{upr}.
 }
 \description{
 \code{nlspw} is short for "NLS, proportional weights": these are the limits
-used when \code{wts_code = "prop"}.
+used under \code{\link[=wts_prop]{wts_prop()}}.
 }
 \details{
-Builds pointwise interval limits for the \code{wts_code = "prop"} case, where the
+Builds pointwise interval limits for the \code{\link[=wts_prop]{wts_prop()}} case, where the
 error standard deviation is taken to be proportional to the mean discharge
 (constant coefficient of variation). Standard errors of the fitted mean come
 from the delta method via \code{\link[investr:predFit]{investr::predFit()}}; the interval half-width uses

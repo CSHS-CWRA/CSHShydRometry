@@ -4,7 +4,13 @@
 \alias{rc_log_nls}
 \title{Fit rating curve using nls on log-transformed data}
 \usage{
-rc_log_nls(discharge, stage, ..., data = NULL, tol = 1e-06)
+rc_log_nls(
+  discharge,
+  stage,
+  ...,
+  data = NULL,
+  control = stats::nls.control(maxiter = 1000, tol = 1e-06)
+)
 }
 \arguments{
 \item{discharge}{<\code{\link[rlang:args_data_masking]{data-masking}}> Discharge: a
@@ -19,7 +25,7 @@ to be named in full.}
 \item{data}{Optional data frame in which \code{discharge} and \code{stage} are
 evaluated.}
 
-\item{tol}{Tolerance for nls convergence.}
+\item{control}{Settings for \code{\link[stats:nls]{stats::nls()}}, as from \code{\link[stats:nls.control]{stats::nls.control()}}.}
 }
 \value{
 An \code{rc_log_nls} object; see \link{rating_curve} for its contents. The
