@@ -50,6 +50,10 @@
   resample's best fit too often, which would understate the uncertainty in
   the breakpoint.
 
+* `rc_2seg_nls()` no longer takes `contcons`, which chose the parameter
+  carrying the continuity constraint. Only `"a"` was implemented, and that
+  is what `config = "piecewise"` does.
+
 * `rc_2seg_nls()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
 

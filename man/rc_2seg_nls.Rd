@@ -10,7 +10,6 @@ rc_2seg_nls(
   ...,
   data = NULL,
   config = c("piecewise", "compound"),
-  contcons = c("a", "c"),
   kfixed = FALSE,
   kstart = NULL,
   kbounds = NULL,
@@ -37,10 +36,8 @@ positional mistakes.}
 are evaluated.}
 
 \item{config}{Segment configuration, \code{"piecewise"} or \code{"compound"}.
-Defaults to the first.}
-
-\item{contcons}{Parameter carrying the continuity constraint, \code{"a"} or
-\code{"c"}. \code{"c"} is not implemented.}
+Defaults to the first. Under \code{"piecewise"} the two power laws meet at the
+breakpoint, the upper segment's coefficient being set so that they do.}
 
 \item{kfixed}{If \code{TRUE}, hold the breakpoint \code{k} fixed at \code{kstart}.}
 

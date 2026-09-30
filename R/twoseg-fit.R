@@ -12,9 +12,8 @@
 #'   to be named, which keeps calls readable and guards against
 #'   positional mistakes.
 #' @param config Segment configuration, `"piecewise"` or `"compound"`.
-#'   Defaults to the first.
-#' @param contcons Parameter carrying the continuity constraint, `"a"` or
-#'   `"c"`. `"c"` is not implemented.
+#'   Defaults to the first. Under `"piecewise"` the two power laws meet at the
+#'   breakpoint, the upper segment's coefficient being set so that they do.
 #' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
 #' @param kstart Starting value(s) for the breakpoint `k`. `NULL`, the
 #'   default, tries 10 values spread evenly across the search range; a
@@ -120,7 +119,6 @@ rc_2seg_nls <- function(
   ...,
   data = NULL,
   config = c("piecewise", "compound"),
-  contcons = c("a", "c"),
   kfixed = FALSE,
   kstart = NULL,
   kbounds = NULL,
@@ -141,7 +139,6 @@ rc_2seg_nls <- function(
 
   # error checks
   config <- rlang::arg_match(config)
-  contcons <- rlang::arg_match(contcons)
   wts_code <- rlang::arg_match(wts_code)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
@@ -209,16 +206,12 @@ rc_2seg_nls <- function(
   # Model formula (see the header for the full derivation). The upper branch
   # of the piecewise form has no free a2: the leading coefficient
   # a1*(k - c1)^b1 / (k - c2)^b2 is exactly what makes the two branches equal
-  # at stage = k, enforcing continuity through the `a` parameter (contcons = "a").
-  if (config == "piecewise" && contcons == "a") {
+  # at stage = k, enforcing continuity through the `a` parameter.
+  if (config == "piecewise") {
     modform <- discharge ~ ifelse(
       stage < k,
       a1 * (stage - c1)^b1,
       (a1 * (k - c1)^b1 / (k - c2)^b2) * (stage - c2)^b2
-    )
-  } else if (config == "piecewise" && contcons == "c") {
-    stop(
-      "`contcons = \"c\"` is not implemented yet"
     )
   } else if (config == "compound") {
     # Upper branch adds an extra power law to the low-flow discharge at k.
@@ -461,7 +454,6 @@ rc_2seg_nls <- function(
     # without this it would silently fall back on the argument defaults.
     settings = list(
       config = config,
-      contcons = contcons,
       kfixed = kfixed,
       kstart = kstart_input,
       kbounds = kbounds,

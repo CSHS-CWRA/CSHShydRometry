@@ -45,13 +45,6 @@ test_that("a misspelled argument is an error, not ignored", {
   expect_error(boot_limits_2seg(fit, stage = 2, N = 10), "must be empty")
 })
 
-test_that("the c continuity constraint is not implemented", {
-  expect_error(
-    rc_2seg_nls(discharge, stage, data = thompson, contcons = "c", kstart = 2),
-    "not implemented"
-  )
-})
-
 test_that("kfixed holds the breakpoint at kstart", {
   expect_error(rc_2seg_nls(Q, H, data = sauze(), kfixed = TRUE), "kstart")
   fit <- rc_2seg_nls(Q, H, data = sauze(), kfixed = TRUE, kstart = 1.8)
