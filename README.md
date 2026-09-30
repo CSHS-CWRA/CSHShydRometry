@@ -8,6 +8,8 @@
 [![R-CMD-check](https://github.com/CSHS-CWRA/CSHShydRometry/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CSHS-CWRA/CSHShydRometry/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/CSHS-CWRA/CSHShydRometry/graph/badge.svg)](https://app.codecov.io/gh/CSHS-CWRA/CSHShydRometry)
+[![License:
+MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.org/web/licenses/MIT)
 <!-- badges: end -->
 
 Frequentist methods for fitting stage–discharge rating curves, with
@@ -98,11 +100,11 @@ do.call(rbind, lapply(names(fits), function(nm) {
 
 Constructors taking `wts_code` offer three error models:
 
-| `wts_code` | assumption                                                               |
-|------------|--------------------------------------------------------------------------|
-| `"none"`   | constant variance                                                        |
-| `"prop"`   | constant coefficient of variation, fitted by IRLS                        |
-| `"spec"`   | variances supplied by the user, e.g. from reported gauging uncertainties |
+| `wts_code` | assumption |
+|----|----|
+| `"none"` | constant variance |
+| `"prop"` | constant coefficient of variation, fitted by IRLS |
+| `"spec"` | variances supplied by the user, e.g. from reported gauging uncertainties |
 
 Under `"spec"` a new observation’s scatter is not identified by the fit,
 so prediction limits are returned as `NA`.
@@ -111,10 +113,10 @@ so prediction limits are returned as `NA`.
 
 `predict.rc_nls_2seg()` takes a `method`:
 
-| method              | notes                                                                      |
-|---------------------|----------------------------------------------------------------------------|
-| `"delta"` (default) | linearised, fast, **unreliable near the breakpoint**                       |
-| `"boot"`            | resamples the gaugings and refits; slow, but trustworthy at the breakpoint |
+| method | notes |
+|----|----|
+| `"delta"` (default) | linearised, fast, **unreliable near the breakpoint** |
+| `"boot"` | resamples the gaugings and refits; slow, but trustworthy at the breakpoint |
 
 The default warrants a word. A two-segment mean function is not
 differentiable at the breakpoint, so the delta method’s linearisation
