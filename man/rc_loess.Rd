@@ -5,8 +5,8 @@
 \title{Fit rating curve using loess smoother}
 \usage{
 rc_loess(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
   degree = 2,
@@ -17,21 +17,21 @@ rc_loess(
 )
 }
 \arguments{
-\item{q}{A vector of streamflow data.}
+\item{discharge}{Discharge: a vector, or a column of \code{data}.}
 
-\item{h}{A vector of stage data.}
+\item{stage}{Stage: a vector, or a column of \code{data}.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
+\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
 supplied, they may be given as bare column names.}
 
 \item{degree}{Degree of local polynomials (1 or 2).}
 
 \item{span}{Smoothing parameter.}
 
-\item{extrapolate}{Allow extrapolation beyond observed h range.}
+\item{extrapolate}{Allow extrapolation beyond the observed stage range.}
 
 \item{wts_code}{Weighting scheme: \code{"none"}, \code{"spec"}, or \code{"prop"}.}
 
@@ -45,6 +45,6 @@ curve has no parameters, so \code{pars} is an empty list.
 Fit rating curve using loess smoother
 }
 \examples{
-fit <- rc_loess(q, h, data = thompson)
-predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+fit <- rc_loess(discharge, stage, data = thompson)
+predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 }

@@ -24,5 +24,5 @@ curve they carry the segment number, as in the model formula (\code{a1}, \code{b
 \code{k}, ...).
 }
 \examples{
-coef(rc_nls(q, h, data = thompson))
+coef(rc_nls(discharge, stage, data = thompson))
 }

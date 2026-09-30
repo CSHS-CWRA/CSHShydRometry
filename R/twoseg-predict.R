@@ -6,13 +6,13 @@
 #' attaches confidence and/or prediction limits. This is a thin dispatcher: it
 #' validates the arguments common to every method, then hands off to one of the
 #' `*_limits_2seg()` functions, which all take the same
-#' `(object, hpred, conflev, predlev)` arguments and all return the same
+#' `(object, stage, conflev, predlev)` arguments and all return the same
 #' columns.
 #'
 #' @section Choosing a method:
 #' The default, `"delta"`, is fast and is the classical choice, but **it is not
 #' reliable near the breakpoint**. The mean function is not differentiable at
-#' `h = k`, so the linearisation switches form there and the interval jumps: on
+#' `stage = k`, so the linearisation switches form there and the interval jumps: on
 #' one fitted curve the band widened from 29 to 242 m^3 s^-1 across the
 #' breakpoint. In a simulation study a nominal 95% delta interval covered the
 #' true curve only about two-thirds of the time just above the breakpoint,
@@ -30,8 +30,8 @@
 #'
 #' @param object An `rc_nls_2seg` fit (from [rc_nls_2seg()]).
 #' @param ... Passed on to the chosen limits function.
-#' @param hpred Stage values at which to return limits. Defaults to
-#'   [rc_hpred_grid()]: 1000 points spanning the observed stage range.
+#' @param stage Stages at which to return limits. Defaults to
+#'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
 #' @param conflev Confidence level for the mean-curve (confidence) interval, or
 #'   `NULL` to omit it.
 #' @param predlev Confidence level for the prediction interval, or `NULL` to
@@ -46,7 +46,7 @@
 #'       slowest, since it refits the model `B` times, and the most trustworthy
 #'       at the breakpoint.
 #'   }
-#' @return A data frame (tibble if \pkg{tibble} is available) with column `h`,
+#' @return A data frame (tibble if \pkg{tibble} is available) with column `stage`,
 #'   the fitted discharge `fit`, and, when requested, `ci_lwr`/`ci_upr` and
 #'   `pi_lwr`/`pi_upr`. Which columns are present depends only on which of
 #'   `conflev` and `predlev` were given -- never on the method or the
@@ -64,27 +64,27 @@
 #'   hp <- c(1, 1.5, 2, 4)
 #'
 #'   # the default, and fast
-#'   predict(fit, hpred = hp, conflev = 0.95)
+#'   predict(fit, stage = hp, conflev = 0.95)
 #'
 #'   # slower, but does not assume the breakpoint is known. Compare the two
 #'   # either side of the breakpoint, at about 1.85 m: the delta band jumps
 #'   # there, the bootstrap band does not.
-#'   predict(fit, hpred = hp, conflev = 0.95, method = "boot", B = 50)
+#'   predict(fit, stage = hp, conflev = 0.95, method = "boot", B = 50)
 #' }
 #'
 #' # the columns returned never depend on the model or the method, so results
 #' # from different approaches stack directly
-#' one <- rc_nls(q, h, data = thompson)
-#' two <- rc_nls_2seg(q, h, data = thompson, wts_code = "prop", kstart = 2)
+#' one <- rc_nls(discharge, stage, data = thompson)
+#' two <- rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
 #' rbind(
-#'   predict(one, hpred = 3, conflev = 0.95),
-#'   predict(two, hpred = 3, conflev = 0.95)
+#'   predict(one, stage = 3, conflev = 0.95),
+#'   predict(two, stage = 3, conflev = 0.95)
 #' )
 #' @export
 predict.rc_nls_2seg <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL,
   method = c("delta", "boot")
@@ -92,7 +92,7 @@ predict.rc_nls_2seg <- function(
   method <- rlang::arg_match(method)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
-  # hpred is deliberately NOT resolved here: every *_limits_2seg() function
+  # stage is deliberately NOT resolved here: every *_limits_2seg() function
   # defaults it the same way, so it resolves once, in whichever one runs.
   limits_fun <- switch(
     method,
@@ -101,7 +101,7 @@ predict.rc_nls_2seg <- function(
   )
   limits_fun(
     object,
-    hpred = hpred,
+    stage = stage,
     conflev = conflev,
     predlev = predlev,
     ...
@@ -119,7 +119,7 @@ predict.rc_nls_2seg <- function(
 #'     error structure.
 #' }
 #' The linearisation holds the breakpoint fixed at `k-hat`, so the gradient
-#' switches abruptly from one segment's to the other's as `h` crosses it and
+#' switches abruptly from one segment's to the other's as `stage` crosses it and
 #' the band jumps. [boot_limits_2seg()] makes no smoothness assumption and is
 #' continuous there; prefer it when the interval near the breakpoint matters.
 #'
@@ -128,8 +128,8 @@ predict.rc_nls_2seg <- function(
 #' single scatter to add to the mean curve. Those columns come back `NA`.
 #'
 #' @param object An `rc_nls_2seg` fit (from [rc_nls_2seg()]).
-#' @param hpred Stage values at which to return limits. Defaults to
-#'   [rc_hpred_grid()]: 1000 points spanning the observed stage range.
+#' @param stage Stages at which to return limits. Defaults to
+#'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
 #' @param ... Passed on to [investr::predFit()] for the `"none"`/`"spec"`
 #'   cases.
 #' @param conflev,predlev Levels for the confidence and prediction intervals,
@@ -140,20 +140,20 @@ predict.rc_nls_2seg <- function(
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
 #'   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
-#'   delta_limits_2seg(fit, hpred = c(1, 2, 4), conflev = 0.95)
+#'   delta_limits_2seg(fit, stage = c(1, 2, 4), conflev = 0.95)
 #' }
 #' @export
 delta_limits_2seg <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
-  if (is.null(hpred)) {
-    hpred <- rc_hpred_grid(object)
+  if (is.null(stage)) {
+    stage <- rc_stage_grid(object)
   }
-  checkmate::assert_numeric(hpred, min.len = 1L, finite = TRUE)
+  checkmate::assert_numeric(stage, min.len = 1L, finite = TRUE)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
@@ -161,19 +161,19 @@ delta_limits_2seg <- function(
   if (predlim && object$settings$wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
-  hpred_df <- data.frame(h = hpred)
+  stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
   wts_code <- object$settings$wts_code
   # point predictions (fitted mean discharge) at the requested stages
-  yvec <- unname(stats::predict(mod, newdata = hpred_df))
-  out_df <- data.frame(h = hpred, fit = yvec)
+  yvec <- unname(stats::predict(mod, newdata = stage_df))
+  out_df <- data.frame(stage = stage, fit = yvec)
   # Confidence limits (uncertainty in the mean curve). Route by weighting:
   # unweighted/user-weighted -> delta method; proportional -> nlspw_limits().
   if (conflim) {
     if (wts_code == "none" || wts_code == "spec") {
       ci_mat <- investr::predFit(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         interval = "confidence",
         level = conflev,
         ...
@@ -183,7 +183,7 @@ delta_limits_2seg <- function(
         mod,
         type = "confidence",
         level = conflev,
-        hpred = hpred
+        stage = stage
       )
     }
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -202,7 +202,7 @@ delta_limits_2seg <- function(
       if (wts_code == "none") {
         pi_mat <- investr::predFit(
           mod,
-          newdata = hpred_df,
+          newdata = stage_df,
           interval = "prediction",
           level = predlev,
           ...
@@ -212,7 +212,7 @@ delta_limits_2seg <- function(
           mod,
           type = "prediction",
           level = predlev,
-          hpred = hpred
+          stage = stage
         )
       }
       pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]

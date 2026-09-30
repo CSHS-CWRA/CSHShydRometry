@@ -29,36 +29,38 @@ remotes::install_github("CSHS-CWRA/CSHShydRometry")
 ## The data
 
 The package comes with 93 gaugings from the Thompson River (Water Survey
-of Canada station 08LF051). `h` is the stage in metres, `q` the
-discharge in cubic metres per second.
+of Canada station 08LF051). `stage` is in metres and `discharge` in
+cubic metres per second. A few gaugings also carry a reported
+uncertainty.
 
 ``` r
 library(CSHShydRometry)
 head(thompson)
-#>         date     h   q  uq
-#> 1 2023-03-22 0.376 141  NA
-#> 2 2023-01-11 0.399 146 2.6
-#> 3 2014-03-05 0.526 160  NA
-#> 4 2011-02-25 0.567 172  NA
-#> 5 2001-04-02 0.618 187  NA
-#> 6 1995-03-17 0.645 197  NA
+#>         date stage discharge uncertainty_percent
+#> 1 2023-03-22 0.376       141                  NA
+#> 2 2023-01-11 0.399       146                 2.6
+#> 3 2014-03-05 0.526       160                  NA
+#> 4 2011-02-25 0.567       172                  NA
+#> 5 2001-04-02 0.618       187                  NA
+#> 6 1995-03-17 0.645       197                  NA
 ```
 
 Discharge rises faster than linearly with stage:
 
 ``` r
-plot(q ~ h, data = thompson)
+plot(discharge ~ stage, data = thompson)
 ```
 
 <img src="man/figures/README-plot-data-1.png" alt="" width="100%" />
 
 ## Fitting a curve
 
-The classic rating curve is a power law, `q = a * (h - c)^b`. `rc_nls()`
-fits it by nonlinear least squares:
+The classic rating curve is a power law,
+`discharge = a * (stage - c)^b`. `rc_nls()` fits it by nonlinear least
+squares:
 
 ``` r
-fit <- rc_nls(q, h, data = thompson)
+fit <- rc_nls(discharge, stage, data = thompson)
 coef(fit)
 #>          a          b          c 
 #> 80.6686684  1.7131160 -0.9044139
@@ -72,9 +74,9 @@ quickly the flow grows above it.
 `predict()` evaluates the curve at the stages you give it:
 
 ``` r
-predict(fit, hpred = c(1, 3, 6))
+predict(fit, stage = c(1, 3, 6))
 #> # A tibble: 3 × 2
-#>       h   fit
+#>   stage   fit
 #>   <dbl> <dbl>
 #> 1     1  243.
 #> 2     3  832.
@@ -85,25 +87,25 @@ Ask for a confidence level to get limits for the curve itself, and a
 prediction level to get limits for a new gauging:
 
 ``` r
-predict(fit, hpred = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
+predict(fit, stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
 #> # A tibble: 3 × 6
-#>       h   fit ci_lwr ci_upr pi_lwr pi_upr
+#>   stage   fit ci_lwr ci_upr pi_lwr pi_upr
 #>   <dbl> <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
 #> 1     1  243.   222.   264.   118.   368.
 #> 2     3  832.   814.   850.   707.   957.
 #> 3     6 2209.  2188.  2230.  2084.  2334.
 ```
 
-Leave out `hpred` to cover the whole range of the gaugings, which is
+Leave out `stage` to cover the whole range of the gaugings, which is
 handy for plotting:
 
 ``` r
 band <- predict(fit, conflev = 0.95, predlev = 0.95)
 
-plot(q ~ h, data = thompson)
-lines(fit ~ h, data = band)
-lines(pi_lwr ~ h, data = band, lty = 2)
-lines(pi_upr ~ h, data = band, lty = 2)
+plot(discharge ~ stage, data = thompson)
+lines(fit ~ stage, data = band)
+lines(pi_lwr ~ stage, data = band, lty = 2)
+lines(pi_upr ~ stage, data = band, lty = 2)
 ```
 
 <img src="man/figures/README-band-1.png" alt="" width="100%" />
@@ -127,10 +129,10 @@ Every model has an `rc_*()` function and a `predict()` method:
 Swapping one model for another changes one line:
 
 ``` r
-fit_poly <- rc_poly(q, h, data = thompson)
-predict(fit_poly, hpred = c(1, 3, 6))
+fit_poly <- rc_poly(discharge, stage, data = thompson)
+predict(fit_poly, stage = c(1, 3, 6))
 #> # A tibble: 3 × 2
-#>       h   fit
+#>   stage   fit
 #>   <dbl> <dbl>
 #> 1     1  244.
 #> 2     3  835.
@@ -142,11 +144,11 @@ different models can be stacked with `rbind()`:
 
 ``` r
 rbind(
-  predict(fit, hpred = 3, conflev = 0.95),
-  predict(fit_poly, hpred = 3, conflev = 0.95)
+  predict(fit, stage = 3, conflev = 0.95),
+  predict(fit_poly, stage = 3, conflev = 0.95)
 )
 #> # A tibble: 2 × 4
-#>       h   fit ci_lwr ci_upr
+#>   stage   fit ci_lwr ci_upr
 #>   <dbl> <dbl>  <dbl>  <dbl>
 #> 1     3  832.   814.   850.
 #> 2     3  835.   816.   855.
@@ -166,10 +168,10 @@ Gaugings of big flows usually scatter more than gaugings of small ones.
 With `"prop"`, the prediction limits widen as the flow grows:
 
 ``` r
-fit_prop <- rc_nls(q, h, data = thompson, wts_code = "prop")
-predict(fit_prop, hpred = c(1, 6), predlev = 0.95)
+fit_prop <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
+predict(fit_prop, stage = c(1, 6), predlev = 0.95)
 #> # A tibble: 2 × 4
-#>       h   fit pi_lwr pi_upr
+#>   stage   fit pi_lwr pi_upr
 #>   <dbl> <dbl>  <dbl>  <dbl>
 #> 1     1  252.   232.   272.
 #> 2     6 2205.  2027.  2383.
@@ -182,8 +184,9 @@ its prediction limits come back as `NA`.
 
 Where the river’s control changes (say, when the water rises out of the
 channel and over a floodplain), one power law is not enough. The Ardèche
-at Sauze, from the RBaM package, is such a river. Its gaugings come with
-a reported uncertainty, `uQ`:
+at Sauze, from the RBaM package, is such a river. RBaM names its columns
+`H` for stage and `Q` for discharge, and gives each gauging’s standard
+uncertainty in `uQ`:
 
 ``` r
 sauze <- RBaM::SauzeGaugings
@@ -221,9 +224,9 @@ Just either side of the breakpoint, the delta band jumps and the
 bootstrap band does not:
 
 ``` r
-hp <- fit2$pars$k + c(-0.05, 0.05)
-delta <- predict(fit2, hpred = hp, conflev = 0.95)
-boot <- predict(fit2, hpred = hp, conflev = 0.95, method = "boot", B = 200,
+near_k <- fit2$pars$k + c(-0.05, 0.05)
+delta <- predict(fit2, stage = near_k, conflev = 0.95)
+boot <- predict(fit2, stage = near_k, conflev = 0.95, method = "boot", B = 200,
                 seed = 1)
 
 delta$ci_upr - delta$ci_lwr

@@ -9,7 +9,8 @@ Every \verb{rc_*()} constructor returns a list with class
 }
 \details{
 \describe{
-\item{\code{qh_obs}}{The gaugings used, with columns \code{q} and \code{h}, after
+\item{\code{gaugings}}{The gaugings used, with columns \code{discharge} and \code{stage},
+after
 dropping any with a missing value. A tibble if \pkg{tibble} is
 installed.}
 \item{\code{pars}}{The estimated parameters of the curve, as a named list with
@@ -19,7 +20,7 @@ differ in length where a parameter is fixed by the configuration. Empty
 for \code{\link[=rc_loess]{rc_loess()}}, which has no parameters. \code{\link[=coef]{coef()}} returns the same
 estimates as a flat named vector.}
 \item{\code{settings}}{The arguments the fit was made with, including any
-user-supplied weights, aligned with \code{qh_obs}. Enough to refit.}
+user-supplied weights, aligned with \code{gaugings}. Enough to refit.}
 \item{\code{rse}}{The residual standard error (on the log scale for the
 log-scale fits).}
 \item{\code{model}}{The underlying model object, e.g. from \code{\link[stats:nls]{stats::nls()}}.}

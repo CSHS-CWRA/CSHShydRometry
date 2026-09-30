@@ -2,9 +2,9 @@
 
 #' Fit rating curve using nls on untransformed data
 #'
-#' @param q A vector of streamflow data.
-#' @param h A vector of stage data.
-#' @param data Optional data frame in which to look up `q` and `h`. When
+#' @param discharge Discharge: a vector, or a column of `data`.
+#' @param stage Stage: a vector, or a column of `data`.
+#' @param data Optional data frame in which to look up `discharge` and `stage`. When
 #'   supplied, they may be given as bare column names.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
@@ -19,16 +19,16 @@
 #' @param nls_maxiter Maximum nls iterations.
 #' @return An `rc_nls` object; see [rating_curve] for its contents.
 #' @examples
-#' fit <- rc_nls(q, h, data = thompson)
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#' fit <- rc_nls(discharge, stage, data = thompson)
+#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # constant coefficient of variation instead of constant variance
-#' fit_prop <- rc_nls(q, h, data = thompson, wts_code = "prop")
-#' predict(fit_prop, hpred = c(1, 3, 6), conflev = 0.95)
+#' fit_prop <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
+#' predict(fit_prop, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
 rc_nls <- function(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
   wts_code = c("none", "spec", "prop"),
@@ -39,27 +39,27 @@ rc_nls <- function(
   nls_maxiter = 1000
 ) {
   ## error checks and warnings
-  # q and h may name columns of `data`, or be vectors
+  # discharge and stage may name columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
-  q <- rlang::eval_tidy(rlang::enquo(q), data)
-  h <- rlang::eval_tidy(rlang::enquo(h), data)
-  checkmate::assert_numeric(q, min.len = 1L)
-  checkmate::assert_numeric(h, len = length(q))
+  discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
+  stage <- rlang::eval_tidy(rlang::enquo(stage), data)
+  checkmate::assert_numeric(discharge, min.len = 1L)
+  checkmate::assert_numeric(stage, len = length(discharge))
   wts_code <- rlang::arg_match(wts_code)
 
   ## remove missing observations
   # keep user-supplied weights aligned with the gaugings that remain
-  if (length(wts) == length(q)) {
-    wts <- wts[stats::complete.cases(q, h)]
+  if (length(wts) == length(discharge)) {
+    wts <- wts[stats::complete.cases(discharge, stage)]
   }
-  qh <- rc_complete(q, h)
-  q <- qh$q
-  h <- qh$h
+  qh <- rc_complete(discharge, stage)
+  discharge <- qh$discharge
+  stage <- qh$stage
 
   ## generate starting values using lm on log-transformed data
-  cstart <- min(h) - 0.1 * (max(h) - min(h))
-  start_lm <- stats::lm(log(q) ~ log(h - cstart))
+  cstart <- min(stage) - 0.1 * (max(stage) - min(stage))
+  start_lm <- stats::lm(log(discharge) ~ log(stage - cstart))
   astart <- unname(exp(start_lm$coefficients[1]))
   bstart <- unname(start_lm$coefficients[2])
   wts_input <- wts
@@ -68,12 +68,12 @@ rc_nls <- function(
   # use nls to determine optimal parameters - no weights or specified weights
   if (wts_code != "prop") {
     if (wts_code == "none") {
-      wts <- rep(1, length(q))
+      wts <- rep(1, length(discharge))
     }
-    checkmate::assert_numeric(wts, len = length(q), .var.name = "wts")
+    checkmate::assert_numeric(wts, len = length(discharge), .var.name = "wts")
     mod_nls <- stats::nls(
-      q ~ a * (h - c)^b,
-      data = data.frame(q = q, h = h),
+      discharge ~ a * (stage - c)^b,
+      data = data.frame(discharge = discharge, stage = stage),
       weights = wts,
       start = list(a = astart, b = bstart, c = cstart),
       control = list(tol = nls_tol, maxiter = nls_maxiter)
@@ -82,8 +82,8 @@ rc_nls <- function(
     # proportional weights, by iterative reweighting from the log-log curve
     fit_fun <- function(wts, start) {
       stats::nls(
-        q ~ a * (h - c)^b,
-        data = data.frame(q = q, h = h, wts = wts),
+        discharge ~ a * (stage - c)^b,
+        data = data.frame(discharge = discharge, stage = stage, wts = wts),
         weights = wts,
         start = start,
         control = list(maxiter = nls_maxiter, tol = nls_tol)
@@ -91,7 +91,7 @@ rc_nls <- function(
     }
     res <- rc_irls(
       fit_fun,
-      yp = astart * (h - cstart)^bstart,
+      yp = astart * (stage - cstart)^bstart,
       start = list(a = astart, b = bstart, c = cstart),
       wts_tol = wts_tol,
       wts_maxiter = wts_maxiter
@@ -107,7 +107,7 @@ rc_nls <- function(
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
-    qh_obs = qh,
+    gaugings = qh,
     pars = list(a = coefs[["a"]], b = coefs[["b"]], c = coefs[["c"]]),
     settings = list(
       wts_code = wts_code,
@@ -134,7 +134,7 @@ rc_nls <- function(
 predict.rc_nls <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
@@ -146,19 +146,19 @@ predict.rc_nls <- function(
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
-  if (is.null(hpred)) {
-    hpred <- rc_hpred_grid(object)
+  if (is.null(stage)) {
+    stage <- rc_stage_grid(object)
   }
-  checkmate::assert_numeric(hpred, min.len = 1, finite = TRUE)
-  hpred_df <- data.frame(h = hpred)
+  checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
+  stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  yvec <- unname(stats::predict(mod, newdata = hpred_df, ...))
-  out_df <- data.frame(h = hpred, fit = yvec)
+  yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
+  out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     if (wts_code == "none" || wts_code == "spec") {
       ci_mat <- investr::predFit(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         interval = "confidence",
         level = conflev,
         ...
@@ -168,7 +168,7 @@ predict.rc_nls <- function(
         mod,
         type = "confidence",
         level = conflev,
-        hpred = hpred
+        stage = stage
       )
     }
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -187,7 +187,7 @@ predict.rc_nls <- function(
     if (wts_code == "none") {
       pi_mat <- investr::predFit(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         interval = "prediction",
         level = predlev,
         ...
@@ -197,7 +197,7 @@ predict.rc_nls <- function(
         mod,
         type = "prediction",
         level = predlev,
-        hpred = hpred
+        stage = stage
       )
     }
     pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]

@@ -7,7 +7,7 @@
 \method{predict}{rc_nls_2seg}(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL,
   method = c("delta", "boot")
@@ -18,8 +18,8 @@
 
 \item{...}{Passed on to the chosen limits function.}
 
-\item{hpred}{Stage values at which to return limits. Defaults to
-\code{\link[=rc_hpred_grid]{rc_hpred_grid()}}: 1000 points spanning the observed stage range.}
+\item{stage}{Stages at which to return limits. Defaults to
+\code{\link[=rc_stage_grid]{rc_stage_grid()}}: 1000 points spanning the observed stage range.}
 
 \item{conflev}{Confidence level for the mean-curve (confidence) interval, or
 \code{NULL} to omit it.}
@@ -39,7 +39,7 @@ at the breakpoint.
 }}
 }
 \value{
-A data frame (tibble if \pkg{tibble} is available) with column \code{h},
+A data frame (tibble if \pkg{tibble} is available) with column \code{stage},
 the fitted discharge \code{fit}, and, when requested, \code{ci_lwr}/\code{ci_upr} and
 \code{pi_lwr}/\code{pi_upr}. Which columns are present depends only on which of
 \code{conflev} and \code{predlev} were given -- never on the method or the
@@ -55,14 +55,14 @@ Evaluates the fitted rating curve on a grid of stage values and, optionally,
 attaches confidence and/or prediction limits. This is a thin dispatcher: it
 validates the arguments common to every method, then hands off to one of the
 \verb{*_limits_2seg()} functions, which all take the same
-\verb{(object, hpred, conflev, predlev)} arguments and all return the same
+\verb{(object, stage, conflev, predlev)} arguments and all return the same
 columns.
 }
 \section{Choosing a method}{
 
 The default, \code{"delta"}, is fast and is the classical choice, but \strong{it is not
 reliable near the breakpoint}. The mean function is not differentiable at
-\code{h = k}, so the linearisation switches form there and the interval jumps: on
+\code{stage = k}, so the linearisation switches form there and the interval jumps: on
 one fitted curve the band widened from 29 to 242 m^3 s^-1 across the
 breakpoint. In a simulation study a nominal 95\% delta interval covered the
 true curve only about two-thirds of the time just above the breakpoint,
@@ -86,21 +86,21 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
   hp <- c(1, 1.5, 2, 4)
 
   # the default, and fast
-  predict(fit, hpred = hp, conflev = 0.95)
+  predict(fit, stage = hp, conflev = 0.95)
 
   # slower, but does not assume the breakpoint is known. Compare the two
   # either side of the breakpoint, at about 1.85 m: the delta band jumps
   # there, the bootstrap band does not.
-  predict(fit, hpred = hp, conflev = 0.95, method = "boot", B = 50)
+  predict(fit, stage = hp, conflev = 0.95, method = "boot", B = 50)
 }
 
 # the columns returned never depend on the model or the method, so results
 # from different approaches stack directly
-one <- rc_nls(q, h, data = thompson)
-two <- rc_nls_2seg(q, h, data = thompson, wts_code = "prop", kstart = 2)
+one <- rc_nls(discharge, stage, data = thompson)
+two <- rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
 rbind(
-  predict(one, hpred = 3, conflev = 0.95),
-  predict(two, hpred = 3, conflev = 0.95)
+  predict(one, stage = 3, conflev = 0.95),
+  predict(two, stage = 3, conflev = 0.95)
 )
 }
 \seealso{

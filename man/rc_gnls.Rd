@@ -4,17 +4,17 @@
 \alias{rc_gnls}
 \title{Fit rating curve using gnls}
 \usage{
-rc_gnls(q, h, ..., data = NULL, var_type = nlme::varPower())
+rc_gnls(discharge, stage, ..., data = NULL, var_type = nlme::varPower())
 }
 \arguments{
-\item{q}{A vector of streamflow data.}
+\item{discharge}{Discharge: a vector, or a column of \code{data}.}
 
-\item{h}{A vector of stage data.}
+\item{stage}{Stage: a vector, or a column of \code{data}.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
+\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
 supplied, they may be given as bare column names.}
 
 \item{var_type}{Variance function for gnls weights (default \code{nlme::varPower()}).}
@@ -27,6 +27,6 @@ estimated parameters of the variance function are in \code{var_pars}.
 Fit rating curve using gnls
 }
 \examples{
-fit <- rc_gnls(q, h, data = thompson)
-predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+fit <- rc_gnls(discharge, stage, data = thompson)
+predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 }

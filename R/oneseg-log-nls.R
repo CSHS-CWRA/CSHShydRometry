@@ -2,9 +2,9 @@
 
 #' Fit rating curve using nls on log-transformed data
 #'
-#' @param q A vector of streamflow data.
-#' @param h A vector of stage data.
-#' @param data Optional data frame in which to look up `q` and `h`. When
+#' @param discharge Discharge: a vector, or a column of `data`.
+#' @param stage Stage: a vector, or a column of `data`.
+#' @param data Optional data frame in which to look up `discharge` and `stage`. When
 #'   supplied, they may be given as bare column names.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
@@ -14,31 +14,29 @@
 #'   `a_corrected` holds two bias-corrected versions for the mean: `nbc`,
 #'   assuming lognormal errors, and `dbc`, Duan's smearing estimate.
 #' @examples
-#' fit <- rc_log_nls(q, h, data = thompson)
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#' fit <- rc_log_nls(discharge, stage, data = thompson)
+#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
-rc_log_nls <- function(q, h, ..., data = NULL, tol = 1e-6) {
-  # q = vector of streamflow data
-  # h = vector of stage data
-  # q and h may name columns of `data`, or be vectors
+rc_log_nls <- function(discharge, stage, ..., data = NULL, tol = 1e-6) {
+  # discharge and stage may name columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
-  q <- rlang::eval_tidy(rlang::enquo(q), data)
-  h <- rlang::eval_tidy(rlang::enquo(h), data)
-  checkmate::assert_numeric(q, min.len = 1L)
-  checkmate::assert_numeric(h, len = length(q))
-  qh <- rc_complete(q, h)
-  q <- qh$q
-  h <- qh$h
+  discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
+  stage <- rlang::eval_tidy(rlang::enquo(stage), data)
+  checkmate::assert_numeric(discharge, min.len = 1L)
+  checkmate::assert_numeric(stage, len = length(discharge))
+  qh <- rc_complete(discharge, stage)
+  discharge <- qh$discharge
+  stage <- qh$stage
   # starting estimates
-  cstart <- min(h) - 0.1 * (max(h) - min(h))
-  lm_mod <- stats::lm(log(q) ~ log(h - cstart))
+  cstart <- min(stage) - 0.1 * (max(stage) - min(stage))
+  lm_mod <- stats::lm(log(discharge) ~ log(stage - cstart))
   b0start <- lm_mod$coef[1]
   b1start <- lm_mod$coef[2]
   # fit model, extract parameters and rse
   mod_nls <- stats::nls(
-    log(q) ~ b0 + b1 * log(h - c),
-    data = data.frame(q = q, h = h),
+    log(discharge) ~ b0 + b1 * log(stage - c),
+    data = data.frame(discharge = discharge, stage = stage),
     start = list(b0 = b0start, b1 = b1start, c = cstart),
     control = list(tol = tol, maxiter = 1000)
   )
@@ -55,7 +53,7 @@ rc_log_nls <- function(q, h, ..., data = NULL, tol = 1e-6) {
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
-    qh_obs = qh,
+    gaugings = qh,
     pars = list(a = unname(a), b = unname(b), c = unname(c)),
     a_corrected = c(nbc = unname(a_nbc), dbc = unname(a_dbc)),
     settings = list(tol = tol),
@@ -74,7 +72,7 @@ rc_log_nls <- function(q, h, ..., data = NULL, tol = 1e-6) {
 predict.rc_log_nls <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
@@ -82,18 +80,18 @@ predict.rc_log_nls <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  if (is.null(hpred)) {
-    hpred <- rc_hpred_grid(object)
+  if (is.null(stage)) {
+    stage <- rc_stage_grid(object)
   }
-  checkmate::assert_numeric(hpred, min.len = 1, finite = TRUE)
-  hpred_df <- data.frame(h = hpred)
+  checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
+  stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  yvec <- unname(exp(stats::predict(mod, newdata = hpred_df, ...)))
-  out_df <- data.frame(h = hpred, fit = yvec)
+  yvec <- unname(exp(stats::predict(mod, newdata = stage_df, ...)))
+  out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     ci_mat <- exp(investr::predFit(
       mod,
-      newdata = hpred_df,
+      newdata = stage_df,
       interval = "confidence",
       level = conflev,
       ...
@@ -105,7 +103,7 @@ predict.rc_log_nls <- function(
   if (predlim) {
     pi_mat <- exp(investr::predFit(
       mod,
-      newdata = hpred_df,
+      newdata = stage_df,
       interval = "prediction",
       level = predlev,
       ...

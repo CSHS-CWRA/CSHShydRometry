@@ -6,7 +6,8 @@
 #' `c("rc_<method>", "rating_curve")` and these elements:
 #'
 #' \describe{
-#'   \item{`qh_obs`}{The gaugings used, with columns `q` and `h`, after
+#'   \item{`gaugings`}{The gaugings used, with columns `discharge` and `stage`,
+#'     after
 #'     dropping any with a missing value. A tibble if \pkg{tibble} is
 #'     installed.}
 #'   \item{`pars`}{The estimated parameters of the curve, as a named list with
@@ -16,7 +17,7 @@
 #'     for [rc_loess()], which has no parameters. [coef()] returns the same
 #'     estimates as a flat named vector.}
 #'   \item{`settings`}{The arguments the fit was made with, including any
-#'     user-supplied weights, aligned with `qh_obs`. Enough to refit.}
+#'     user-supplied weights, aligned with `gaugings`. Enough to refit.}
 #'   \item{`rse`}{The residual standard error (on the log scale for the
 #'     log-scale fits).}
 #'   \item{`model`}{The underlying model object, e.g. from [stats::nls()].}
@@ -61,7 +62,7 @@ print.rating_curve <- function(x, ...) {
 #' @param ... Ignored.
 #' @return A named numeric vector; empty for [rc_loess()].
 #' @examples
-#' coef(rc_nls(q, h, data = thompson))
+#' coef(rc_nls(discharge, stage, data = thompson))
 #' @export
 coef.rating_curve <- function(object, ...) {
   pars <- object$pars

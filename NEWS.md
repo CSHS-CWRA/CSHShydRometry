@@ -5,7 +5,24 @@
 * Every argument after the mandatory ones (`q` and `h`, or `object`) must now
   be named in full: `...` sits between them, and the constructors reject
   anything passed through it. In particular `data` must be named, as in
-  `rc_nls(q, h, data = thompson)`.
+  `rc_nls(discharge, stage, data = thompson)`.
+
+* Stage and discharge are named in full throughout, rather than `h` and `q`:
+  * the constructors take `discharge` and `stage` (formerly `q` and `h`), as
+    in `rc_nls(discharge, stage, data = thompson)`;
+  * `predict()` and the `*_limits_2seg()` functions take `stage` (formerly
+    `hpred`), and return it as the column `stage` (formerly `h`);
+  * the gaugings stored on a fit are `gaugings`, with columns `discharge` and
+    `stage` (formerly `qh_obs`, with `q` and `h`), and the fitted models'
+    formulas use the same names;
+  * `thompson` has columns `stage`, `discharge` and `uncertainty_percent`
+    (formerly `h`, `q` and `uq`).
+
+* `thompson$uncertainty_percent` is now documented as what it is: a
+  percentage of the discharge at two standard deviations, as reported by the
+  Water Survey of Canada. It was previously described as a discharge
+  uncertainty, and the tests used `1 / uq^2` as weights as though it were a
+  standard deviation in cubic metres per second.
 
 * The `"sim"` interval method is removed, along with `sim_limits_2seg()`.
   Drawing parameters from their asymptotic normal distribution and pushing

@@ -2,9 +2,9 @@
 
 #' Fit polynomial rating curve
 #'
-#' @param q A vector of streamflow data.
-#' @param h A vector of stage data.
-#' @param data Optional data frame in which to look up `q` and `h`. When
+#' @param discharge Discharge: a vector, or a column of `data`.
+#' @param stage Stage: a vector, or a column of `data`.
+#' @param data Optional data frame in which to look up `discharge` and `stage`. When
 #'   supplied, they may be given as bare column names.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
@@ -17,14 +17,14 @@
 #' @param wts_maxiter Maximum number of reweighting rounds under
 #'   `wts_code = "prop"`. Reaching it gives a warning.
 #' @return An `rc_poly` object; see [rating_curve] for its contents. The
-#'   coefficients are named `b0`, `b1`, ... by power of `h`.
+#'   coefficients are named `b0`, `b1`, ... by power of `stage`.
 #' @examples
-#' fit <- rc_poly(q, h, data = thompson, degree = 2)
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#' fit <- rc_poly(discharge, stage, data = thompson, degree = 2)
+#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
 rc_poly <- function(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
   degree = 2,
@@ -34,33 +34,33 @@ rc_poly <- function(
   wts_maxiter = 100
 ) {
   # error checks and warnings
-  # q and h may name columns of `data`, or be vectors
+  # discharge and stage may name columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
-  q <- rlang::eval_tidy(rlang::enquo(q), data)
-  h <- rlang::eval_tidy(rlang::enquo(h), data)
-  checkmate::assert_numeric(q, min.len = 1L)
-  checkmate::assert_numeric(h, len = length(q))
+  discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
+  stage <- rlang::eval_tidy(rlang::enquo(stage), data)
+  checkmate::assert_numeric(discharge, min.len = 1L)
+  checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_count(degree, positive = TRUE)
   wts_code <- rlang::arg_match(wts_code)
 
   # remove missing observations
   # keep user-supplied weights aligned with the gaugings that remain
-  if (length(wts) == length(q)) {
-    wts <- wts[stats::complete.cases(q, h)]
+  if (length(wts) == length(discharge)) {
+    wts <- wts[stats::complete.cases(discharge, stage)]
   }
-  qh <- rc_complete(q, h)
-  q <- qh$q
-  h <- qh$h
-  qh_fit <- data.frame(q = q, h = h)
+  qh <- rc_complete(discharge, stage)
+  discharge <- qh$discharge
+  stage <- qh$stage
+  qh_fit <- data.frame(discharge = discharge, stage = stage)
   wts_input <- wts
   irls <- NULL
 
   # lm model formula
-  lm_modform <- "q ~ h"
-  term <- "h"
+  lm_modform <- "discharge ~ stage"
+  term <- "stage"
   for (i in seq_len(degree)[-1]) {
-    term <- paste0(term, "*h")
+    term <- paste0(term, "*stage")
     lm_modform <- paste0(lm_modform, " + I(", term, ")")
   }
 
@@ -71,7 +71,7 @@ rc_poly <- function(
     mod_sum <- summary(mod_poly)
   } else if (wts_code == "spec") {
     # use specified weights
-    checkmate::assert_numeric(wts, len = length(q), .var.name = "wts")
+    checkmate::assert_numeric(wts, len = length(discharge), .var.name = "wts")
     mod_poly <- stats::lm(
       formula = lm_modform,
       weights = wts,
@@ -83,9 +83,9 @@ rc_poly <- function(
     mod_ols <- stats::lm(formula = lm_modform, data = qh_fit)
 
     # create model formula for nls fit
-    nls_modform <- "q ~ b0 + b1*h"
+    nls_modform <- "discharge ~ b0 + b1*stage"
     for (i in seq_len(degree)[-1]) {
-      nls_modform <- paste0(nls_modform, " + b", i, "*h^", i)
+      nls_modform <- paste0(nls_modform, " + b", i, "*stage^", i)
     }
     nls_modform <- stats::as.formula(nls_modform)
 
@@ -114,7 +114,7 @@ rc_poly <- function(
     mod_sum <- summary(mod_poly)
   }
   if (wts_code == "none") {
-    wts <- rep(1, length(q))
+    wts <- rep(1, length(discharge))
   }
   coefs <- unname(stats::coef(mod_poly))
   pars <- as.list(coefs)
@@ -123,7 +123,7 @@ rc_poly <- function(
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
-    qh_obs = qh,
+    gaugings = qh,
     pars = pars,
     settings = list(
       degree = degree,
@@ -149,7 +149,7 @@ rc_poly <- function(
 predict.rc_poly <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
@@ -161,19 +161,19 @@ predict.rc_poly <- function(
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
-  if (is.null(hpred)) {
-    hpred <- rc_hpred_grid(object)
+  if (is.null(stage)) {
+    stage <- rc_stage_grid(object)
   }
-  checkmate::assert_numeric(hpred, min.len = 1, finite = TRUE)
-  hpred_df <- data.frame(h = hpred)
+  checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
+  stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  yvec <- unname(stats::predict(mod, newdata = hpred_df, ...))
-  out_df <- data.frame(h = hpred, fit = yvec)
+  yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
+  out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     if (wts_code != "prop") {
       ci_mat <- stats::predict(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         interval = "confidence",
         level = conflev,
         ...
@@ -182,7 +182,7 @@ predict.rc_poly <- function(
       # confidence limits, proportional weights
       cl_poly <- investr::predFit(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         se.fit = TRUE
       )
       se_fit <- cl_poly$se.fit
@@ -212,19 +212,19 @@ predict.rc_poly <- function(
     if (wts_code == "none") {
       pi_mat <- stats::predict(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         interval = "prediction",
         level = predlev,
         ...
       )
     } else if (wts_code == "prop") {
       # compute weights for new observations if wts_code == "prop"
-      qp <- stats::predict(mod, newdata = hpred_df)
+      qp <- stats::predict(mod, newdata = stage_df)
       wtsp <- 1 / qp^2
       # prediction limits, proportional weights
       pl_poly <- investr::predFit(
         mod,
-        newdata = hpred_df,
+        newdata = stage_df,
         se.fit = TRUE
       )
       se_fit <- pl_poly$se.fit

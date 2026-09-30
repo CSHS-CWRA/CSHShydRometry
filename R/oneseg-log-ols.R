@@ -2,9 +2,9 @@
 
 #' Fit rating curve using lm and log-log transform
 #'
-#' @param q A vector of streamflow data.
-#' @param h A vector of stage data.
-#' @param data Optional data frame in which to look up `q` and `h`. When
+#' @param discharge Discharge: a vector, or a column of `data`.
+#' @param stage Stage: a vector, or a column of `data`.
+#' @param data Optional data frame in which to look up `discharge` and `stage`. When
 #'   supplied, they may be given as bare column names.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
@@ -15,44 +15,44 @@
 #'   `a_corrected` holds two bias-corrected versions for the mean: `nbc`,
 #'   assuming lognormal errors, and `dbc`, Duan's smearing estimate.
 #' @examples
-#' fit <- rc_log_ols(q, h, data = thompson)
+#' fit <- rc_log_ols(discharge, stage, data = thompson)
 #' fit
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
 rc_log_ols <- function(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
-  c_lwr = min(h) - 10 * max(h),
-  c_upr = min(h) - 0.0001
+  c_lwr = min(stage) - 10 * max(stage),
+  c_upr = min(stage) - 0.0001
 ) {
-  # q and h may name columns of `data`, or be vectors
+  # discharge and stage may name columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
-  q <- rlang::eval_tidy(rlang::enquo(q), data)
-  h <- rlang::eval_tidy(rlang::enquo(h), data)
-  checkmate::assert_numeric(q, min.len = 1L)
-  checkmate::assert_numeric(h, len = length(q))
+  discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
+  stage <- rlang::eval_tidy(rlang::enquo(stage), data)
+  checkmate::assert_numeric(discharge, min.len = 1L)
+  checkmate::assert_numeric(stage, len = length(discharge))
   # function to minimize
-  opt_fun <- function(c, q, h) {
-    mod <- stats::lm(log(q) ~ log(h - c))
+  opt_fun <- function(c, discharge, stage) {
+    mod <- stats::lm(log(discharge) ~ log(stage - c))
     summary(mod)$sigma
   }
-  qh <- rc_complete(q, h)
-  q <- qh$q
-  h <- qh$h
+  qh <- rc_complete(discharge, stage)
+  discharge <- qh$discharge
+  stage <- qh$stage
   mod_opt <- stats::optim(
     par = c_lwr,
     fn = opt_fun,
-    q = q,
-    h = h,
+    discharge = discharge,
+    stage = stage,
     method = "Brent",
     lower = c_lwr,
     upper = c_upr
   )
   c <- mod_opt$par
-  mod <- stats::lm(log(q) ~ log(h - c))
+  mod <- stats::lm(log(discharge) ~ log(stage - c))
   rse <- summary(mod)$sigma
   resids <- summary(mod)$residuals
   a <- exp(mod$coef[1])
@@ -63,7 +63,7 @@ rc_log_ols <- function(
     qh <- tibble::as_tibble(qh)
   }
   outlist <- list(
-    qh_obs = qh,
+    gaugings = qh,
     pars = list(a = unname(a), b = unname(b), c = unname(c)),
     a_corrected = c(nbc = unname(a_nbc), dbc = unname(a_dbc)),
     settings = list(c_lwr = c_lwr, c_upr = c_upr),
@@ -77,9 +77,8 @@ rc_log_ols <- function(
 #' Predict method for rc_log_ols objects
 #'
 #' @param object An rc_log_ols object.
-#' @param hpred A vector of h values to predict on. If NULL, a grid of 1000
-#'   equally spaced values between the minimum and maximum of the input h values
-#'   is used.
+#' @param stage Stages at which to predict discharge. If `NULL`, a grid of
+#'   1000 equally spaced stages spanning the observed range is used.
 #' @param ... Additional arguments passed to the inner `stats::predict()` function.
 #' @param conflev The confidence level for the confidence limits; if NULL, no
 #'   confidence limits are returned.
@@ -94,7 +93,7 @@ rc_log_ols <- function(
 predict.rc_log_ols <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
@@ -102,20 +101,20 @@ predict.rc_log_ols <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  if (is.null(hpred)) {
-    hpred <- rc_hpred_grid(object)
+  if (is.null(stage)) {
+    stage <- rc_stage_grid(object)
   }
-  checkmate::assert_numeric(hpred, min.len = 1, finite = TRUE)
-  hpred_df <- data.frame(h = hpred)
+  checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
+  stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  yvec <- unname(exp(stats::predict(mod, newdata = hpred_df, ...)))
-  out_df <- data.frame(h = hpred, fit = yvec)
+  yvec <- unname(exp(stats::predict(mod, newdata = stage_df, ...)))
+  out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     ci_mat <- exp(stats::predict(
       mod,
       interval = "confidence",
       level = conflev,
-      newdata = hpred_df,
+      newdata = stage_df,
       ...
     ))
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -127,7 +126,7 @@ predict.rc_log_ols <- function(
       mod,
       interval = "prediction",
       level = predlev,
-      newdata = hpred_df,
+      newdata = stage_df,
       ...
     ))
     pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]

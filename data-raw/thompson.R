@@ -19,20 +19,23 @@ keep <- !is.na(raw$Discharge) &
   !is.na(raw$Mean.Gauge.Height) &
   raw$Discharge > 0
 
+# The reported uncertainty is a percentage of the discharge, at two standard
+# deviations: the activity remarks describe it as the "IVE method, 2-sigma
+# value". It is kept as reported.
 thompson <- data.frame(
   date = as.Date(substr(raw$Date..UTC.[keep], 1, 10)),
-  h = as.numeric(raw$Mean.Gauge.Height[keep]),
-  q = as.numeric(raw$Discharge[keep]),
-  uq = as.numeric(raw$Uncertainty[keep])
+  stage = as.numeric(raw$Mean.Gauge.Height[keep]),
+  discharge = as.numeric(raw$Discharge[keep]),
+  uncertainty_percent = as.numeric(raw$Uncertainty[keep])
 )
-thompson <- thompson[order(thompson$h), ]
+thompson <- thompson[order(thompson$stage), ]
 rownames(thompson) <- NULL
 
 stopifnot(
   nrow(thompson) > 50,
-  all(thompson$q > 0),
-  !any(is.na(thompson$h)),
-  !any(is.na(thompson$q))
+  all(thompson$discharge > 0),
+  !any(is.na(thompson$stage)),
+  !any(is.na(thompson$discharge))
 )
 
 save(thompson, file = file.path("data", "thompson.rda"), compress = "bzip2")

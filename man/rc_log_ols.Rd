@@ -5,23 +5,23 @@
 \title{Fit rating curve using lm and log-log transform}
 \usage{
 rc_log_ols(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
-  c_lwr = min(h) - 10 * max(h),
-  c_upr = min(h) - 1e-04
+  c_lwr = min(stage) - 10 * max(stage),
+  c_upr = min(stage) - 1e-04
 )
 }
 \arguments{
-\item{q}{A vector of streamflow data.}
+\item{discharge}{Discharge: a vector, or a column of \code{data}.}
 
-\item{h}{A vector of stage data.}
+\item{stage}{Stage: a vector, or a column of \code{data}.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
+\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
 supplied, they may be given as bare column names.}
 
 \item{c_lwr}{The lower bound for the c parameter.}
@@ -38,7 +38,7 @@ assuming lognormal errors, and \code{dbc}, Duan's smearing estimate.
 Fit rating curve using lm and log-log transform
 }
 \examples{
-fit <- rc_log_ols(q, h, data = thompson)
+fit <- rc_log_ols(discharge, stage, data = thompson)
 fit
-predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 }

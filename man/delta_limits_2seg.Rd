@@ -4,7 +4,7 @@
 \alias{delta_limits_2seg}
 \title{Delta-method confidence and prediction limits for a two-segment fit}
 \usage{
-delta_limits_2seg(object, ..., hpred = NULL, conflev = NULL, predlev = NULL)
+delta_limits_2seg(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
 }
 \arguments{
 \item{object}{An \code{rc_nls_2seg} fit (from \code{\link[=rc_nls_2seg]{rc_nls_2seg()}}).}
@@ -12,8 +12,8 @@ delta_limits_2seg(object, ..., hpred = NULL, conflev = NULL, predlev = NULL)
 \item{...}{Passed on to \code{\link[investr:predFit]{investr::predFit()}} for the \code{"none"}/\code{"spec"}
 cases.}
 
-\item{hpred}{Stage values at which to return limits. Defaults to
-\code{\link[=rc_hpred_grid]{rc_hpred_grid()}}: 1000 points spanning the observed stage range.}
+\item{stage}{Stages at which to return limits. Defaults to
+\code{\link[=rc_stage_grid]{rc_stage_grid()}}: 1000 points spanning the observed stage range.}
 
 \item{conflev, predlev}{Levels for the confidence and prediction intervals,
 or \code{NULL} to omit either.}
@@ -31,7 +31,7 @@ covariance through that linearisation. Routed by weighting:
 error structure.
 }
 The linearisation holds the breakpoint fixed at \code{k-hat}, so the gradient
-switches abruptly from one segment's to the other's as \code{h} crosses it and
+switches abruptly from one segment's to the other's as \code{stage} crosses it and
 the band jumps. \code{\link[=boot_limits_2seg]{boot_limits_2seg()}} makes no smoothness assumption and is
 continuous there; prefer it when the interval near the breakpoint matters.
 }
@@ -44,6 +44,6 @@ single scatter to add to the mean curve. Those columns come back \code{NA}.
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
-  delta_limits_2seg(fit, hpred = c(1, 2, 4), conflev = 0.95)
+  delta_limits_2seg(fit, stage = c(1, 2, 4), conflev = 0.95)
 }
 }

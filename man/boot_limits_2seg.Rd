@@ -7,7 +7,7 @@
 boot_limits_2seg(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL,
   B = 1000,
@@ -17,15 +17,15 @@ boot_limits_2seg(
 }
 \arguments{
 \item{object}{An \code{rc_nls_2seg} fit (from \code{\link[=rc_nls_2seg]{rc_nls_2seg()}}). The gaugings are
-taken from \code{object$qh_obs} and the fitting arguments from
+taken from \code{object$gaugings} and the fitting arguments from
 \code{object$settings}. Under \code{wts_code = "spec"} the supplied weights are
 resampled along with the cases.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{hpred}{Stage values at which to return limits. Defaults to
-\code{\link[=rc_hpred_grid]{rc_hpred_grid()}}: 1000 points spanning the observed stage range.}
+\item{stage}{Stages at which to return limits. Defaults to
+\code{\link[=rc_stage_grid]{rc_stage_grid()}}: 1000 points spanning the observed stage range.}
 
 \item{conflev}{Coverage for the confidence (mean-curve) interval, or \code{NULL}.}
 
@@ -42,7 +42,7 @@ if its fit errors or, under \code{wts_code = "prop"}, if its reweighting does
 not converge; failed resamples are redrawn.}
 }
 \value{
-A data frame (tibble if available) with \code{h}, the point-estimate
+A data frame (tibble if available) with \code{stage}, the point-estimate
 curve \code{fit}, and the requested \code{ci_lwr}/\code{ci_upr} and \code{pi_lwr}/\code{pi_upr}.
 \code{attr(, "B_success")} records how many resamples converged.
 }
@@ -56,7 +56,7 @@ resulting spread of fitted rating curves. Returns the same column layout as
 Why bootstrap? The delta-method limits in \code{\link[=predict.rc_nls_2seg]{predict.rc_nls_2seg()}} (via
 \code{\link[investr:predFit]{investr::predFit()}}) linearise the mean function about the fitted
 parameters, but the two-segment mean is not differentiable in the breakpoint
-\code{k} (it is an \code{ifelse} at \code{h = k}). That produces an artificial, near-
+\code{k} (it is an \code{ifelse} at \code{stage = k}). That produces an artificial, near-
 discontinuous widening of the delta-method band at the transition. The
 bootstrap makes no smoothness assumption, so comparing the two is a direct
 check on whether the widening near \code{k} is real or a delta-method artifact.
@@ -72,9 +72,9 @@ of the bootstrap curves at each stage) with the observation-noise sd in
 quadrature, using a t-quantile on the fit's residual degrees of freedom. The
 observation-noise sd follows the error model:
 \itemize{
-\item \code{"none"}: homoscedastic, \code{sd(q - fitted)}.
+\item \code{"none"}: homoscedastic, \code{sd(discharge - fitted)}.
 \item \code{"prop"}: constant coefficient of variation,
-\code{fit * sd((q - fitted)/fitted)}.
+\code{fit * sd((discharge - fitted) / fitted)}.
 \item \code{"spec"}: a new observation's uncertainty is not identified by the
 fit, so \code{pi_lwr}/\code{pi_upr} are returned as \code{NA}, as in every other
 method.
@@ -86,7 +86,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
   boot_limits_2seg(
     fit,
-    hpred = c(1, 2, 4),
+    stage = c(1, 2, 4),
     conflev = 0.95,
     B = 50,
     seed = 1

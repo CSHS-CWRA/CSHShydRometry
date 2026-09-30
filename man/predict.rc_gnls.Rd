@@ -4,16 +4,15 @@
 \alias{predict.rc_gnls}
 \title{Predict method for rc_gnls objects}
 \usage{
-\method{predict}{rc_gnls}(object, ..., hpred = NULL, conflev = NULL, predlev = NULL)
+\method{predict}{rc_gnls}(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
 }
 \arguments{
 \item{object}{An rc_gnls object.}
 
 \item{...}{Additional arguments passed to the inner \code{stats::predict()} function.}
 
-\item{hpred}{A vector of h values to predict on. If NULL, a grid of 1000
-equally spaced values between the minimum and maximum of the input h values
-is used.}
+\item{stage}{Stages at which to predict discharge. If \code{NULL}, a grid of
+1000 equally spaced stages spanning the observed range is used.}
 
 \item{conflev}{The confidence level for the confidence limits; if NULL, no
 confidence limits are returned.}

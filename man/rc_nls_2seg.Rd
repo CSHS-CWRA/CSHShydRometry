@@ -5,8 +5,8 @@
 \title{Fit two-segment power-law rating curve using nls on untransformed data}
 \usage{
 rc_nls_2seg(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
   config = c("piecewise", "compound"),
@@ -23,15 +23,15 @@ rc_nls_2seg(
 )
 }
 \arguments{
-\item{q}{Streamflow. A vector, or a column of \code{data}.}
+\item{discharge}{Discharge: a vector, or a column of \code{data}.}
 
-\item{h}{Stage. A vector, or a column of \code{data}.}
+\item{stage}{Stage: a vector, or a column of \code{data}.}
 
 \item{...}{Must be empty. Present so that every argument after it has
 to be named, which keeps calls readable and guards against
 positional mistakes.}
 
-\item{data}{Optional data frame in which to look up \code{q} and \code{h}. When
+\item{data}{Optional data frame in which to look up \code{discharge} and \code{stage}. When
 supplied, they may be given as bare column names.}
 
 \item{config}{Segment configuration, \code{"piecewise"} or \code{"compound"}.
@@ -51,8 +51,8 @@ three gaugings in each segment.}
 
 \item{wts_code}{Weighting scheme:
 \code{"none"} (ordinary least squares, the default),
-\code{"spec"} (user-supplied weights via \code{wts}, e.g. \code{1/uq^2} from reported
-discharge uncertainties), or \code{"prop"} (proportional / constant-CV error,
+\code{"spec"} (user-supplied weights via \code{wts}, e.g. \code{1 / sd^2}, where \code{sd} is
+the reported standard uncertainty of each discharge), or \code{"prop"} (proportional / constant-CV error,
 fit by iteratively reweighting with weights \code{1/fitted^2}).}
 
 \item{wts}{Optional vector of weights when \code{wts_code = "spec"}.}
@@ -91,7 +91,7 @@ that leaves at least three gaugings in each segment) and the
 starting breakpoints to try.
 \item Derive starting values for the segment parameters by splitting the
 data at the starting breakpoint and fitting a linear model to each
-segment on the log-log scale (\verb{log q ~ log(h - c)});
+segment on the log-log scale (\code{log(discharge) ~ log(stage - c)});
 \code{a = exp(intercept)}, \code{b = slope}.
 \item Fit all parameters jointly with \code{\link[stats:nls]{stats::nls()}} using the "port"
 algorithm (which supports the box constraints in \code{lower}/\code{upper}).
@@ -121,14 +121,14 @@ then rest on that one start.
 \examples{
 # The Thompson is close to a single control, so its two-segment fit needs
 # proportional weights to converge.
-fit <- rc_nls_2seg(q, h, data = thompson, wts_code = "prop")
+fit <- rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop")
 fit
 coef(fit)
 
 # what each starting breakpoint led to
 fit$kstart_search
 
-predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 
 # A river with a clearer change of control is far less fussy. The Ardeche
 # at Sauze, in the RBaM package, fits under either configuration and

@@ -15,7 +15,7 @@
 #' @param type `"confidence"` (uncertainty in the mean curve only) or
 #'   `"prediction"` (adds the scatter of an individual observation).
 #' @param level Coverage probability, e.g. `0.95`.
-#' @param hpred Numeric vector of stage values at which to evaluate the limits.
+#' @param stage Numeric vector of stages at which to evaluate the limits.
 #' @return A data frame with columns `fit`, `lwr`, `upr`.
 #' @details For a confidence interval the half-width is `t * se(fit)`. For a
 #'   prediction interval the observation variance `residual.scale^2 / w` is
@@ -24,16 +24,16 @@
 #' @keywords internal
 nlspw_limits <- function(
   mod,
-  hpred,
+  stage,
   type = c("confidence", "prediction"),
   level = 0.95
 ) {
   type <- rlang::arg_match(type)
 
-  ## compute fitted values, se and residual scale for hpred values
+  ## compute fitted values, se and residual scale for stage values
   nlsw_predfit <- investr::predFit(
     mod,
-    newdata = data.frame(h = hpred),
+    newdata = data.frame(stage = stage),
     se.fit = TRUE
   )
   nlsw_se <- nlsw_predfit$se.fit
@@ -63,30 +63,31 @@ nlspw_limits <- function(
 
 #' Default stage grid for prediction
 #'
-#' The grid used when `hpred` is not supplied: 1000 points spanning the
-#' observed stage range. Factored out so that every function taking `hpred`
+#' The grid used when `stage` is not supplied: 1000 points spanning the
+#' observed stage range. Factored out so that every function taking `stage`
 #' treats a missing one the same way -- extrapolating beyond the gaugings is a
 #' decision for the caller to make deliberately, not a default.
 #'
-#' @param object A fitted rating curve carrying `qh_obs`.
+#' @param object A fitted rating curve carrying `gaugings`.
 #' @param n Number of grid points.
 #' @return Numeric vector of stage values.
 #' @keywords internal
-rc_hpred_grid <- function(object, n = 1000) {
-  h <- object[["qh_obs"]][["h"]]
-  checkmate::assert_numeric(h, min.len = 1L, any.missing = FALSE)
-  seq(min(h), max(h), length.out = n)
+rc_stage_grid <- function(object, n = 1000) {
+  stage <- object[["gaugings"]][["stage"]]
+  checkmate::assert_numeric(stage, min.len = 1L, any.missing = FALSE)
+  seq(min(stage), max(stage), length.out = n)
 }
 
 
 #' Drop gaugings with a missing stage or discharge
 #'
-#' @param q,h Discharge and stage vectors of equal length.
-#' @return A data frame with columns `q` and `h`, holding the complete cases.
+#' @param discharge,stage Vectors of equal length.
+#' @return A data frame with columns `discharge` and `stage`, holding the
+#'   complete cases.
 #' @keywords internal
-rc_complete <- function(q, h) {
-  keep <- stats::complete.cases(q, h)
-  data.frame(q = q[keep], h = h[keep])
+rc_complete <- function(discharge, stage) {
+  keep <- stats::complete.cases(discharge, stage)
+  data.frame(discharge = discharge[keep], stage = stage[keep])
 }
 
 
@@ -157,12 +158,12 @@ rc_irls <- function(fit_fun, yp, start, wts_tol, wts_maxiter) {
 #' sum of squares does, and it stays comparable when, as under proportional
 #' weights, the weights themselves depend on the fit.
 #'
-#' @param q Observed discharges.
+#' @param discharge Observed discharges.
 #' @param mu Fitted discharges.
 #' @param w Weights, the reciprocal of each observation's relative variance.
 #' @return A single number.
 #' @keywords internal
-rc_loglik <- function(q, mu, w) {
-  n <- length(q)
-  0.5 * sum(log(w)) - 0.5 * n * log(mean(w * (q - mu)^2))
+rc_loglik <- function(discharge, mu, w) {
+  n <- length(discharge)
+  0.5 * sum(log(w)) - 0.5 * n * log(mean(w * (discharge - mu)^2))
 }

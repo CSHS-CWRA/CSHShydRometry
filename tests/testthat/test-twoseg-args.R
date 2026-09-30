@@ -7,16 +7,16 @@ sauze <- function() {
   RBaM::SauzeGaugings
 }
 
-# A piecewise power law with a break at h = 1.5, and deterministic scatter.
+# A piecewise power law with a break at stage 1.5, and deterministic scatter.
 two_control <- function() {
-  h <- seq(0.2, 3, length.out = 40)
+  stage <- seq(0.2, 3, length.out = 40)
   k <- 1.5
   mu <- ifelse(
-    h < k,
-    10 * h^1.5,
-    10 * k^1.5 / (k - 1)^2.5 * (h - 1)^2.5
+    stage < k,
+    10 * stage^1.5,
+    10 * k^1.5 / (k - 1)^2.5 * (stage - 1)^2.5
   )
-  data.frame(h = h, q = mu * (1 + 0.03 * sin(7 * seq_along(h))))
+  data.frame(stage = stage, discharge = mu * (1 + 0.03 * sin(7 * seq_along(stage))))
 }
 
 sauze_fit <- function(config = "piecewise", wts_code = "none") {
@@ -38,16 +38,16 @@ test_that("too few gaugings is an error", {
 
 test_that("a misspelled argument is an error, not ignored", {
   expect_error(
-    rc_nls_2seg(q, h, data = thompson, kstrat = 2),
+    rc_nls_2seg(discharge, stage, data = thompson, kstrat = 2),
     "must be empty"
   )
   fit <- rc_nls_2seg(Q, H, data = sauze(), kstart = 1)
-  expect_error(boot_limits_2seg(fit, hpred = 2, N = 10), "must be empty")
+  expect_error(boot_limits_2seg(fit, stage = 2, N = 10), "must be empty")
 })
 
 test_that("the c continuity constraint is not implemented", {
   expect_error(
-    rc_nls_2seg(q, h, data = thompson, contcons = "c", kstart = 2),
+    rc_nls_2seg(discharge, stage, data = thompson, contcons = "c", kstart = 2),
     "not implemented"
   )
 })
@@ -59,17 +59,17 @@ test_that("kfixed holds the breakpoint at kstart", {
 })
 
 test_that("kbounds limit the breakpoint search", {
-  # Synthetic gaugings with a clear break at h = 1.5: the Sauze fits are too
+  # Synthetic gaugings with a clear break at stage 1.5: the Sauze fits are too
   # sensitive to their starting values to test the bounds on reliably across
   # platforms. This fit converges from any start between about 1.05 and 1.75.
   d <- two_control()
-  fit <- rc_nls_2seg(q, h, data = d, kbounds = c(1, 2), kstart = 1.5)
+  fit <- rc_nls_2seg(discharge, stage, data = d, kbounds = c(1, 2), kstart = 1.5)
   expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
-  fit2 <- rc_nls_2seg(q, h, data = d, kstart = 1.3, kbounds = c(1, 2))
+  fit2 <- rc_nls_2seg(discharge, stage, data = d, kstart = 1.3, kbounds = c(1, 2))
   expect_equal(fit2$settings$kbounds, c(1, 2))
   expect_equal(fit2$pars[["k"]], fit$pars[["k"]], tolerance = 1e-4)
   expect_error(
-    rc_nls_2seg(q, h, data = d, kstart = 3, kbounds = c(1, 2)),
+    rc_nls_2seg(discharge, stage, data = d, kstart = 3, kbounds = c(1, 2)),
     "invalid"
   )
 })
@@ -89,7 +89,7 @@ test_that("specified weights stay aligned when gaugings are dropped", {
   expect_equal(fit$settings$wts, w[-5])
   # and the bootstrap, which resamples them, still runs
   b <- suppressWarnings(
-    boot_limits_2seg(fit, hpred = 2, conflev = 0.9, B = 5, seed = 1)
+    boot_limits_2seg(fit, stage = 2, conflev = 0.9, B = 5, seed = 1)
   )
   expect_equal(nrow(b), 1L)
 })
@@ -99,7 +99,7 @@ test_that("specified weights stay aligned when gaugings are dropped", {
 test_that("delta prediction limits under each weighting", {
   for (wc in c("none", "prop")) {
     fit <- sauze_fit("piecewise", wc)
-    p <- predict(fit, hpred = c(1, 3), conflev = 0.95, predlev = 0.95)
+    p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
     expect_true(all(p$pi_lwr < p$ci_lwr & p$ci_upr < p$pi_upr), info = wc)
   }
 })
@@ -110,10 +110,10 @@ test_that("boot prediction limits under each weighting", {
   for (wc in c("none", "prop", "spec")) {
     fit <- sauze_fit("piecewise", wc)
     p <- suppressWarnings(
-      boot_limits_2seg(fit, hpred = c(1, 3), conflev = 0.9, predlev = 0.9,
+      boot_limits_2seg(fit, stage = c(1, 3), conflev = 0.9, predlev = 0.9,
                        B = 10, seed = 1)
     )
-    expect_named(p, c("h", "fit", "ci_lwr", "ci_upr", "pi_lwr", "pi_upr"))
+    expect_named(p, c("stage", "fit", "ci_lwr", "ci_upr", "pi_lwr", "pi_upr"))
     if (wc == "spec") {
       expect_true(all(is.na(p$pi_lwr)))
     } else {
@@ -126,7 +126,7 @@ test_that("boot prediction limits under each weighting", {
 test_that("boot refuses spec weights it cannot resample", {
   fit <- sauze_fit("piecewise", "spec")
   fit$settings$wts <- NULL
-  expect_error(boot_limits_2seg(fit, hpred = 2, B = 5), "spec weights")
+  expect_error(boot_limits_2seg(fit, stage = 2, B = 5), "spec weights")
 })
 
 test_that("boot warns when too few resamples converge", {
@@ -134,7 +134,7 @@ test_that("boot warns when too few resamples converge", {
   # corrupt the arguments so that every refit fails
   fit$settings$kstart <- -100
   expect_warning(
-    p <- boot_limits_2seg(fit, hpred = 2, conflev = 0.9, B = 3,
+    p <- boot_limits_2seg(fit, stage = 2, conflev = 0.9, B = 3,
                           max_tries_factor = 1),
     "only 0 of 3"
   )
@@ -145,11 +145,11 @@ test_that("boot warns when too few resamples converge", {
 
 test_that("by default, starting breakpoints span the search range", {
   d <- two_control()
-  fit <- rc_nls_2seg(q, h, data = d)
+  fit <- rc_nls_2seg(discharge, stage, data = d)
   s <- fit$kstart_search
   expect_named(s, c("kstart", "k", "loglik"))
   expect_equal(nrow(s), 10L)
-  hs <- sort(d$h)
+  hs <- sort(d$stage)
   expect_true(all(s$kstart > hs[3] & s$kstart < hs[length(hs) - 2]))
   expect_null(fit$settings$kstart)
   # the fit kept is the most likely of those that succeeded
@@ -159,17 +159,17 @@ test_that("by default, starting breakpoints span the search range", {
 })
 
 test_that("kbounds set the range the default starts span", {
-  fit <- rc_nls_2seg(q, h, data = two_control(), kbounds = c(1, 2))
+  fit <- rc_nls_2seg(discharge, stage, data = two_control(), kbounds = c(1, 2))
   expect_true(all(fit$kstart_search$kstart > 1 & fit$kstart_search$kstart < 2))
   expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
 })
 
 test_that("a vector of starting breakpoints is tried in turn", {
-  fit <- rc_nls_2seg(q, h, data = two_control(), kstart = c(1.2, 1.4, 1.6))
+  fit <- rc_nls_2seg(discharge, stage, data = two_control(), kstart = c(1.2, 1.4, 1.6))
   expect_equal(fit$kstart_search$kstart, c(1.2, 1.4, 1.6))
   expect_equal(fit$settings$kstart, c(1.2, 1.4, 1.6))
   expect_error(
-    rc_nls_2seg(q, h, data = two_control(), kfixed = TRUE, kstart = c(1, 2)),
+    rc_nls_2seg(discharge, stage, data = two_control(), kfixed = TRUE, kstart = c(1, 2)),
     "single value"
   )
 })
@@ -186,20 +186,20 @@ test_that("starts that fail are recorded and passed over", {
 
 test_that("a fit that fails from every start is an error", {
   expect_error(
-    rc_nls_2seg(-thompson$q, thompson$h),
+    rc_nls_2seg(-thompson$discharge, thompson$stage),
     "failed from every starting breakpoint"
   )
 })
 
 test_that("the likelihood orders fixed-weight fits by residual sum of squares", {
-  q <- c(1, 2, 3, 4)
+  discharge <- c(1, 2, 3, 4)
   expect_equal(
-    rc_loglik(q, q + c(0.1, -0.1, 0.1, -0.1), rep(1, 4)),
+    rc_loglik(discharge, discharge + c(0.1, -0.1, 0.1, -0.1), rep(1, 4)),
     -2 * log(0.01)
   )
   expect_gt(
-    rc_loglik(q, q + 0.1, rep(1, 4)),
-    rc_loglik(q, q + 0.2, rep(1, 4))
+    rc_loglik(discharge, discharge + 0.1, rep(1, 4)),
+    rc_loglik(discharge, discharge + 0.2, rep(1, 4))
   )
 })
 

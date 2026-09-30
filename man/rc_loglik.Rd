@@ -4,10 +4,10 @@
 \alias{rc_loglik}
 \title{Profile log-likelihood of a fit under its error model}
 \usage{
-rc_loglik(q, mu, w)
+rc_loglik(discharge, mu, w)
 }
 \arguments{
-\item{q}{Observed discharges.}
+\item{discharge}{Observed discharges.}
 
 \item{mu}{Fitted discharges.}
 

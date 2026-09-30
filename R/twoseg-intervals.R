@@ -10,7 +10,7 @@
 #' Why bootstrap? The delta-method limits in [predict.rc_nls_2seg()] (via
 #' [investr::predFit()]) linearise the mean function about the fitted
 #' parameters, but the two-segment mean is not differentiable in the breakpoint
-#' `k` (it is an `ifelse` at `h = k`). That produces an artificial, near-
+#' `k` (it is an `ifelse` at `stage = k`). That produces an artificial, near-
 #' discontinuous widening of the delta-method band at the transition. The
 #' bootstrap makes no smoothness assumption, so comparing the two is a direct
 #' check on whether the widening near `k` is real or a delta-method artifact.
@@ -20,11 +20,11 @@
 #' relying on the caller to restate it.
 #'
 #' @param object An `rc_nls_2seg` fit (from [rc_nls_2seg()]). The gaugings are
-#'   taken from `object$qh_obs` and the fitting arguments from
+#'   taken from `object$gaugings` and the fitting arguments from
 #'   `object$settings`. Under `wts_code = "spec"` the supplied weights are
 #'   resampled along with the cases.
-#' @param hpred Stage values at which to return limits. Defaults to
-#'   [rc_hpred_grid()]: 1000 points spanning the observed stage range.
+#' @param stage Stages at which to return limits. Defaults to
+#'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param conflev Coverage for the confidence (mean-curve) interval, or `NULL`.
@@ -45,15 +45,15 @@
 #' quadrature, using a t-quantile on the fit's residual degrees of freedom. The
 #' observation-noise sd follows the error model:
 #' \itemize{
-#'   \item `"none"`: homoscedastic, `sd(q - fitted)`.
+#'   \item `"none"`: homoscedastic, `sd(discharge - fitted)`.
 #'   \item `"prop"`: constant coefficient of variation,
-#'         `fit * sd((q - fitted)/fitted)`.
+#'         `fit * sd((discharge - fitted) / fitted)`.
 #'   \item `"spec"`: a new observation's uncertainty is not identified by the
 #'         fit, so `pi_lwr`/`pi_upr` are returned as `NA`, as in every other
 #'         method.
 #' }
 #'
-#' @return A data frame (tibble if available) with `h`, the point-estimate
+#' @return A data frame (tibble if available) with `stage`, the point-estimate
 #'   curve `fit`, and the requested `ci_lwr`/`ci_upr` and `pi_lwr`/`pi_upr`.
 #'   `attr(, "B_success")` records how many resamples converged.
 #' @examples
@@ -62,7 +62,7 @@
 #'   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
 #'   boot_limits_2seg(
 #'     fit,
-#'     hpred = c(1, 2, 4),
+#'     stage = c(1, 2, 4),
 #'     conflev = 0.95,
 #'     B = 50,
 #'     seed = 1
@@ -72,7 +72,7 @@
 boot_limits_2seg <- function(
   object,
   ...,
-  hpred = NULL,
+  stage = NULL,
   conflev = NULL,
   predlev = NULL,
   B = 1000,
@@ -80,10 +80,10 @@ boot_limits_2seg <- function(
   max_tries_factor = 3
 ) {
   checkmate::assert_class(object, "rc_nls_2seg")
-  if (is.null(hpred)) {
-    hpred <- rc_hpred_grid(object)
+  if (is.null(stage)) {
+    stage <- rc_stage_grid(object)
   }
-  checkmate::assert_numeric(hpred, min.len = 1L, finite = TRUE)
+  checkmate::assert_numeric(stage, min.len = 1L, finite = TRUE)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_count(B, positive = TRUE)
@@ -99,9 +99,9 @@ boot_limits_2seg <- function(
   wts_code <- object$settings$wts_code
 
   mod0 <- object$model
-  qh <- object$qh_obs
-  qc <- qh$q
-  hc <- qh$h
+  qh <- object$gaugings
+  qc <- qh$discharge
+  hc <- qh$stage
   n <- length(hc)
   wts_full <- fit_args$wts
   if (wts_code == "spec" && (is.null(wts_full) || length(wts_full) != n)) {
@@ -111,11 +111,11 @@ boot_limits_2seg <- function(
     )
   }
   fit_grid <- as.numeric(
-    stats::predict(mod0, newdata = data.frame(h = hpred))
+    stats::predict(mod0, newdata = data.frame(stage = stage))
   )
 
   # Residual pool for prediction limits (model-appropriate scaling).
-  mu_obs <- as.numeric(stats::predict(mod0, newdata = data.frame(h = hc)))
+  mu_obs <- as.numeric(stats::predict(mod0, newdata = data.frame(stage = hc)))
   resid_pool <- if (wts_code == "prop") {
     (qc - mu_obs) / mu_obs
   } else {
@@ -123,7 +123,7 @@ boot_limits_2seg <- function(
   }
 
   # Case-resampling loop. Skip (and retry) resamples that fail to converge.
-  boot_mat <- matrix(NA_real_, nrow = B, ncol = length(hpred))
+  boot_mat <- matrix(NA_real_, nrow = B, ncol = length(stage))
   nb <- 0L
   tries <- 0L
   max_tries <- B * max_tries_factor
@@ -138,7 +138,7 @@ boot_limits_2seg <- function(
     # like one whose fit errors, rather than warning once per resample
     fb <- tryCatch(
       suppressWarnings(
-        do.call(rc_nls_2seg, c(list(q = qc[s], h = hc[s]), args_b))
+        do.call(rc_nls_2seg, c(list(discharge = qc[s], stage = hc[s]), args_b))
       ),
       error = function(e) NULL
     )
@@ -146,7 +146,7 @@ boot_limits_2seg <- function(
       next
     }
     yb <- tryCatch(
-      as.numeric(stats::predict(fb$model, newdata = data.frame(h = hpred))),
+      as.numeric(stats::predict(fb$model, newdata = data.frame(stage = stage))),
       error = function(e) NULL
     )
     if (is.null(yb) || any(!is.finite(yb))) {
@@ -164,7 +164,7 @@ boot_limits_2seg <- function(
     boot_mat <- boot_mat[seq_len(nb), , drop = FALSE]
   }
 
-  out <- data.frame(h = hpred, fit = fit_grid)
+  out <- data.frame(stage = stage, fit = fit_grid)
 
   # Confidence limits: percentiles of the bootstrap mean curves.
   if (!is.null(conflev)) {

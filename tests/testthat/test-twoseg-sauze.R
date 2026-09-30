@@ -10,8 +10,8 @@
 sauze_fit <- function(config = "piecewise", wts_code = "none") {
   d <- RBaM::SauzeGaugings
   args <- list(
-    q = d$Q,
-    h = d$H,
+    discharge = d$Q,
+    stage = d$H,
     config = config,
     wts_code = wts_code,
     kstart = 1
@@ -54,7 +54,7 @@ test_that("specified weights give confidence but not prediction limits", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("piecewise", "spec")
   p <- suppressMessages(
-    predict(fit, hpred = c(1, 3), conflev = 0.95, predlev = 0.95)
+    predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
   )
   expect_true(all(is.finite(p$ci_lwr)))
   expect_true(all(is.na(p$pi_lwr)))
@@ -67,11 +67,11 @@ test_that("the delta band jumps at the breakpoint and the bootstrap does not", {
   k <- fit$pars[["k"]]
   hh <- c(k - 0.05, k + 0.05)
 
-  d <- suppressMessages(predict(fit, hpred = hh, conflev = 0.95))
+  d <- suppressMessages(predict(fit, stage = hh, conflev = 0.95))
   d_ratio <- (d$ci_upr[2] - d$ci_lwr[2]) / (d$ci_upr[1] - d$ci_lwr[1])
 
   b <- suppressWarnings(suppressMessages(
-    predict(fit, hpred = hh, conflev = 0.95, method = "boot",
+    predict(fit, stage = hh, conflev = 0.95, method = "boot",
             B = 150, seed = 1)
   ))
   b_ratio <- (b$ci_upr[2] - b$ci_lwr[2]) / (b$ci_upr[1] - b$ci_lwr[1])
@@ -86,9 +86,9 @@ test_that("both methods agree on the fitted curve", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("piecewise", "spec")
   hp <- c(0.5, 1, 2, 4)
-  d <- delta_limits_2seg(fit, hpred = hp)
+  d <- delta_limits_2seg(fit, stage = hp)
   b <- suppressWarnings(
-    boot_limits_2seg(fit, hpred = hp, B = 25, seed = 1)
+    boot_limits_2seg(fit, stage = hp, B = 25, seed = 1)
   )
   expect_equal(d$fit, b$fit)
 })
@@ -97,6 +97,6 @@ test_that("the compound configuration is continuous at the breakpoint", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("compound", "spec")
   k <- fit$pars[["k"]]
-  p <- predict(fit, hpred = c(k - 1e-6, k + 1e-6))
+  p <- predict(fit, stage = c(k - 1e-6, k + 1e-6))
   expect_equal(p$fit[1], p$fit[2], tolerance = 1e-5)
 })

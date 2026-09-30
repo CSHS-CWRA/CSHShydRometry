@@ -8,9 +8,11 @@
 A data frame with 93 rows and 4 columns:
 \describe{
 \item{date}{Date of the measurement.}
-\item{h}{Stage, in metres (the mean gauge height for the activity).}
-\item{q}{Discharge, in cubic metres per second.}
-\item{uq}{Reported discharge uncertainty, or \code{NA} where none was given.}
+\item{stage}{Stage, in metres (the mean gauge height for the activity).}
+\item{discharge}{Discharge, in cubic metres per second.}
+\item{uncertainty_percent}{Reported uncertainty of the discharge, as a
+percentage of it at two standard deviations (the "IVE method, 2-sigma
+value"), or \code{NA} where none was given.}
 }
 }
 \source{
@@ -28,9 +30,15 @@ a discharge measurement, reduced to the columns a rating curve needs and
 sorted by stage.
 }
 \details{
-Reported uncertainties are available for only a minority of the gaugings, so
-\code{uq} is mostly \code{NA}. Fits using \code{wts_code = "spec"} need a complete weight
-vector, and so need either a subset with \code{uq} present or weights from
-elsewhere.
+Reported uncertainties are available for only 19 of the gaugings, so
+\code{uncertainty_percent} is mostly \code{NA}. It is a percentage of the discharge at
+two standard deviations, so the standard uncertainty of a discharge, in
+cubic metres per second, is \code{uncertainty_percent / 100 * discharge / 2}.
+Fits using \code{wts_code = "spec"} need a complete weight vector, and so need
+either the subset with an uncertainty or weights from elsewhere.
+
+One value, for the gauging of 2018-11-01, is 0.0226 where the others lie
+between about 2.5 and 11; it may have been recorded as a fraction rather
+than a percentage. It is kept as reported.
 }
 \keyword{datasets}

@@ -4,13 +4,14 @@
 \alias{rc_complete}
 \title{Drop gaugings with a missing stage or discharge}
 \usage{
-rc_complete(q, h)
+rc_complete(discharge, stage)
 }
 \arguments{
-\item{q, h}{Discharge and stage vectors of equal length.}
+\item{discharge, stage}{Vectors of equal length.}
 }
 \value{
-A data frame with columns \code{q} and \code{h}, holding the complete cases.
+A data frame with columns \code{discharge} and \code{stage}, holding the
+complete cases.
 }
 \description{
 Drop gaugings with a missing stage or discharge

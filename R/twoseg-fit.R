@@ -2,9 +2,9 @@
 
 #' Fit two-segment power-law rating curve using nls on untransformed data
 #'
-#' @param q Streamflow. A vector, or a column of `data`.
-#' @param h Stage. A vector, or a column of `data`.
-#' @param data Optional data frame in which to look up `q` and `h`. When
+#' @param discharge Discharge: a vector, or a column of `data`.
+#' @param stage Stage: a vector, or a column of `data`.
+#' @param data Optional data frame in which to look up `discharge` and `stage`. When
 #'   supplied, they may be given as bare column names.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named, which keeps calls readable and guards against
@@ -21,8 +21,8 @@
 #'   three gaugings in each segment.
 #' @param wts_code Weighting scheme:
 #'   `"none"` (ordinary least squares, the default),
-#'   `"spec"` (user-supplied weights via `wts`, e.g. `1/uq^2` from reported
-#'   discharge uncertainties), or `"prop"` (proportional / constant-CV error,
+#'   `"spec"` (user-supplied weights via `wts`, e.g. `1 / sd^2`, where `sd` is
+#'   the reported standard uncertainty of each discharge), or `"prop"` (proportional / constant-CV error,
 #'   fit by iteratively reweighting with weights `1/fitted^2`).
 #' @param wts Optional vector of weights when `wts_code = "spec"`.
 #' @param wts_tol Convergence tolerance under `wts_code = "prop"`: the
@@ -42,7 +42,7 @@
 #'         starting breakpoints to try.
 #'   \item Derive starting values for the segment parameters by splitting the
 #'         data at the starting breakpoint and fitting a linear model to each
-#'         segment on the log-log scale (`log q ~ log(h - c)`);
+#'         segment on the log-log scale (`log(discharge) ~ log(stage - c)`);
 #'         `a = exp(intercept)`, `b = slope`.
 #'   \item Fit all parameters jointly with [stats::nls()] using the "port"
 #'         algorithm (which supports the box constraints in `lower`/`upper`).
@@ -81,14 +81,14 @@
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs
 #' # proportional weights to converge.
-#' fit <- rc_nls_2seg(q, h, data = thompson, wts_code = "prop")
+#' fit <- rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop")
 #' fit
 #' coef(fit)
 #'
 #' # what each starting breakpoint led to
 #' fit$kstart_search
 #'
-#' predict(fit, hpred = c(1, 3, 6), conflev = 0.95)
+#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # A river with a clearer change of control is far less fussy. The Ardeche
 #' # at Sauze, in the RBaM package, fits under either configuration and
@@ -111,8 +111,8 @@
 #' }
 #' @export
 rc_nls_2seg <- function(
-  q,
-  h,
+  discharge,
+  stage,
   ...,
   data = NULL,
   config = c("piecewise", "compound"),
@@ -128,18 +128,18 @@ rc_nls_2seg <- function(
   nls_maxiter = 1000
 ) {
   # -- 1. Inputs: tidy evaluation, checks, missing values ----
-  # q and h may name columns of `data`, or be vectors
+  # discharge and stage may name columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
-  q <- rlang::eval_tidy(rlang::enquo(q), data)
-  h <- rlang::eval_tidy(rlang::enquo(h), data)
+  discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
+  stage <- rlang::eval_tidy(rlang::enquo(stage), data)
 
   # error checks
   config <- rlang::arg_match(config)
   contcons <- rlang::arg_match(contcons)
   wts_code <- rlang::arg_match(wts_code)
-  checkmate::assert_numeric(q, min.len = 1L)
-  checkmate::assert_numeric(h, len = length(q))
+  checkmate::assert_numeric(discharge, min.len = 1L)
+  checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_flag(kfixed)
   checkmate::assert_numeric(kstart, min.len = 1L, finite = TRUE, null.ok = TRUE)
   checkmate::assert_numeric(kbounds, len = 2L, null.ok = TRUE)
@@ -149,18 +149,18 @@ rc_nls_2seg <- function(
   checkmate::assert_count(nls_maxiter, positive = TRUE)
   # remove missing values, keeping user-supplied weights aligned with the
   # gaugings that remain, and check the number of observations
-  if (length(wts) == length(q)) {
-    wts <- wts[stats::complete.cases(q, h)]
+  if (length(wts) == length(discharge)) {
+    wts <- wts[stats::complete.cases(discharge, stage)]
   }
-  qh <- rc_complete(q, h)
+  qh <- rc_complete(discharge, stage)
   # Keep the weights as supplied. `wts` is overwritten below (unit weights for
   # "none", the converged IRLS weights for "prop"), and refitting methods such
   # as boot_limits_2seg need the original to reproduce the fit.
   wts_input <- wts
-  q <- qh$q
-  h <- qh$h
-  hsort <- sort(h)
-  n <- length(h)
+  discharge <- qh$discharge
+  stage <- qh$stage
+  hsort <- sort(stage)
+  n <- length(stage)
   if (n < 7) {
     stop("n < 7 - too few data points to fit two-segment curve")
   }
@@ -204,12 +204,12 @@ rc_nls_2seg <- function(
   # Model formula (see the header for the full derivation). The upper branch
   # of the piecewise form has no free a2: the leading coefficient
   # a1*(k - c1)^b1 / (k - c2)^b2 is exactly what makes the two branches equal
-  # at h = k, enforcing continuity through the `a` parameter (contcons = "a").
+  # at stage = k, enforcing continuity through the `a` parameter (contcons = "a").
   if (config == "piecewise" && contcons == "a") {
-    modform <- q ~ ifelse(
-      h < k,
-      a1 * (h - c1)^b1,
-      (a1 * (k - c1)^b1 / (k - c2)^b2) * (h - c2)^b2
+    modform <- discharge ~ ifelse(
+      stage < k,
+      a1 * (stage - c1)^b1,
+      (a1 * (k - c1)^b1 / (k - c2)^b2) * (stage - c2)^b2
     )
   } else if (config == "piecewise" && contcons == "c") {
     stop(
@@ -217,18 +217,18 @@ rc_nls_2seg <- function(
     )
   } else if (config == "compound") {
     # Upper branch adds an extra power law to the low-flow discharge at k.
-    modform <- q ~ ifelse(
-      h < k,
-      a1 * (h - c1)^b1,
-      a1 * (k - c1)^b1 + a2 * (h - k)^b2
+    modform <- discharge ~ ifelse(
+      stage < k,
+      a1 * (stage - c1)^b1,
+      a1 * (k - c1)^b1 + a2 * (stage - k)^b2
     )
   }
 
   if (wts_code == "none") {
-    wts <- rep(1, length(q))
+    wts <- rep(1, length(discharge))
   }
   if (wts_code != "prop") {
-    checkmate::assert_numeric(wts, len = length(q), .var.name = "wts")
+    checkmate::assert_numeric(wts, len = length(discharge), .var.name = "wts")
   }
 
   # Steps 3, 5 and 6 depend on the starting breakpoint, so they are wrapped
@@ -237,14 +237,14 @@ rc_nls_2seg <- function(
     # -- 3. Starting values, from a log-log fit to each segment ----
     # Starting values for the nls fit. Split the data at kstart and fit each
     # segment separately as a straight line on the log-log scale, since
-    # log(q) = log(a) + b*log(h - c) is linear in log(a) and b once c is fixed.
-    qh1 <- subset(qh, h < kstart) # low-flow segment
-    qh2 <- subset(qh, h >= kstart) # high-flow segment
+    # log(discharge) = log(a) + b*log(stage - c) is linear in log(a) and b once c is fixed.
+    qh1 <- subset(qh, stage < kstart) # low-flow segment
+    qh2 <- subset(qh, stage >= kstart) # high-flow segment
 
-    # Lower segment: pick c1 just below the smallest stage so that (h - c1) > 0,
+    # Lower segment: pick c1 just below the smallest stage so that (stage - c1) > 0,
     # then read a1, b1 off the log-log linear fit.
-    c1start <- min(qh1$h) - 0.1 * (max(qh1$h) - min(qh1$h))
-    lm_mod <- stats::lm(log(qh1$q) ~ log(qh1$h - c1start))
+    c1start <- min(qh1$stage) - 0.1 * (max(qh1$stage) - min(qh1$stage))
+    lm_mod <- stats::lm(log(qh1$discharge) ~ log(qh1$stage - c1start))
     pars_1 <- as.numeric(stats::coefficients(lm_mod))
     a1start <- exp(pars_1[1])
     b1start <- pars_1[2]
@@ -253,20 +253,20 @@ rc_nls_2seg <- function(
     if (config == "piecewise") {
       # Independent power law on the upper data; offset c2 placed between c1 and k.
       c2start <- 0.5 * (kstart + c1start)
-      lm_mod <- stats::lm(log(qh2$q) ~ log(qh2$h - c2start))
+      lm_mod <- stats::lm(log(qh2$discharge) ~ log(qh2$stage - c2start))
       pars_2 <- as.numeric(stats::coefficients(lm_mod))
       a2start <- exp(pars_2[1])
       b2start <- pars_2[2]
     } else if (config == "compound") {
       # Remove the low-flow discharge carried up to the breakpoint, then fit the
-      # remaining "excess" discharge q2 against depth above k, (h - k). Keep only
+      # remaining "excess" discharge against depth above k, (stage - k). Keep only
       # positive residuals so the log is defined.
       if (kstart < c1start) {
         stop("`kstart` is below the starting value of `c1`")
       }
-      qh2$q2 <- qh2$q - a1start * (kstart - c1start)^b1start
-      qh2 <- qh2[which(qh2$q2 > 0), , drop = FALSE]
-      lm_mod <- stats::lm(log(q2) ~ log(h - kstart), data = qh2)
+      qh2$excess <- qh2$discharge - a1start * (kstart - c1start)^b1start
+      qh2 <- qh2[which(qh2$excess > 0), , drop = FALSE]
+      lm_mod <- stats::lm(log(excess) ~ log(stage - kstart), data = qh2)
       pars_2 <- as.numeric(stats::coefficients(lm_mod))
       a2start <- exp(pars_2[1])
       b2start <- pars_2[2]
@@ -294,9 +294,9 @@ rc_nls_2seg <- function(
       upr_list <- list(
         a1 = Inf,
         b1 = 4,
-        c1 = min(h) - 0.001,
+        c1 = min(stage) - 0.001,
         b2 = 4,
-        c2 = max(h),
+        c2 = max(stage),
         k = kupr
       )
     } else if (config == "compound") {
@@ -319,7 +319,7 @@ rc_nls_2seg <- function(
       upr_list <- list(
         a1 = Inf,
         b1 = 4,
-        c1 = min(h) - 0.001,
+        c1 = min(stage) - 0.001,
         a2 = Inf,
         b2 = 4,
         k = kupr
@@ -334,7 +334,7 @@ rc_nls_2seg <- function(
     if (wts_code != "prop") {
       mod_nls <- stats::nls(
         formula = modform,
-        data = data.frame(q, h),
+        data = data.frame(discharge, stage),
         weights = wts,
         start = start_list,
         lower = unlist(lwr_list),
@@ -343,29 +343,29 @@ rc_nls_2seg <- function(
         algorithm = "port"
       )
       # Path 2: proportional weights (constant coefficient of variation). The
-      # weights 1/q^2 depend on the (unknown) fitted discharge, so we iterate:
+      # weights 1/fitted^2 depend on the (unknown) fitted discharge, so we iterate:
       # fit -> recompute weights from the new fitted values -> refit, stopping when
       # the coefficients change by less than wts_tol (or after wts_maxiter). The
       # initial weights use the log-log starting-value curve.
     } else if (wts_code == "prop") {
       if (config == "piecewise") {
         yp <- ifelse(
-          h < kstart,
-          a1start * (h - c1start)^b1start,
-          a2start * (h - c2start)^b2start
+          stage < kstart,
+          a1start * (stage - c1start)^b1start,
+          a2start * (stage - c2start)^b2start
         )
       } else {
         # config = "compound"
         yp <- ifelse(
-          h < kstart,
-          a1start * (h - c1start)^b1start,
-          a1start * (kstart - c1start)^b1start + a2start * (h - kstart)^b2start
+          stage < kstart,
+          a1start * (stage - c1start)^b1start,
+          a1start * (kstart - c1start)^b1start + a2start * (stage - kstart)^b2start
         )
       }
       fit_fun <- function(wts, start) {
         stats::nls(
           formula = modform,
-          data = data.frame(q, h, wts),
+          data = data.frame(discharge, stage, wts),
           weights = wts,
           start = start,
           lower = unlist(lwr_list),
@@ -405,7 +405,7 @@ rc_nls_2seg <- function(
   for (i in which(ok)) {
     mu <- as.numeric(stats::fitted(fits[[i]]$model))
     w_model <- if (wts_code == "prop") 1 / mu^2 else wts
-    loglik[i] <- rc_loglik(q, mu, w_model)
+    loglik[i] <- rc_loglik(discharge, mu, w_model)
     k_hat[i] <- stats::coef(fits[[i]]$model)[["k"]]
   }
   kstart_search <- data.frame(kstart = kstart, k = k_hat, loglik = loglik)
@@ -449,7 +449,7 @@ rc_nls_2seg <- function(
     )
   }
   outlist <- list(
-    qh_obs = qh,
+    gaugings = qh,
     pars = pars,
     # Everything needed to refit these data from scratch. boot_limits_2seg()
     # resamples and refits, so it has to reproduce the original call exactly;

@@ -4,22 +4,22 @@
 # different approaches be stacked with rbind().
 
 one_seg_fits <- function() {
-  q <- thompson$q
-  h <- thompson$h
+  discharge <- thompson$discharge
+  stage <- thompson$stage
   list(
-    rc_log_ols = rc_log_ols(q, h),
-    rc_log_nls = rc_log_nls(q, h),
-    rc_nls = rc_nls(q, h),
-    rc_gnls = rc_gnls(q, h),
-    rc_poly = rc_poly(q, h),
-    rc_loess = rc_loess(q, h)
+    rc_log_ols = rc_log_ols(discharge, stage),
+    rc_log_nls = rc_log_nls(discharge, stage),
+    rc_nls = rc_nls(discharge, stage),
+    rc_gnls = rc_gnls(discharge, stage),
+    rc_poly = rc_poly(discharge, stage),
+    rc_loess = rc_loess(discharge, stage)
   )
 }
 
 two_seg_fit <- function() {
   rc_nls_2seg(
-    thompson$q,
-    thompson$h,
+    thompson$discharge,
+    thompson$stage,
     wts_code = "prop",
     kstart = 2
   )
@@ -27,10 +27,10 @@ two_seg_fit <- function() {
 
 test_that("every one-segment model returns the same columns", {
   fits <- one_seg_fits()
-  want <- c("h", "fit", "ci_lwr", "ci_upr", "pi_lwr", "pi_upr")
+  want <- c("stage", "fit", "ci_lwr", "ci_upr", "pi_lwr", "pi_upr")
   for (nm in names(fits)) {
     p <- suppressMessages(
-      predict(fits[[nm]], hpred = c(1, 3), conflev = 0.95, predlev = 0.95)
+      predict(fits[[nm]], stage = c(1, 3), conflev = 0.95, predlev = 0.95)
     )
     expect_named(p, want, info = nm)
   }
@@ -40,7 +40,7 @@ test_that("results from different models stack with rbind()", {
   fits <- one_seg_fits()
   rows <- lapply(names(fits), function(nm) {
     p <- suppressMessages(
-      predict(fits[[nm]], hpred = c(1, 3), conflev = 0.95, predlev = 0.95)
+      predict(fits[[nm]], stage = c(1, 3), conflev = 0.95, predlev = 0.95)
     )
     cbind(model = nm, as.data.frame(p))
   })
@@ -49,15 +49,15 @@ test_that("results from different models stack with rbind()", {
 })
 
 test_that("asking for neither level returns neither set of columns", {
-  fit <- rc_nls(thompson$q, thompson$h)
-  p <- predict(fit, hpred = c(1, 3))
-  expect_named(p, c("h", "fit"))
+  fit <- rc_nls(thompson$discharge, thompson$stage)
+  p <- predict(fit, stage = c(1, 3))
+  expect_named(p, c("stage", "fit"))
 })
 
 test_that("conflev alone returns only confidence columns", {
-  fit <- rc_nls(thompson$q, thompson$h)
-  p <- predict(fit, hpred = c(1, 3), conflev = 0.95)
-  expect_named(p, c("h", "fit", "ci_lwr", "ci_upr"))
+  fit <- rc_nls(thompson$discharge, thompson$stage)
+  p <- predict(fit, stage = c(1, 3), conflev = 0.95)
+  expect_named(p, c("stage", "fit", "ci_lwr", "ci_upr"))
 })
 
 test_that("a single prediction stage works", {
@@ -66,22 +66,23 @@ test_that("a single prediction stage works", {
   fits <- one_seg_fits()
   for (nm in names(fits)) {
     p <- suppressMessages(
-      predict(fits[[nm]], hpred = 3, conflev = 0.95, predlev = 0.95)
+      predict(fits[[nm]], stage = 3, conflev = 0.95, predlev = 0.95)
     )
     expect_equal(nrow(p), 1L, info = nm)
     expect_true(is.finite(p$fit), info = nm)
   }
-  p2 <- predict(two_seg_fit(), hpred = 3, conflev = 0.95)
+  p2 <- predict(two_seg_fit(), stage = 3, conflev = 0.95)
   expect_equal(nrow(p2), 1L)
 })
 
 test_that("specified weights give NA prediction limits, not missing columns", {
-  keep <- !is.na(thompson$uq)
+  keep <- !is.na(thompson$uncertainty_percent)
   d <- thompson[keep, ]
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
-  fit <- rc_nls(d$q, d$h, wts_code = "spec", wts = 1 / d$uq^2)
+  sd <- d$uncertainty_percent / 100 * d$discharge / 2
+  fit <- rc_nls(d$discharge, d$stage, wts_code = "spec", wts = 1 / sd^2)
   p <- suppressMessages(
-    predict(fit, hpred = c(1, 3), conflev = 0.95, predlev = 0.95)
+    predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
   )
   expect_true(all(c("pi_lwr", "pi_upr") %in% names(p)))
   expect_true(all(is.na(p$pi_lwr)))

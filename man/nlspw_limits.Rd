@@ -4,12 +4,12 @@
 \alias{nlspw_limits}
 \title{Confidence and prediction limits for an NLS fit with proportional weights}
 \usage{
-nlspw_limits(mod, hpred, type = c("confidence", "prediction"), level = 0.95)
+nlspw_limits(mod, stage, type = c("confidence", "prediction"), level = 0.95)
 }
 \arguments{
 \item{mod}{A fitted \code{nls} model object.}
 
-\item{hpred}{Numeric vector of stage values at which to evaluate the limits.}
+\item{stage}{Numeric vector of stages at which to evaluate the limits.}
 
 \item{type}{\code{"confidence"} (uncertainty in the mean curve only) or
 \code{"prediction"} (adds the scatter of an individual observation).}

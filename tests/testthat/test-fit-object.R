@@ -3,15 +3,15 @@
 
 all_fits <- function() {
   list(
-    rc_log_ols = rc_log_ols(q, h, data = thompson),
-    rc_log_nls = rc_log_nls(q, h, data = thompson),
-    rc_nls = rc_nls(q, h, data = thompson),
-    rc_nls_prop = rc_nls(q, h, data = thompson, wts_code = "prop"),
-    rc_gnls = rc_gnls(q, h, data = thompson),
-    rc_poly = rc_poly(q, h, data = thompson),
-    rc_poly_prop = rc_poly(q, h, data = thompson, wts_code = "prop"),
-    rc_loess = rc_loess(q, h, data = thompson),
-    rc_nls_2seg = rc_nls_2seg(q, h, data = thompson, wts_code = "prop",
+    rc_log_ols = rc_log_ols(discharge, stage, data = thompson),
+    rc_log_nls = rc_log_nls(discharge, stage, data = thompson),
+    rc_nls = rc_nls(discharge, stage, data = thompson),
+    rc_nls_prop = rc_nls(discharge, stage, data = thompson, wts_code = "prop"),
+    rc_gnls = rc_gnls(discharge, stage, data = thompson),
+    rc_poly = rc_poly(discharge, stage, data = thompson),
+    rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts_code = "prop"),
+    rc_loess = rc_loess(discharge, stage, data = thompson),
+    rc_nls_2seg = rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop",
                               kstart = 2)
   )
 }
@@ -20,7 +20,7 @@ test_that("every fit has the shared elements", {
   for (nm in names(fits <- all_fits())) {
     fit <- fits[[nm]]
     expect_s3_class(fit, "rating_curve")
-    expect_named(fit$qh_obs, c("q", "h"), info = nm)
+    expect_named(fit$gaugings, c("discharge", "stage"), info = nm)
     expect_type(fit$pars, "list")
     expect_type(fit$settings, "list")
     expect_true(is.numeric(fit$rse) && length(fit$rse) == 1L, info = nm)
@@ -35,12 +35,12 @@ test_that("coef() flattens pars into a named numeric vector", {
     expect_length(cf, length(unlist(fits[[nm]]$pars)))
     expect_false(is.null(names(cf)), info = nm)
   }
-  expect_named(coef(rc_nls(q, h, data = thompson)), c("a", "b", "c"))
-  expect_length(coef(rc_loess(q, h, data = thompson)), 0L)
+  expect_named(coef(rc_nls(discharge, stage, data = thompson)), c("a", "b", "c"))
+  expect_length(coef(rc_loess(discharge, stage, data = thompson)), 0L)
 })
 
 test_that("one-segment coef() agrees with the underlying nls model", {
-  fit <- rc_nls(q, h, data = thompson)
+  fit <- rc_nls(discharge, stage, data = thompson)
   expect_equal(coef(fit), stats::coef(fit$model))
 })
 
@@ -59,30 +59,30 @@ test_that("two-segment pars hold one value per segment", {
 })
 
 test_that("settings are enough to refit", {
-  fit <- rc_nls(q, h, data = thompson, wts_code = "prop")
-  refit <- do.call(rc_nls, c(list(thompson$q, thompson$h), fit$settings))
+  fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop")
+  refit <- do.call(rc_nls, c(list(thompson$discharge, thompson$stage), fit$settings))
   expect_equal(coef(refit), coef(fit))
-  fit2 <- rc_poly(q, h, data = thompson, degree = 3)
-  refit2 <- do.call(rc_poly, c(list(thompson$q, thompson$h), fit2$settings))
+  fit2 <- rc_poly(discharge, stage, data = thompson, degree = 3)
+  refit2 <- do.call(rc_poly, c(list(thompson$discharge, thompson$stage), fit2$settings))
   expect_equal(coef(refit2), coef(fit2))
 })
 
 test_that("the two-segment fit no longer takes conflev or predlev", {
   expect_error(
-    rc_nls_2seg(q, h, data = thompson, kstart = 2, wts_code = "prop",
+    rc_nls_2seg(discharge, stage, data = thompson, kstart = 2, wts_code = "prop",
                 conflev = 0.9),
     class = "rlib_error_dots_nonempty"
   )
 })
 
 test_that("loess records its residual scale and equivalent parameters", {
-  fit <- rc_loess(q, h, data = thompson)
+  fit <- rc_loess(discharge, stage, data = thompson)
   expect_gt(fit$rse, 0)
   expect_gt(fit$enp, 1)
 })
 
 test_that("gnls records its variance parameters", {
-  fit <- rc_gnls(q, h, data = thompson)
+  fit <- rc_gnls(discharge, stage, data = thompson)
   expect_named(fit$var_pars, "power")
 })
 
@@ -90,39 +90,39 @@ test_that("gnls records its variance parameters", {
 
 test_that("converged reweighting is recorded", {
   for (fit in list(
-    rc_nls(q, h, data = thompson, wts_code = "prop"),
-    rc_poly(q, h, data = thompson, wts_code = "prop"),
-    rc_nls_2seg(q, h, data = thompson, wts_code = "prop", kstart = 2)
+    rc_nls(discharge, stage, data = thompson, wts_code = "prop"),
+    rc_poly(discharge, stage, data = thompson, wts_code = "prop"),
+    rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
   )) {
     expect_true(fit$irls$converged)
     expect_gt(fit$irls$iterations, 1L)
     # the weights are those the final model was fitted with
     expect_equal(unname(fit$weights), unname(stats::weights(fit$model)))
   }
-  expect_null(rc_nls(q, h, data = thompson)$irls)
+  expect_null(rc_nls(discharge, stage, data = thompson)$irls)
 })
 
 test_that("reweighting that runs out of rounds warns and says so", {
   expect_warning(
-    fit <- rc_nls(q, h, data = thompson, wts_code = "prop", wts_maxiter = 1),
+    fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop", wts_maxiter = 1),
     "did not converge in 1 rounds"
   )
   expect_false(fit$irls$converged)
   expect_equal(fit$irls$iterations, 1L)
   expect_warning(
-    rc_poly(q, h, data = thompson, wts_code = "prop", wts_maxiter = 1),
+    rc_poly(discharge, stage, data = thompson, wts_code = "prop", wts_maxiter = 1),
     "did not converge"
   )
   expect_warning(
-    rc_nls_2seg(q, h, data = thompson, wts_code = "prop", kstart = 2,
+    rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2,
                 wts_maxiter = 1),
     "did not converge"
   )
 })
 
 test_that("reweighting stops on the change in fitted discharge", {
-  fit <- rc_nls(q, h, data = thompson, wts_code = "prop", wts_tol = 1e-3)
-  tight <- rc_nls(q, h, data = thompson, wts_code = "prop", wts_tol = 1e-10)
+  fit <- rc_nls(discharge, stage, data = thompson, wts_code = "prop", wts_tol = 1e-3)
+  tight <- rc_nls(discharge, stage, data = thompson, wts_code = "prop", wts_tol = 1e-10)
   expect_lte(fit$irls$iterations, tight$irls$iterations)
   expect_equal(stats::fitted(fit$model), stats::fitted(tight$model),
                tolerance = 1e-2)

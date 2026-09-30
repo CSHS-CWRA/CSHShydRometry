@@ -34,7 +34,7 @@
 #'
 #' @section Confidence and prediction limits:
 #' `predict()` returns the same columns whatever the model, the method or the
-#' weighting: `h`, `fit`, and — when `conflev` or `predlev` is given —
+#' weighting: `stage`, `fit`, and — when `conflev` or `predlev` is given —
 #' `ci_lwr`/`ci_upr` and `pi_lwr`/`pi_upr`. Quantities that cannot be computed
 #' come back as `NA` rather than as missing columns, so results from different
 #' approaches stack directly with `rbind()`.
