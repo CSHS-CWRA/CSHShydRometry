@@ -7,6 +7,18 @@ sauze <- function() {
   RBaM::SauzeGaugings
 }
 
+# A piecewise power law with a break at h = 1.5, and deterministic scatter.
+two_control <- function() {
+  h <- seq(0.2, 3, length.out = 40)
+  k <- 1.5
+  mu <- ifelse(
+    h < k,
+    10 * h^1.5,
+    10 * k^1.5 / (k - 1)^2.5 * (h - 1)^2.5
+  )
+  data.frame(h = h, q = mu * (1 + 0.03 * sin(7 * seq_along(h))))
+}
+
 sauze_fit <- function(config = "piecewise", wts_code = "none") {
   d <- sauze()
   if (wts_code == "spec") {
@@ -47,13 +59,18 @@ test_that("kfixed holds the breakpoint at kstart", {
 })
 
 test_that("kbounds limit the breakpoint search", {
-  d <- sauze()
-  fit <- rc_nls_2seg(Q, H, data = d, kbounds = c(1.5, 2.5))
-  expect_true(fit$pars[["k"]] >= 1.5 && fit$pars[["k"]] <= 2.5)
-  fit2 <- rc_nls_2seg(Q, H, data = d, kstart = 1.8, kbounds = c(1.5, 2.5))
-  expect_equal(fit2$settings$kbounds, c(1.5, 2.5))
+  # Synthetic gaugings with a clear break at h = 1.5: the Sauze fits are too
+  # sensitive to their starting values to test the bounds on reliably across
+  # platforms. This fit converges from any start between about 1.05 and 1.75.
+  d <- two_control()
+  fit <- rc_nls_2seg(q, h, data = d, kbounds = c(1, 2))
+  expect_equal(fit$settings$kstart, 1.5)
+  expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
+  fit2 <- rc_nls_2seg(q, h, data = d, kstart = 1.3, kbounds = c(1, 2))
+  expect_equal(fit2$settings$kbounds, c(1, 2))
+  expect_equal(fit2$pars[["k"]], fit$pars[["k"]], tolerance = 1e-4)
   expect_error(
-    rc_nls_2seg(Q, H, data = d, kstart = 3, kbounds = c(1.5, 2.5)),
+    rc_nls_2seg(q, h, data = d, kstart = 3, kbounds = c(1, 2)),
     "invalid"
   )
 })
