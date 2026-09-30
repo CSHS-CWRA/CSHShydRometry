@@ -1,7 +1,7 @@
 Type: Package
 Package: CSHShydRometry
 Title: Statistical Methods for Rating Curves
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: c(
     person("Vincenzo", "Coia",
            email = "vincenzo.coia@gmail.com",
