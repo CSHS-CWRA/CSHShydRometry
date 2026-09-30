@@ -28,7 +28,7 @@
 #' is, the draws too often land on impossible curves: negative or
 #' astronomically large discharges, giving limits that are meaningless.
 #'
-#' @param object An `rc_nls_2seg` fit (from [rc_nls_2seg()]).
+#' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]).
 #' @param ... Passed on to the chosen limits function.
 #' @param stage Stages at which to return limits. Defaults to
 #'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
@@ -53,14 +53,14 @@
 #'   weighting. Where a quantity cannot be computed (prediction limits under
 #'   `"spec"` weights) the column is returned as `NA`.
 #'
-#'   Named for the object's class, `rc_nls_2seg`, so `predict(object)`
+#'   Named for the object's class, `rc_2seg_nls`, so `predict(object)`
 #'   dispatches here. The one-segment models define their own `predict.rc_nls`
 #'   for the `rc_nls` class; the two do not collide.
 #' @seealso [delta_limits_2seg()], [boot_limits_2seg()].
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+#'   fit <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
 #'   hp <- c(1, 1.5, 2, 4)
 #'
 #'   # the default, and fast
@@ -75,13 +75,13 @@
 #' # the columns returned never depend on the model or the method, so results
 #' # from different approaches stack directly
 #' one <- rc_nls(discharge, stage, data = thompson)
-#' two <- rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
+#' two <- rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
 #' rbind(
 #'   predict(one, stage = 3, conflev = 0.95),
 #'   predict(two, stage = 3, conflev = 0.95)
 #' )
 #' @export
-predict.rc_nls_2seg <- function(
+predict.rc_2seg_nls <- function(
   object,
   ...,
   stage = NULL,
@@ -127,7 +127,7 @@ predict.rc_nls_2seg <- function(
 #' per-observation error variances are supplied, not estimated, so there is no
 #' single scatter to add to the mean curve. Those columns come back `NA`.
 #'
-#' @param object An `rc_nls_2seg` fit (from [rc_nls_2seg()]).
+#' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]).
 #' @param stage Stages at which to return limits. Defaults to
 #'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
 #' @param ... Passed on to [investr::predFit()] for the `"none"`/`"spec"`
@@ -135,11 +135,11 @@ predict.rc_nls_2seg <- function(
 #' @param conflev,predlev Levels for the confidence and prediction intervals,
 #'   or `NULL` to omit either.
 #' @return A data frame (tibble if \pkg{tibble} is available); see
-#'   [predict.rc_nls_2seg()] for the columns.
+#'   [predict.rc_2seg_nls()] for the columns.
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+#'   fit <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
 #'   delta_limits_2seg(fit, stage = c(1, 2, 4), conflev = 0.95)
 #' }
 #' @export

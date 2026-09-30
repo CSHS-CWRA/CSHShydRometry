@@ -19,7 +19,7 @@
 #'
 #' Two segments, joined at an estimated breakpoint:
 #' \itemize{
-#'   \item [rc_nls_2seg()] — `config = "piecewise"` forces the two power laws
+#'   \item [rc_2seg_nls()] — `config = "piecewise"` forces the two power laws
 #'     to meet at the breakpoint; `config = "compound"` adds the upper segment
 #'     to the discharge carried at the breakpoint.
 #' }
@@ -45,8 +45,8 @@
 #' which has a clearer change of control; RBaM is a suggested dependency used
 #' only as a source of that data.
 #'
-#' For two-segment curves, [predict.rc_nls_2seg()] takes a `method`. The
+#' For two-segment curves, [predict.rc_2seg_nls()] takes a `method`. The
 #' default, `"delta"`, is fast but unreliable near the breakpoint, where the
 #' mean function is not differentiable; `"boot"` costs a refit per resample and
-#' behaves much better there. See [predict.rc_nls_2seg()] for the detail.
+#' behaves much better there. See [predict.rc_2seg_nls()] for the detail.
 NULL

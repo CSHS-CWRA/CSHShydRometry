@@ -75,6 +75,6 @@ coef.rating_curve <- function(object, ...) {
 
 #' @rdname coef.rating_curve
 #' @export
-coef.rc_nls_2seg <- function(object, ...) {
+coef.rc_2seg_nls <- function(object, ...) {
   stats::coef(object$model)
 }

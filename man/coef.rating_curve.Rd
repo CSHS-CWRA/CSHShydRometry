@@ -2,12 +2,12 @@
 % Please edit documentation in R/rating-curve.R
 \name{coef.rating_curve}
 \alias{coef.rating_curve}
-\alias{coef.rc_nls_2seg}
+\alias{coef.rc_2seg_nls}
 \title{Estimated parameters of a rating curve}
 \usage{
 \method{coef}{rating_curve}(object, ...)
 
-\method{coef}{rc_nls_2seg}(object, ...)
+\method{coef}{rc_2seg_nls}(object, ...)
 }
 \arguments{
 \item{object}{A rating curve fit.}

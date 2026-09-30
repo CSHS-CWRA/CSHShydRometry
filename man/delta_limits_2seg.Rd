@@ -7,7 +7,7 @@
 delta_limits_2seg(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
 }
 \arguments{
-\item{object}{An \code{rc_nls_2seg} fit (from \code{\link[=rc_nls_2seg]{rc_nls_2seg()}}).}
+\item{object}{An \code{rc_2seg_nls} fit (from \code{\link[=rc_2seg_nls]{rc_2seg_nls()}}).}
 
 \item{...}{Passed on to \code{\link[investr:predFit]{investr::predFit()}} for the \code{"none"}/\code{"spec"}
 cases.}
@@ -20,7 +20,7 @@ or \code{NULL} to omit either.}
 }
 \value{
 A data frame (tibble if \pkg{tibble} is available); see
-\code{\link[=predict.rc_nls_2seg]{predict.rc_nls_2seg()}} for the columns.
+\code{\link[=predict.rc_2seg_nls]{predict.rc_2seg_nls()}} for the columns.
 }
 \description{
 Linearises the fitted curve about \code{theta-hat} and propagates the parameter
@@ -43,7 +43,7 @@ single scatter to add to the mean curve. Those columns come back \code{NA}.
 \examples{
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
-  fit <- rc_nls_2seg(Q, H, data = sauze, kstart = 1)
+  fit <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
   delta_limits_2seg(fit, stage = c(1, 2, 4), conflev = 0.95)
 }
 }

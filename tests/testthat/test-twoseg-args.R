@@ -22,10 +22,10 @@ two_control <- function() {
 sauze_fit <- function(config = "piecewise", wts_code = "none") {
   d <- sauze()
   if (wts_code == "spec") {
-    rc_nls_2seg(Q, H, data = d, config = config, wts_code = "spec",
+    rc_2seg_nls(Q, H, data = d, config = config, wts_code = "spec",
                 wts = 1 / d$uQ^2, kstart = 1)
   } else {
-    rc_nls_2seg(Q, H, data = d, config = config, wts_code = wts_code,
+    rc_2seg_nls(Q, H, data = d, config = config, wts_code = wts_code,
                 kstart = 1)
   }
 }
@@ -33,28 +33,28 @@ sauze_fit <- function(config = "piecewise", wts_code = "none") {
 # -- arguments -----------------------------------------------------------------
 
 test_that("too few gaugings is an error", {
-  expect_error(rc_nls_2seg(1:6, 1:6), "too few")
+  expect_error(rc_2seg_nls(1:6, 1:6), "too few")
 })
 
 test_that("a misspelled argument is an error, not ignored", {
   expect_error(
-    rc_nls_2seg(discharge, stage, data = thompson, kstrat = 2),
+    rc_2seg_nls(discharge, stage, data = thompson, kstrat = 2),
     "must be empty"
   )
-  fit <- rc_nls_2seg(Q, H, data = sauze(), kstart = 1)
+  fit <- rc_2seg_nls(Q, H, data = sauze(), kstart = 1)
   expect_error(boot_limits_2seg(fit, stage = 2, N = 10), "must be empty")
 })
 
 test_that("the c continuity constraint is not implemented", {
   expect_error(
-    rc_nls_2seg(discharge, stage, data = thompson, contcons = "c", kstart = 2),
+    rc_2seg_nls(discharge, stage, data = thompson, contcons = "c", kstart = 2),
     "not implemented"
   )
 })
 
 test_that("kfixed holds the breakpoint at kstart", {
-  expect_error(rc_nls_2seg(Q, H, data = sauze(), kfixed = TRUE), "kstart")
-  fit <- rc_nls_2seg(Q, H, data = sauze(), kfixed = TRUE, kstart = 1.8)
+  expect_error(rc_2seg_nls(Q, H, data = sauze(), kfixed = TRUE), "kstart")
+  fit <- rc_2seg_nls(Q, H, data = sauze(), kfixed = TRUE, kstart = 1.8)
   expect_equal(fit$pars[["k"]], 1.8)
 })
 
@@ -63,29 +63,29 @@ test_that("kbounds limit the breakpoint search", {
   # sensitive to their starting values to test the bounds on reliably across
   # platforms. This fit converges from any start between about 1.05 and 1.75.
   d <- two_control()
-  fit <- rc_nls_2seg(discharge, stage, data = d, kbounds = c(1, 2), kstart = 1.5)
+  fit <- rc_2seg_nls(discharge, stage, data = d, kbounds = c(1, 2), kstart = 1.5)
   expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
-  fit2 <- rc_nls_2seg(discharge, stage, data = d, kstart = 1.3, kbounds = c(1, 2))
+  fit2 <- rc_2seg_nls(discharge, stage, data = d, kstart = 1.3, kbounds = c(1, 2))
   expect_equal(fit2$settings$kbounds, c(1, 2))
   expect_equal(fit2$pars[["k"]], fit$pars[["k"]], tolerance = 1e-4)
   expect_error(
-    rc_nls_2seg(discharge, stage, data = d, kstart = 3, kbounds = c(1, 2)),
+    rc_2seg_nls(discharge, stage, data = d, kstart = 3, kbounds = c(1, 2)),
     "invalid"
   )
 })
 
 test_that("kstart must leave three gaugings in each segment", {
   expect_error(
-    rc_nls_2seg(Q, H, data = sauze(), kstart = min(sauze()$H)),
+    rc_2seg_nls(Q, H, data = sauze(), kstart = min(sauze()$H)),
     "at least 3"
   )
 })
 
 test_that("two-segment weights may be an expression using columns of data", {
   d <- sauze()
-  masked <- rc_nls_2seg(Q, H, data = d, wts_code = "spec", wts = 1 / uQ^2,
+  masked <- rc_2seg_nls(Q, H, data = d, wts_code = "spec", wts = 1 / uQ^2,
                         kstart = 1)
-  vector <- rc_nls_2seg(Q, H, data = d, wts_code = "spec",
+  vector <- rc_2seg_nls(Q, H, data = d, wts_code = "spec",
                         wts = 1 / d$uQ^2, kstart = 1)
   expect_equal(coef(masked), coef(vector))
   # the bootstrap refits with the evaluated weights
@@ -96,7 +96,7 @@ test_that("specified weights stay aligned when gaugings are dropped", {
   d <- sauze()
   w <- 1 / d$uQ^2
   d$Q[5] <- NA
-  fit <- rc_nls_2seg(Q, H, data = d, wts_code = "spec", wts = w, kstart = 1)
+  fit <- rc_2seg_nls(Q, H, data = d, wts_code = "spec", wts = w, kstart = 1)
   expect_equal(fit$settings$wts, w[-5])
   # and the bootstrap, which resamples them, still runs
   b <- suppressWarnings(
@@ -156,7 +156,7 @@ test_that("boot warns when too few resamples converge", {
 
 test_that("by default, starting breakpoints span the search range", {
   d <- two_control()
-  fit <- rc_nls_2seg(discharge, stage, data = d)
+  fit <- rc_2seg_nls(discharge, stage, data = d)
   s <- fit$kstart_search
   expect_named(s, c("kstart", "k", "loglik"))
   expect_equal(nrow(s), 10L)
@@ -170,17 +170,17 @@ test_that("by default, starting breakpoints span the search range", {
 })
 
 test_that("kbounds set the range the default starts span", {
-  fit <- rc_nls_2seg(discharge, stage, data = two_control(), kbounds = c(1, 2))
+  fit <- rc_2seg_nls(discharge, stage, data = two_control(), kbounds = c(1, 2))
   expect_true(all(fit$kstart_search$kstart > 1 & fit$kstart_search$kstart < 2))
   expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
 })
 
 test_that("a vector of starting breakpoints is tried in turn", {
-  fit <- rc_nls_2seg(discharge, stage, data = two_control(), kstart = c(1.2, 1.4, 1.6))
+  fit <- rc_2seg_nls(discharge, stage, data = two_control(), kstart = c(1.2, 1.4, 1.6))
   expect_equal(fit$kstart_search$kstart, c(1.2, 1.4, 1.6))
   expect_equal(fit$settings$kstart, c(1.2, 1.4, 1.6))
   expect_error(
-    rc_nls_2seg(discharge, stage, data = two_control(), kfixed = TRUE, kstart = c(1, 2)),
+    rc_2seg_nls(discharge, stage, data = two_control(), kfixed = TRUE, kstart = c(1, 2)),
     "single value"
   )
 })
@@ -189,7 +189,7 @@ test_that("starts that fail are recorded and passed over", {
   skip_if_not_installed("RBaM")
   d <- RBaM::SauzeGaugings
   # from starting breakpoints of 1.95 and above this fit used to fail
-  fit <- rc_nls_2seg(Q, H, data = d, wts_code = "spec", wts = 1 / d$uQ^2,
+  fit <- rc_2seg_nls(Q, H, data = d, wts_code = "spec", wts = 1 / d$uQ^2,
                      kbounds = c(1.5, 2.5))
   expect_true(anyNA(fit$kstart_search$k))
   expect_equal(fit$pars[["k"]], 1.62, tolerance = 0.01)
@@ -197,7 +197,7 @@ test_that("starts that fail are recorded and passed over", {
 
 test_that("a fit that fails from every start is an error", {
   expect_error(
-    rc_nls_2seg(-thompson$discharge, thompson$stage),
+    rc_2seg_nls(-thompson$discharge, thompson$stage),
     "failed from every starting breakpoint"
   )
 })

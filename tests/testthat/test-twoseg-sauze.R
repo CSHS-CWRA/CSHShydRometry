@@ -19,7 +19,7 @@ sauze_fit <- function(config = "piecewise", wts_code = "none") {
   if (wts_code == "spec") {
     args$wts <- 1 / d$uQ^2
   }
-  do.call(rc_nls_2seg, args)
+  do.call(rc_2seg_nls, args)
 }
 
 test_that("both configurations fit under every weighting", {
@@ -27,7 +27,7 @@ test_that("both configurations fit under every weighting", {
   for (cfg in c("piecewise", "compound")) {
     for (wc in c("none", "prop", "spec")) {
       fit <- sauze_fit(cfg, wc)
-      expect_s3_class(fit, "rc_nls_2seg")
+      expect_s3_class(fit, "rc_2seg_nls")
       expect_s3_class(fit, "rating_curve")
       k <- fit$pars[["k"]]
       expect_true(

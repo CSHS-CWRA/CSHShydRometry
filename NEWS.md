@@ -2,6 +2,12 @@
 
 ## Breaking changes
 
+* `rc_nls_2seg()` is renamed `rc_2seg_nls()`, and its class `rc_nls_2seg`
+  is now `rc_2seg_nls`. Functions are named by number of segments first:
+  one-segment curves keep their names (`rc_nls()`, `rc_poly()`, ...), and
+  two-segment curves are `rc_2seg_*()`, leaving room for more two-segment
+  methods and for curves with more segments.
+
 * Every argument after the mandatory ones (`q` and `h`, or `object`) must now
   be named in full: `...` sits between them, and the constructors reject
   anything passed through it. In particular `data` must be named, as in
@@ -30,7 +36,7 @@
   astronomically large discharges) where a segment is poorly identified,
   making the limits meaningless. Use `method = "boot"` instead.
 
-* By default, `rc_nls_2seg()` now tries 10 starting breakpoints spread across
+* By default, `rc_2seg_nls()` now tries 10 starting breakpoints spread across
   the search range and keeps the most likely fit, rather than starting once
   from the middle of the range. `kstart` may also be a vector of starting
   values to try. The fit is sensitive to where it starts: from some starts
@@ -44,7 +50,7 @@
   resample's best fit too often, which would understate the uncertainty in
   the breakpoint.
 
-* `rc_nls_2seg()` no longer takes `conflev` or `predlev`. They were stored on
+* `rc_2seg_nls()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
 
 * Fit objects are restructured, the same way for every model (see
@@ -89,7 +95,7 @@
 ## Bug fixes
 
 * `rc_poly(degree = 1)` fitted spurious quadratic and cubic terms.
-* `rc_nls_2seg()` ignored `nls_maxiter`.
+* `rc_2seg_nls()` ignored `nls_maxiter`.
 * User-supplied weights (`wts_code = "spec"`) fell out of step with the
   gaugings when any gauging had a missing stage or discharge.
 * `rc_loess()` stored `NULL` for its residual standard error and degrees of

@@ -17,7 +17,7 @@ one_seg_fits <- function() {
 }
 
 two_seg_fit <- function() {
-  rc_nls_2seg(
+  rc_2seg_nls(
     thompson$discharge,
     thompson$stage,
     wts_code = "prop",

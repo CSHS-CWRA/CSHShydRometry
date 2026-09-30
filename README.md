@@ -144,7 +144,7 @@ Every model has an `rc_*()` function and a `predict()` method:
 - `rc_gnls()`: power law, with the scatter estimated as a power of the
   flow.
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
-- `rc_nls_2seg()`: two power laws joined at a breakpoint (more below).
+- `rc_2seg_nls()`: two power laws joined at a breakpoint (more below).
 
 Swapping one model for another changes one line:
 
@@ -209,11 +209,11 @@ plot(stage ~ discharge, data = sauze)
 
 <img src="man/figures/README-plot-sauze-1.png" alt="" width="100%" />
 
-`rc_nls_2seg()` fits two power laws that meet at a breakpoint, $k$. Here
+`rc_2seg_nls()` fits two power laws that meet at a breakpoint, $k$. Here
 we weight each gauging by its reported uncertainty:
 
 ``` r
-fit2 <- rc_nls_2seg(discharge, stage, data = sauze,
+fit2 <- rc_2seg_nls(discharge, stage, data = sauze,
                     wts_code = "spec", wts = 1 / uncertainty_sd^2)
 fit2$pars$k
 #> [1] 1.621688

@@ -11,7 +11,7 @@ all_fits <- function() {
     rc_poly = rc_poly(discharge, stage, data = thompson),
     rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts_code = "prop"),
     rc_loess = rc_loess(discharge, stage, data = thompson),
-    rc_nls_2seg = rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop",
+    rc_2seg_nls = rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop",
                               kstart = 2)
   )
 }
@@ -47,13 +47,13 @@ test_that("one-segment coef() agrees with the underlying nls model", {
 test_that("two-segment pars hold one value per segment", {
   skip_if_not_installed("RBaM")
   d <- RBaM::SauzeGaugings
-  pw <- rc_nls_2seg(Q, H, data = d, kstart = 1)
+  pw <- rc_2seg_nls(Q, H, data = d, kstart = 1)
   expect_named(pw$pars, c("a", "b", "c", "k"))
   expect_equal(lengths(pw$pars), c(a = 1L, b = 2L, c = 2L, k = 1L))
   expect_named(coef(pw), c("a1", "b1", "c1", "b2", "c2", "k"))
   expect_equal(unname(coef(pw)[["b2"]]), pw$pars$b[2])
 
-  cp <- rc_nls_2seg(Q, H, data = d, config = "compound", kstart = 1)
+  cp <- rc_2seg_nls(Q, H, data = d, config = "compound", kstart = 1)
   expect_equal(lengths(cp$pars), c(a = 2L, b = 2L, c = 1L, k = 1L))
   expect_named(coef(cp), c("a1", "b1", "c1", "a2", "b2", "k"))
 })
@@ -69,7 +69,7 @@ test_that("settings are enough to refit", {
 
 test_that("the two-segment fit no longer takes conflev or predlev", {
   expect_error(
-    rc_nls_2seg(discharge, stage, data = thompson, kstart = 2, wts_code = "prop",
+    rc_2seg_nls(discharge, stage, data = thompson, kstart = 2, wts_code = "prop",
                 conflev = 0.9),
     class = "rlib_error_dots_nonempty"
   )
@@ -92,7 +92,7 @@ test_that("converged reweighting is recorded", {
   for (fit in list(
     rc_nls(discharge, stage, data = thompson, wts_code = "prop"),
     rc_poly(discharge, stage, data = thompson, wts_code = "prop"),
-    rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
+    rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2)
   )) {
     expect_true(fit$irls$converged)
     expect_gt(fit$irls$iterations, 1L)
@@ -114,7 +114,7 @@ test_that("reweighting that runs out of rounds warns and says so", {
     "did not converge"
   )
   expect_warning(
-    rc_nls_2seg(discharge, stage, data = thompson, wts_code = "prop", kstart = 2,
+    rc_2seg_nls(discharge, stage, data = thompson, wts_code = "prop", kstart = 2,
                 wts_maxiter = 1),
     "did not converge"
   )
