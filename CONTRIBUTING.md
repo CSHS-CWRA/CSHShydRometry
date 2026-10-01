@@ -39,6 +39,12 @@ and check out a more detailed guide to
 * Push to your fork, and submit a pull request to `main` at
   `CSHS-CWRA/CSHShydRometry`.
 
+### Design decisions
+
+Before changing how something works, read [DESIGN.md](DESIGN.md): it records
+the decisions behind the package's design, why they were made, and what they
+leave open. If your change revisits one of them, update its entry.
+
 ### Code style
 
 * Match the style of the surrounding code.
