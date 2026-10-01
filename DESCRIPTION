@@ -2,6 +2,7 @@ Type: Package
 Package: CSHShydRometry
 Title: Statistical Methods for Rating Curves
 Version: 0.0.1.9000
+Date: 2026-10-01
 Authors@R: c(
     person("Vincenzo", "Coia",
            email = "vincenzo.coia@gmail.com",
@@ -18,10 +19,11 @@ Description: Fits stage-discharge rating curves by a range of statistical
     curve. Single-segment curves may be fitted as a power law (by ordinary
     or nonlinear least squares, on the log-log or the natural scale, or by
     generalised nonlinear least squares), as a polynomial, or by loess.
-    Two-segment power-law curves, joined either continuously or additively
-    at an estimated breakpoint, are also supported. Every fit is given a
-    'predict()' method returning the same columns, so results from
-    different approaches can be combined directly.
+    Two-segment power-law curves are also supported: above an estimated
+    breakpoint, the upper segment either takes over from the lower one or
+    adds to it. Every fit is given a 'predict()' method returning the
+    same columns, so results from different approaches can be combined
+    directly.
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

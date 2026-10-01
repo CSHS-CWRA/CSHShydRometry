@@ -6,8 +6,66 @@
 \alias{CSHShydRometry-package}
 \title{CSHShydRometry: Statistical Methods for Rating Curves}
 \description{
-Fits stage-discharge rating curves by a range of statistical methods, and attaches confidence and prediction limits to the fitted curve. Single-segment curves may be fitted as a power law (by ordinary or nonlinear least squares, on the log-log or the natural scale, or by generalised nonlinear least squares), as a polynomial, or by loess. Two-segment power-law curves, joined either continuously or additively at an estimated breakpoint, are also supported. Every fit is given a 'predict()' method returning the same columns, so results from different approaches can be combined directly.
+Fits stage-discharge rating curves by a range of statistical methods, and attaches confidence and prediction limits to the fitted curve. Single-segment curves may be fitted as a power law (by ordinary or nonlinear least squares, on the log-log or the natural scale, or by generalised nonlinear least squares), as a polynomial, or by loess. Two-segment power-law curves are also supported: above an estimated breakpoint, the upper segment either takes over from the lower one or adds to it. Every fit is given a 'predict()' method returning the same columns, so results from different approaches can be combined directly.
 }
+\section{Fitting a rating curve}{
+
+Every model is fitted by a \verb{rc_*()} constructor and evaluated by a
+\code{predict()} method. The constructors take discharge and stage — as vectors,
+or as column names with a \code{data} argument — and return an object carrying
+\code{"rating_curve"} as its second class; see \link{rating_curve}.
+
+Single segment:
+\itemize{
+\item \code{\link[=rc_log_ols]{rc_log_ols()}}, \code{\link[=rc_log_nls]{rc_log_nls()}} — power law fitted on the log-log
+scale, by ordinary or nonlinear least squares.
+\item \code{\link[=rc_nls]{rc_nls()}} — power law fitted on the natural scale.
+\item \code{\link[=rc_gnls]{rc_gnls()}} — power law by generalised nonlinear least squares,
+with the error variance estimated as a power of the mean.
+\item \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} — polynomial and loess alternatives.
+}
+
+Two segments, joined at an estimated breakpoint:
+\itemize{
+\item \code{\link[=rc_2seg_nls]{rc_2seg_nls()}} — \code{controls = "successive"}: the upper power law
+takes over from the lower at the breakpoint; \code{controls = "additive"}:
+it adds to the discharge carried at the breakpoint.
+}
+}
+
+\section{Weighting}{
+
+The constructors that take \code{wts} offer three error models: \code{\link[=wts_none]{wts_none()}}
+(constant variance), \code{\link[=wts_prop]{wts_prop()}} (constant coefficient of variation,
+fitted by iteratively reweighted least squares), and \code{\link[=wts_spec]{wts_spec()}}
+(variances supplied by the user, typically from reported gauging
+uncertainties). Under \code{\link[=wts_spec]{wts_spec()}} a new observation's scatter is not
+identified by the fit, so prediction limits are returned as \code{NA}. See
+\link{wts}.
+}
+
+\section{Confidence and prediction limits}{
+
+\code{predict()} returns the same columns whatever the model, the method or the
+weighting: \code{stage}, \code{fit}, and — when \code{conflev} or \code{predlev} is given —
+\code{ci_lwr}/\code{ci_upr} and \code{pi_lwr}/\code{pi_upr}. Quantities that cannot be computed
+come back as \code{NA} rather than as missing columns, so results from different
+approaches stack directly with \code{rbind()}.
+
+For two-segment curves, \code{\link[=predict.rc_2seg_nls]{predict.rc_2seg_nls()}} takes a \code{method}. The
+default, \code{"delta"}, is fast but unreliable near the breakpoint, where the
+mean function is not differentiable; \code{"boot"} costs a refit per resample
+and behaves much better there. See \code{\link[=predict.rc_2seg_nls]{predict.rc_2seg_nls()}} for the detail.
+}
+
+\section{Data}{
+
+\link{thompson} ships with the package and suits the single-segment models. The
+two-segment examples prefer the Ardeche at Sauze, \code{RBaM::SauzeGaugings},
+which has a clearer change of control; RBaM is a suggested dependency used
+only as a source of that data.
+}
+
 \seealso{
 Useful links:
 \itemize{
@@ -17,13 +75,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Vincenzo Coia \email{vincenzo.coia@gmail.com}
-
-Authors:
-\itemize{
-  \item Daniel Moore \email{dan.moore@ubc.ca}
-  \item Paul Whitfield \email{paul.h.whitfield@gmail.com}
-}
-
+Authors, in order: Vincenzo Coia (maintainer,
+\email{vincenzo.coia@gmail.com}), Daniel Moore, and Paul Whitfield.
 }
 \keyword{internal}

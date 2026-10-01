@@ -253,6 +253,27 @@ against roughly 97% for the bootstrap. Away from the breakpoint the two
 agree. So use `"delta"` for a quick look, and `"boot"` where the
 interval matters.
 
+## Citation
+
+To cite CSHShydRometry in publications, please use the following (which
+`citation("CSHShydRometry")` also prints):
+
+    To cite package 'CSHShydRometry' in publications use:
+
+      Coia V, Moore D, Whitfield P (2026). _CSHShydRometry: Statistical
+      Methods for Rating Curves_. R package version 0.0.1.9000,
+      <https://github.com/CSHS-CWRA/CSHShydRometry>.
+
+    A BibTeX entry for LaTeX users is
+
+      @Manual{,
+        title = {CSHShydRometry: Statistical Methods for Rating Curves},
+        author = {Vincenzo Coia and Daniel Moore and Paul Whitfield},
+        year = {2026},
+        note = {R package version 0.0.1.9000},
+        url = {https://github.com/CSHS-CWRA/CSHShydRometry},
+      }
+
 ## Acknowledgements
 
 The name of this R package is in recognition of the support provided by
