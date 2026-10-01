@@ -44,8 +44,9 @@ library(CSHShydRometry)
 ```
 
 The package comes with 93 gaugings from the Thompson River (Water Survey of
-Canada station 08LF051). `stage` is in meters and `discharge` in cubic meters
-per second. A few gaugings also carry a reported uncertainty.
+Canada station 08LF051), made between 1994 and 2024. `stage` is in meters and
+`discharge` in cubic meters per second. A few gaugings also carry a reported
+uncertainty.
 
 ```{r}
 head(thompson)

@@ -33,21 +33,21 @@ library(CSHShydRometry)
 ```
 
 The package comes with 93 gaugings from the Thompson River (Water Survey
-of Canada station 08LF051). `stage` is in meters and `discharge` in
-cubic meters per second. A few gaugings also carry a reported
-uncertainty.
+of Canada station 08LF051), made between 1994 and 2024. `stage` is in
+meters and `discharge` in cubic meters per second. A few gaugings also
+carry a reported uncertainty.
 
 ``` r
 head(thompson)
 #> # A tibble: 6 × 4
 #>   date       stage discharge uncertainty_pct
 #>   <date>     <dbl>     <dbl>           <dbl>
-#> 1 2023-03-22 0.376       141            NA  
-#> 2 2023-01-11 0.399       146             2.6
-#> 3 2014-03-05 0.526       160            NA  
-#> 4 2011-02-25 0.567       172            NA  
-#> 5 2001-04-02 0.618       187            NA  
-#> 6 1995-03-17 0.645       197            NA
+#> 1 1994-03-29 1.01        266              NA
+#> 2 1994-05-20 5.58       2000              NA
+#> 3 1994-09-15 1.76        451              NA
+#> 4 1995-03-17 0.645       197              NA
+#> 5 1995-06-09 6.40       2440              NA
+#> 6 1996-06-27 6.03       2290              NA
 ```
 
 By convention, rating curves are drawn with stage on the vertical axis.
@@ -84,7 +84,7 @@ fit
 #> - Method: rc_nls
 coef(fit)
 #>          a          b          c 
-#> 80.6686684  1.7131160 -0.9044139
+#> 80.6686540  1.7131161 -0.9044141
 ```
 
 Here $c$ is the stage at which the flow would stop, $b$ says how quickly

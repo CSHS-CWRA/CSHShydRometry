@@ -30,7 +30,7 @@ thompson <- data.frame(
   discharge = as.numeric(raw$Discharge[keep]),
   uncertainty_pct = as.numeric(raw$Uncertainty[keep])
 )
-thompson <- thompson[order(thompson$stage), ]
+thompson <- thompson[order(thompson$date), ]
 thompson <- tibble::as_tibble(thompson)
 
 stopifnot(

@@ -26,7 +26,7 @@ thompson
 Stage and discharge measurements from Water Survey of Canada station
 08LF051, Thompson River near Spences Bridge, British Columbia, used in the
 examples: every discharge measurement made at the station from 1994 to
-2024, sorted by stage.
+2024, in date order.
 }
 \details{
 Reported uncertainties are available for only 19 of the gaugings, so
