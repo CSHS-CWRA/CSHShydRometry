@@ -31,7 +31,7 @@ thompson <- data.frame(
   uncertainty_pct = as.numeric(raw$Uncertainty[keep])
 )
 thompson <- thompson[order(thompson$stage), ]
-rownames(thompson) <- NULL
+thompson <- tibble::as_tibble(thompson)
 
 stopifnot(
   nrow(thompson) > 50,

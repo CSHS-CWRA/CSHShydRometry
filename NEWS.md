@@ -96,6 +96,13 @@
 
 ## New features
 
+* Tables are always tibbles: `predict()` and the limits functions return
+  them, fits store their gaugings as one, and `thompson` is one. tibble is
+  now a dependency (it was suggested). Previously the output was a tibble
+  only when tibble was installed, so the same script could behave
+  differently from one machine to another; for example, `$` partial-matches
+  column names on a data frame but not on a tibble.
+
 * `coef()` returns the estimated parameters as a flat named vector.
 
 * Proportional weights (`wts_prop()`) are fitted more robustly:

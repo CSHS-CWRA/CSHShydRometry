@@ -63,7 +63,7 @@ type, one value per segment: under \code{"successive"}, \code{a} has a single va
 because the upper segment's coefficient is fixed by continuity, and under
 \code{"additive"}, \code{c} has a single value because the upper segment is
 measured from \code{k}. \code{coef()} gives the same estimates by their model
-names (\code{a1}, \code{b1}, \code{c1}, ...). \code{kstart_search} is a data frame with a row
+names (\code{a1}, \code{b1}, \code{c1}, ...). \code{kstart_search} is a tibble with a row
 per starting breakpoint tried: the estimated breakpoint \code{k} it led to and
 the log-likelihood \code{loglik} of that fit, both \code{NA} where the fit failed.
 }

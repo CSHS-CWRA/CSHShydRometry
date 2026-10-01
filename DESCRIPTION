@@ -33,11 +33,11 @@ Imports:
     nlme,
     nlraa,
     rlang (>= 1.1.0),
-    stats
+    stats,
+    tibble
 Suggests:
     RBaM,
-    testthat (>= 3.0.0),
-    tibble
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 LazyData: true
 License: MIT + file LICENSE

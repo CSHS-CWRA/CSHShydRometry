@@ -58,9 +58,7 @@ rc_log_nls <- function(
   # bias corrections
   a_nbc <- a * exp(0.5 * rse^2)
   a_dbc <- (a / length(resids)) * sum(exp(resids))
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
     pars = list(a = unname(a), b = unname(b), c = unname(c)),
@@ -121,8 +119,6 @@ predict.rc_log_nls <- function(
     colnames(pi_mat) <- paste0("pi_", colnames(pi_mat))
     out_df <- cbind(out_df, as.data.frame(pi_mat))
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

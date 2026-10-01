@@ -46,7 +46,7 @@
 #'       slowest, since it refits the model `B` times, and the most trustworthy
 #'       at the breakpoint.
 #'   }
-#' @return A data frame (tibble if \pkg{tibble} is available) with column `stage`,
+#' @return A tibble with column `stage`,
 #'   the fitted discharge `fit`, and, when requested, `ci_lwr`/`ci_upr` and
 #'   `pi_lwr`/`pi_upr`. Which columns are present depends only on which of
 #'   `conflev` and `predlev` were given -- never on the method or the
@@ -134,7 +134,7 @@ predict.rc_2seg_nls <- function(
 #'   cases.
 #' @param conflev,predlev Levels for the confidence and prediction intervals,
 #'   or `NULL` to omit either.
-#' @return A data frame (tibble if \pkg{tibble} is available); see
+#' @return A tibble; see
 #'   [predict.rc_2seg_nls()] for the columns.
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
@@ -220,8 +220,6 @@ delta_limits_2seg <- function(
       out_df <- cbind(out_df, as.data.frame(pi_mat))
     }
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

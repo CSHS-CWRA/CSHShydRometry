@@ -5,7 +5,7 @@
 \alias{thompson}
 \title{Thompson River gaugings}
 \format{
-A data frame with 93 rows and 4 columns:
+A tibble with 93 rows and 4 columns:
 \describe{
 \item{date}{Date of the measurement.}
 \item{stage}{Stage, in meters (the mean gauge height for the visit).}

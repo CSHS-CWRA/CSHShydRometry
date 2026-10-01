@@ -21,11 +21,9 @@ confidence limits are returned.}
 prediction limits are returned.}
 }
 \value{
-A data frame with the predicted values and confidence/prediction
-limits, if requested. The data frame has columns for the predicted values
-(fit), the lower confidence limit (ci_lwr), the upper confidence limit
-(ci_upr), the lower prediction limit (pi_lwr), and the upper prediction
-limit (pi_upr).
+A tibble with the stages (\code{stage}), the predicted discharges
+(\code{fit}) and, if requested, the lower and upper confidence limits
+(\code{ci_lwr}, \code{ci_upr}) and prediction limits (\code{pi_lwr}, \code{pi_upr}).
 }
 \description{
 Predict method for rc_log_ols objects

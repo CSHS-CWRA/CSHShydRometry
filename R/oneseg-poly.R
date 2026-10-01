@@ -117,9 +117,7 @@ rc_poly <- function(
   coefs <- unname(stats::coef(mod_poly))
   pars <- as.list(coefs)
   names(pars) <- paste0("b", 0:degree)
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
     pars = pars,
@@ -236,8 +234,6 @@ predict.rc_poly <- function(
     colnames(pi_mat) <- paste0("pi_", colnames(pi_mat))
     out_df <- cbind(out_df, as.data.frame(pi_mat))
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

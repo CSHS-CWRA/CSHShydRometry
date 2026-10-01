@@ -126,3 +126,25 @@ test_that("reweighting stops on the change in fitted discharge", {
   expect_equal(stats::fitted(fit$model), stats::fitted(tight$model),
                tolerance = 1e-2)
 })
+
+test_that("every table the package returns is a tibble", {
+  expect_s3_class(thompson, "tbl_df")
+  for (nm in names(fits <- all_fits())) {
+    expect_s3_class(fits[[nm]]$gaugings, "tbl_df")
+    p <- suppressMessages(predict(fits[[nm]], stage = 3, conflev = 0.95))
+    expect_s3_class(p, "tbl_df")
+  }
+  two <- fits$rc_2seg_nls
+  expect_s3_class(two$kstart_search, "tbl_df")
+  expect_s3_class(
+    suppressWarnings(boot_limits_2seg(two, stage = 3, conflev = 0.9, B = 5,
+                                      seed = 1)),
+    "tbl_df"
+  )
+})
+
+test_that("loading the package loads tibble", {
+  # without an import, tibble would load only on first use, and until then
+  # the package's tibbles would behave like plain data frames
+  expect_true("tibble" %in% names(getNamespaceImports("CSHShydRometry")))
+})

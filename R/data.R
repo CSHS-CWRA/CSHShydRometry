@@ -29,7 +29,7 @@
 #' obtained from it directly. The station's page on the website does report
 #' its most recent discharge measurement.
 #'
-#' @format A data frame with 93 rows and 4 columns:
+#' @format A tibble with 93 rows and 4 columns:
 #' \describe{
 #'   \item{date}{Date of the measurement.}
 #'   \item{stage}{Stage, in meters (the mean gauge height for the visit).}

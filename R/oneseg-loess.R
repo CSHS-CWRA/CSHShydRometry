@@ -87,9 +87,7 @@ rc_loess <- function(
     }
     mod_lo <- fit_lo(wts)
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
     pars = list(),
@@ -151,8 +149,6 @@ predict.rc_loess <- function(
     out_df$pi_lwr <- NA_real_
     out_df$pi_upr <- NA_real_
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

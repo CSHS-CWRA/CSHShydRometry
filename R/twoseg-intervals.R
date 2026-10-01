@@ -53,7 +53,7 @@
 #'         method.
 #' }
 #'
-#' @return A data frame (tibble if available) with `stage`, the point-estimate
+#' @return A tibble with `stage`, the point-estimate
 #'   curve `fit`, and the requested `ci_lwr`/`ci_upr` and `pi_lwr`/`pi_upr`.
 #'   `attr(, "B_success")` records how many resamples converged.
 #' @examples
@@ -206,8 +206,6 @@ boot_limits_2seg <- function(
   }
 
   attr(out, "B_success") <- nb
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out <- tibble::as_tibble(out)
-  }
+  out <- tibble::as_tibble(out)
   out
 }

@@ -44,9 +44,7 @@ rc_gnls <- function(discharge, stage, ..., data = NULL, var_type = nlme::varPowe
   )
   coefs <- as.numeric(stats::coef(mod_gnls))
   var_pars <- stats::coef(mod_gnls$modelStruct$varStruct, unconstrained = FALSE)
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
     pars = list(a = coefs[1], b = coefs[2], c = coefs[3]),
@@ -109,8 +107,6 @@ predict.rc_gnls <- function(
     colnames(pi_mat) <- paste0("pi_", colnames(pi_mat))
     out_df <- cbind(out_df, as.data.frame(pi_mat))
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

@@ -6,10 +6,8 @@
 #' `c("rc_<method>", "rating_curve")` and these elements:
 #'
 #' \describe{
-#'   \item{`gaugings`}{The gaugings used, with columns `discharge` and `stage`,
-#'     after
-#'     dropping any with a missing value. A tibble if \pkg{tibble} is
-#'     installed.}
+#'   \item{`gaugings`}{A tibble of the gaugings used, with columns
+#'     `discharge` and `stage`, after dropping any with a missing value.}
 #'   \item{`pars`}{The estimated parameters of the curve, as a named list with
 #'     one element per parameter type. For a multi-segment curve an element
 #'     holds one value per segment (for `k`, per breakpoint); elements may

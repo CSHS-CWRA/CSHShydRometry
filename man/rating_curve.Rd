@@ -9,10 +9,8 @@ Every \verb{rc_*()} constructor returns a list with class
 }
 \details{
 \describe{
-\item{\code{gaugings}}{The gaugings used, with columns \code{discharge} and \code{stage},
-after
-dropping any with a missing value. A tibble if \pkg{tibble} is
-installed.}
+\item{\code{gaugings}}{A tibble of the gaugings used, with columns
+\code{discharge} and \code{stage}, after dropping any with a missing value.}
 \item{\code{pars}}{The estimated parameters of the curve, as a named list with
 one element per parameter type. For a multi-segment curve an element
 holds one value per segment (for \code{k}, per breakpoint); elements may

@@ -1,6 +1,13 @@
 #' @keywords internal
 "_PACKAGE"
 
+# Import from tibble so that loading this package loads it. Every table the
+# package returns or ships is a tibble, and a tibble only behaves like one
+# (printing, `[`, no partial matching with `$`) once tibble is loaded;
+# calling it with `tibble::` alone would load it only on first use.
+#' @importFrom tibble tibble
+NULL
+
 #' @section Fitting a rating curve:
 #' Every model is fitted by a `rc_*()` constructor and evaluated by a
 #' `predict()` method. The constructors take discharge and stage — as vectors,

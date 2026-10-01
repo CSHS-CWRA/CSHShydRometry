@@ -39,7 +39,7 @@ at the breakpoint.
 }}
 }
 \value{
-A data frame (tibble if \pkg{tibble} is available) with column \code{stage},
+A tibble with column \code{stage},
 the fitted discharge \code{fit}, and, when requested, \code{ci_lwr}/\code{ci_upr} and
 \code{pi_lwr}/\code{pi_upr}. Which columns are present depends only on which of
 \code{conflev} and \code{predlev} were given -- never on the method or the

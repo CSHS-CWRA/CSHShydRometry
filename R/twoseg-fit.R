@@ -73,7 +73,7 @@
 #'   because the upper segment's coefficient is fixed by continuity, and under
 #'   `"additive"`, `c` has a single value because the upper segment is
 #'   measured from `k`. `coef()` gives the same estimates by their model
-#'   names (`a1`, `b1`, `c1`, ...). `kstart_search` is a data frame with a row
+#'   names (`a1`, `b1`, `c1`, ...). `kstart_search` is a tibble with a row
 #'   per starting breakpoint tried: the estimated breakpoint `k` it led to and
 #'   the log-likelihood `loglik` of that fit, both `NA` where the fit failed.
 #' @examples
@@ -392,7 +392,7 @@ rc_2seg_nls <- function(
     loglik[i] <- profile_loglik(discharge, mu, w_model)
     k_hat[i] <- stats::coef(fits[[i]]$model)[["k"]]
   }
-  kstart_search <- data.frame(kstart = kstart, k = k_hat, loglik = loglik)
+  kstart_search <- tibble::tibble(kstart = kstart, k = k_hat, loglik = loglik)
   # prefer fits whose reweighting converged, then the highest likelihood
   converged <- vapply(
     fits,
@@ -412,9 +412,7 @@ rc_2seg_nls <- function(
       call. = FALSE
     )
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   mod_sum <- summary(mod_nls)
   th <- stats::coef(mod_nls)
   pars <- if (controls == "successive") {

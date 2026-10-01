@@ -100,9 +100,7 @@ rc_nls <- function(
   mod_sum <- summary(mod_nls)
   coefs <- stats::coef(mod_nls)
 
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
     pars = list(a = coefs[["a"]], b = coefs[["b"]], c = coefs[["c"]]),
@@ -194,8 +192,6 @@ predict.rc_nls <- function(
     colnames(pi_mat) <- paste0("pi_", colnames(pi_mat))
     out_df <- cbind(out_df, as.data.frame(pi_mat))
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

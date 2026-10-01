@@ -61,9 +61,7 @@ rc_log_ols <- function(
   b <- mod$coef[2]
   a_nbc <- a * exp(0.5 * rse^2)
   a_dbc <- (a / length(resids)) * sum(exp(resids))
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    qh <- tibble::as_tibble(qh)
-  }
+  qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
     pars = list(a = unname(a), b = unname(b), c = unname(c)),
@@ -86,11 +84,9 @@ rc_log_ols <- function(
 #'   confidence limits are returned.
 #' @param predlev The prediction level for the prediction limits; if NULL, no
 #'   prediction limits are returned.
-#' @return A data frame with the predicted values and confidence/prediction
-#'   limits, if requested. The data frame has columns for the predicted values
-#'   (fit), the lower confidence limit (ci_lwr), the upper confidence limit
-#'   (ci_upr), the lower prediction limit (pi_lwr), and the upper prediction
-#'   limit (pi_upr).
+#' @return A tibble with the stages (`stage`), the predicted discharges
+#'   (`fit`) and, if requested, the lower and upper confidence limits
+#'   (`ci_lwr`, `ci_upr`) and prediction limits (`pi_lwr`, `pi_upr`).
 #' @export
 predict.rc_log_ols <- function(
   object,
@@ -135,8 +131,6 @@ predict.rc_log_ols <- function(
     colnames(pi_mat) <- paste0("pi_", colnames(pi_mat))
     out_df <- cbind(out_df, as.data.frame(pi_mat))
   }
-  if (requireNamespace("tibble", quietly = TRUE)) {
-    out_df <- tibble::as_tibble(out_df)
-  }
+  out_df <- tibble::as_tibble(out_df)
   out_df
 }

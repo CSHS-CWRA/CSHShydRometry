@@ -42,7 +42,7 @@ if its fit errors or, under \code{wts_prop()}, if its reweighting does
 not converge; failed resamples are redrawn.}
 }
 \value{
-A data frame (tibble if available) with \code{stage}, the point-estimate
+A tibble with \code{stage}, the point-estimate
 curve \code{fit}, and the requested \code{ci_lwr}/\code{ci_upr} and \code{pi_lwr}/\code{pi_upr}.
 \code{attr(, "B_success")} records how many resamples converged.
 }

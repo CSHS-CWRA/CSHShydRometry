@@ -19,7 +19,7 @@ cases.}
 or \code{NULL} to omit either.}
 }
 \value{
-A data frame (tibble if \pkg{tibble} is available); see
+A tibble; see
 \code{\link[=predict.rc_2seg_nls]{predict.rc_2seg_nls()}} for the columns.
 }
 \description{
