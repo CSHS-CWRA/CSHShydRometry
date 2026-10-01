@@ -8,13 +8,23 @@
 #' back-transformed curve estimates the geometric mean discharge at each stage
 #' (also the median, when the scatter on the log scale is symmetric).
 #'
-#' When `c` is estimated, the fit is nonlinear in `c` and is made with
-#' [stats::nls()]. When `c` is given, the model is linear on the log-log scale
-#' and is fitted with [stats::lm()], and the limits from [predict()] carry no
-#' uncertainty in `c`. Fixing `c` at the value estimated by a first fit, as in
-#' the examples, treats an estimated `c` as known: the curve is the same, but
-#' the limits are narrower than they should be, because the uncertainty in `c`
-#' is left out.
+#' @section The stage of zero flow:
+#' When \eqn{c} is estimated, the fit is nonlinear in \eqn{c} and is made
+#' with [stats::nls()]. When it is given, through `zero_flow_stage`, the
+#' model is linear in its remaining parameters on the log-log scale and is
+#' fitted with [stats::lm()], and the limits from [predict()] carry no
+#' uncertainty in \eqn{c}. Fixing \eqn{c} at the value estimated by a first
+#' fit, as in the examples, treats an estimated \eqn{c} as known: the curve
+#' is the same, but the limits are narrower than they should be, because the
+#' uncertainty in \eqn{c} is left out.
+#'
+#' @section Weighting:
+#' There is no `wts` argument. Equal scatter on the log scale already means
+#' scatter proportional to the flow, which is usually why one would weight a
+#' fit on the original scale, so weighting is not implemented here. Taking
+#' logs does not always even out the scatter completely, though, and a
+#' weighting scheme on the log scale could still be useful; check the
+#' residuals of the fit.
 #'
 #' @param discharge <[`data-masking`][rlang::args_data_masking]> Discharge: a
 #'   vector, or an expression evaluated in `data`, such as a column name.
@@ -24,10 +34,11 @@
 #'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
-#' @param c The stage of zero flow, \eqn{c}: `NULL` (the default) to estimate
-#'   it, or a known value, below every gauged stage, to hold it fixed.
+#' @param zero_flow_stage The stage of zero flow, \eqn{c} in the formula:
+#'   `NULL` (the default) to estimate it, or a known value, below every gauged
+#'   stage, to hold it fixed.
 #' @param control Settings for [stats::nls()], as from [stats::nls.control()].
-#'   Used only when `c` is estimated.
+#'   Used only when the stage of zero flow is estimated.
 #' @return An `rc_power_log` object; see [rating_curve] for its contents. The
 #'   back-transformed coefficient `a` estimates the geometric mean discharge;
 #'   `a_corrected` holds two bias-corrected versions for the arithmetic mean:
@@ -37,12 +48,17 @@
 #' coef(fit)
 #' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #'
-#' # c known, say from a survey of the control
-#' rc_power_log(discharge, stage, data = thompson, c = -1.3)
+#' # the stage of zero flow known, say from a survey of the control
+#' rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3)
 #'
 #' # c estimated, then treated as known: the same curve, with narrower limits
 #' # that leave out the uncertainty in c
-#' fixed <- rc_power_log(discharge, stage, data = thompson, c = fit$pars$c)
+#' fixed <- rc_power_log(
+#'   discharge,
+#'   stage,
+#'   data = thompson,
+#'   zero_flow_stage = fit$pars$c
+#' )
 #' predict(fixed, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
 rc_power_log <- function(
@@ -50,22 +66,31 @@ rc_power_log <- function(
   stage,
   ...,
   data = NULL,
-  c = NULL,
+  zero_flow_stage = NULL,
   control = stats::nls.control(maxiter = 1000, tol = 1e-6)
 ) {
   # discharge and stage may name columns of `data`, or be vectors
+  if ("wts" %in% names(match.call(expand.dots = FALSE)$...)) {
+    stop(
+      "`rc_power_log()` has no `wts` argument: weighting is not implemented ",
+      "for the log-scale fit. Equal scatter on the log scale already means ",
+      "scatter proportional to the flow, which is usually the reason to ",
+      "weight. To weight on the original scale, use `rc_power()`.",
+      call. = FALSE
+    )
+  }
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
-  checkmate::assert_number(c, null.ok = TRUE, finite = TRUE)
+  checkmate::assert_number(zero_flow_stage, null.ok = TRUE, finite = TRUE)
   checkmate::assert_list(control, names = "named")
   qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
-  c_input <- c
+  c <- zero_flow_stage
   if (is.null(c)) {
     # starting estimates from a straight line on the log-log scale
     cstart <- min(stage) - 0.1 * (max(stage) - min(stage))
@@ -86,7 +111,7 @@ rc_power_log <- function(
     c <- coefs[["c"]]
   } else {
     if (c >= min(stage)) {
-      stop("`c` must be below every gauged stage.", call. = FALSE)
+      stop("`zero_flow_stage` must be below every gauged stage.", call. = FALSE)
     }
     # with c known the model is linear on the log-log scale
     mod <- stats::lm(
@@ -106,7 +131,7 @@ rc_power_log <- function(
     gaugings = tibble::as_tibble(qh),
     pars = list(a = a, b = b, c = c),
     a_corrected = c(nbc = a_nbc, dbc = a_dbc),
-    settings = list(c = c_input, control = control),
+    settings = list(zero_flow_stage = zero_flow_stage, control = control),
     rse = rse,
     model = mod
   )

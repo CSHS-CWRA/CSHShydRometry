@@ -3,7 +3,7 @@
 
 all_fits <- function() {
   list(
-    rc_power_log_c = rc_power_log(discharge, stage, data = thompson, c = -1.3),
+    rc_power_log_c = rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3),
     rc_power_log = rc_power_log(discharge, stage, data = thompson),
     rc_power = rc_power(discharge, stage, data = thompson),
     rc_power_prop = rc_power(discharge, stage, data = thompson, wts = "prop"),

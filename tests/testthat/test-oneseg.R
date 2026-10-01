@@ -204,7 +204,7 @@ test_that("rc_loess: prediction limits are NA with a note", {
 
 test_that("log-scale fits report bias-corrected coefficients", {
   for (fit in list(rc_power_log(discharge, stage, data = thompson),
-                   rc_power_log(discharge, stage, data = thompson, c = -1.3))) {
+                   rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3))) {
     expect_gt(fit$a_corrected[["nbc"]], fit$pars$a)
     expect_true(fit$pars$c < min(thompson$stage))
   }
@@ -212,21 +212,21 @@ test_that("log-scale fits report bias-corrected coefficients", {
 
 test_that("log-scale limits are positive", {
   for (fit in list(rc_power_log(discharge, stage, data = thompson),
-                   rc_power_log(discharge, stage, data = thompson, c = -1.3))) {
+                   rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3))) {
     p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
     expect_true(all(p$pi_lwr > 0))
   }
 })
 
 test_that("a known c is held fixed, and gives a linear fit on the log scale", {
-  fit <- rc_power_log(discharge, stage, data = thompson, c = -1.3)
+  fit <- rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3)
   expect_equal(fit$pars$c, -1.3)
-  expect_equal(fit$settings$c, -1.3)
+  expect_equal(fit$settings$zero_flow_stage, -1.3)
   expect_s3_class(fit$model, "lm")
-  expect_null(rc_power_log(discharge, stage, data = thompson)$settings$c)
+  expect_null(rc_power_log(discharge, stage, data = thompson)$settings$zero_flow_stage)
   expect_error(
-    rc_power_log(discharge, stage, data = thompson, c = min(thompson$stage)),
-    "below every gauged stage"
+    rc_power_log(discharge, stage, data = thompson, zero_flow_stage = min(thompson$stage)),
+    "`zero_flow_stage` must be below"
   )
 })
 
@@ -234,12 +234,24 @@ test_that("fixing c at its estimate keeps the curve but narrows the limits", {
   # this is what the former rc_log_ols() did: estimate c, then treat it as
   # known, leaving its uncertainty out of the limits
   est <- rc_power_log(discharge, stage, data = thompson)
-  fixed <- rc_power_log(discharge, stage, data = thompson, c = est$pars$c)
+  fixed <- rc_power_log(discharge, stage, data = thompson, zero_flow_stage = est$pars$c)
   expect_equal(fixed$pars$a, est$pars$a, tolerance = 1e-6)
   expect_equal(fixed$pars$b, est$pars$b, tolerance = 1e-6)
   p_est <- predict(est, stage = 3, conflev = 0.95)
   p_fixed <- predict(fixed, stage = 3, conflev = 0.95)
   expect_equal(p_fixed$fit, p_est$fit, tolerance = 1e-6)
   expect_lt(p_fixed$ci_upr - p_fixed$ci_lwr, p_est$ci_upr - p_est$ci_lwr)
+})
+
+test_that("the log-scale fit explains why it takes no weights", {
+  expect_error(
+    rc_power_log(discharge, stage, data = thompson, wts = "prop"),
+    "weighting is not implemented for the log-scale fit"
+  )
+  # other stray arguments still get the usual error
+  expect_error(
+    rc_power_log(discharge, stage, data = thompson, zero_flow = 1),
+    class = "rlib_error_dots_nonempty"
+  )
 })
 

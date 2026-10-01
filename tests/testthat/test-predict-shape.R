@@ -7,7 +7,7 @@ one_seg_fits <- function() {
   discharge <- thompson$discharge
   stage <- thompson$stage
   list(
-    rc_power_log_c = rc_power_log(discharge, stage, c = -1.3),
+    rc_power_log_c = rc_power_log(discharge, stage, zero_flow_stage = -1.3),
     rc_power_log = rc_power_log(discharge, stage),
     rc_power = rc_power(discharge, stage),
     rc_gnls = rc_gnls(discharge, stage),

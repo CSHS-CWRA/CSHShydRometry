@@ -9,7 +9,7 @@ rc_power_log(
   stage,
   ...,
   data = NULL,
-  c = NULL,
+  zero_flow_stage = NULL,
   control = stats::nls.control(maxiter = 1000, tol = 1e-06)
 )
 }
@@ -26,11 +26,12 @@ to be named in full.}
 \item{data}{Optional data frame in which \code{discharge} and \code{stage} are
 evaluated.}
 
-\item{c}{The stage of zero flow, \eqn{c}: \code{NULL} (the default) to estimate
-it, or a known value, below every gauged stage, to hold it fixed.}
+\item{zero_flow_stage}{The stage of zero flow, \eqn{c} in the formula:
+\code{NULL} (the default) to estimate it, or a known value, below every gauged
+stage, to hold it fixed.}
 
 \item{control}{Settings for \code{\link[stats:nls]{stats::nls()}}, as from \code{\link[stats:nls.control]{stats::nls.control()}}.
-Used only when \code{c} is estimated.}
+Used only when the stage of zero flow is estimated.}
 }
 \value{
 An \code{rc_power_log} object; see \link{rating_curve} for its contents. The
@@ -45,25 +46,43 @@ scale means the scatter in discharge is proportional to the flow, and the
 back-transformed curve estimates the geometric mean discharge at each stage
 (also the median, when the scatter on the log scale is symmetric).
 }
-\details{
-When \code{c} is estimated, the fit is nonlinear in \code{c} and is made with
-\code{\link[stats:nls]{stats::nls()}}. When \code{c} is given, the model is linear on the log-log scale
-and is fitted with \code{\link[stats:lm]{stats::lm()}}, and the limits from \code{\link[=predict]{predict()}} carry no
-uncertainty in \code{c}. Fixing \code{c} at the value estimated by a first fit, as in
-the examples, treats an estimated \code{c} as known: the curve is the same, but
-the limits are narrower than they should be, because the uncertainty in \code{c}
-is left out.
+\section{The stage of zero flow}{
+
+When \eqn{c} is estimated, the fit is nonlinear in \eqn{c} and is made
+with \code{\link[stats:nls]{stats::nls()}}. When it is given, through \code{zero_flow_stage}, the
+model is linear in its remaining parameters on the log-log scale and is
+fitted with \code{\link[stats:lm]{stats::lm()}}, and the limits from \code{\link[=predict]{predict()}} carry no
+uncertainty in \eqn{c}. Fixing \eqn{c} at the value estimated by a first
+fit, as in the examples, treats an estimated \eqn{c} as known: the curve
+is the same, but the limits are narrower than they should be, because the
+uncertainty in \eqn{c} is left out.
 }
+
+\section{Weighting}{
+
+There is no \code{wts} argument. Equal scatter on the log scale already means
+scatter proportional to the flow, which is usually why one would weight a
+fit on the original scale, so weighting is not implemented here. Taking
+logs does not always even out the scatter completely, though, and a
+weighting scheme on the log scale could still be useful; check the
+residuals of the fit.
+}
+
 \examples{
 fit <- rc_power_log(discharge, stage, data = thompson)
 coef(fit)
 predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 
-# c known, say from a survey of the control
-rc_power_log(discharge, stage, data = thompson, c = -1.3)
+# the stage of zero flow known, say from a survey of the control
+rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3)
 
 # c estimated, then treated as known: the same curve, with narrower limits
 # that leave out the uncertainty in c
-fixed <- rc_power_log(discharge, stage, data = thompson, c = fit$pars$c)
+fixed <- rc_power_log(
+  discharge,
+  stage,
+  data = thompson,
+  zero_flow_stage = fit$pars$c
+)
 predict(fixed, stage = c(1, 3, 6), conflev = 0.95)
 }

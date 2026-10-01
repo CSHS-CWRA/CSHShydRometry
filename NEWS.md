@@ -15,10 +15,10 @@
 
 * `rc_log_ols()` is removed. It gave the same estimates as `rc_log_nls()`,
   but treated the estimated `c` as known when computing limits, which left
-  its uncertainty out. `rc_power_log()` instead gains a `c` argument: `NULL`
-  (the default) estimates it, and a value holds it fixed, for a stage of
-  zero flow known from a survey. Fixing `c` at its estimate reproduces the
-  old behaviour.
+  its uncertainty out. `rc_power_log()` instead gains a `zero_flow_stage`
+  argument for `c`: `NULL` (the default) estimates it, and a value holds it
+  fixed, for a stage of zero flow known from a survey. Fixing it at the
+  estimate of `c` reproduces the old behaviour.
 
 * Weighting is chosen by a single argument, `wts`, in `rc_power()`, `rc_poly()`,
   `rc_loess()` and `rc_2seg_power()`. It replaces `wts_code`, `wts`, `wts_tol`
