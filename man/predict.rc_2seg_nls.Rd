@@ -19,7 +19,7 @@
 \item{...}{Passed on to the chosen limits function.}
 
 \item{stage}{Stages at which to return limits. Defaults to
-\code{\link[=rc_stage_grid]{rc_stage_grid()}}: 1000 points spanning the observed stage range.}
+1000 points spanning the observed stage range.}
 
 \item{conflev}{Confidence level for the mean-curve (confidence) interval, or
 \code{NULL} to omit it.}

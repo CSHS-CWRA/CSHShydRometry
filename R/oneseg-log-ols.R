@@ -41,7 +41,7 @@ rc_log_ols <- function(
     mod <- stats::lm(log(discharge) ~ log(stage - c))
     summary(mod)$sigma
   }
-  qh <- rc_complete(discharge, stage)
+  qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
   mod_opt <- stats::optim(
@@ -104,7 +104,7 @@ predict.rc_log_ols <- function(
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)

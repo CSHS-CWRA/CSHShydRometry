@@ -21,7 +21,7 @@
 #'   prediction interval the observation variance `residual.scale^2 / w` is
 #'   added, where the prediction-point weight `w = 1/fit^2` reintroduces the
 #'   proportional-error assumption (so the added variance grows as `fit^2`).
-#' @keywords internal
+#' @noRd
 nlspw_limits <- function(
   mod,
   stage,
@@ -71,8 +71,8 @@ nlspw_limits <- function(
 #' @param object A fitted rating curve carrying `gaugings`.
 #' @param n Number of grid points.
 #' @return Numeric vector of stage values.
-#' @keywords internal
-rc_stage_grid <- function(object, n = 1000) {
+#' @noRd
+stage_grid <- function(object, n = 1000) {
   stage <- object[["gaugings"]][["stage"]]
   checkmate::assert_numeric(stage, min.len = 1L, any.missing = FALSE)
   seq(min(stage), max(stage), length.out = n)
@@ -84,8 +84,8 @@ rc_stage_grid <- function(object, n = 1000) {
 #' @param discharge,stage Vectors of equal length.
 #' @return A data frame with columns `discharge` and `stage`, holding the
 #'   complete cases.
-#' @keywords internal
-rc_complete <- function(discharge, stage) {
+#' @noRd
+drop_incomplete <- function(discharge, stage) {
   keep <- stats::complete.cases(discharge, stage)
   data.frame(discharge = discharge[keep], stage = stage[keep])
 }
@@ -112,8 +112,8 @@ rc_complete <- function(discharge, stage) {
 #' @return A list with the final `model`, the `weights` it was fitted with,
 #'   and `irls`: a list of the number of `iterations` (rounds) and whether
 #'   the rounds `converged`.
-#' @keywords internal
-rc_irls <- function(fit_fun, yp, start, tol, maxiter) {
+#' @noRd
+reweight_in_rounds <- function(fit_fun, yp, start, tol, maxiter) {
   converged <- FALSE
   for (i in seq_len(maxiter)) {
     wts <- 1 / yp^2
@@ -164,8 +164,8 @@ rc_irls <- function(fit_fun, yp, start, tol, maxiter) {
 #' @param mu Fitted discharges.
 #' @param w Weights, the reciprocal of each observation's relative variance.
 #' @return A single number.
-#' @keywords internal
-rc_loglik <- function(discharge, mu, w) {
+#' @noRd
+profile_loglik <- function(discharge, mu, w) {
   n <- length(discharge)
   0.5 * sum(log(w)) - 0.5 * n * log(mean(w * (discharge - mu)^2))
 }

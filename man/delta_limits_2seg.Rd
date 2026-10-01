@@ -13,7 +13,7 @@ delta_limits_2seg(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
 cases.}
 
 \item{stage}{Stages at which to return limits. Defaults to
-\code{\link[=rc_stage_grid]{rc_stage_grid()}}: 1000 points spanning the observed stage range.}
+1000 points spanning the observed stage range.}
 
 \item{conflev, predlev}{Levels for the confidence and prediction intervals,
 or \code{NULL} to omit either.}
@@ -27,7 +27,7 @@ Linearises the fitted curve about \code{theta-hat} and propagates the parameter
 covariance through that linearisation. Routed by weighting:
 \itemize{
 \item \code{\link[=wts_none]{wts_none()}} / \code{\link[=wts_spec]{wts_spec()}}: \code{\link[investr:predFit]{investr::predFit()}}.
-\item \code{\link[=wts_prop]{wts_prop()}}: \code{\link[=nlspw_limits]{nlspw_limits()}}, which accounts for the proportional
+\item \code{\link[=wts_prop]{wts_prop()}}: the delta method adapted to the proportional
 error structure.
 }
 The linearisation holds the breakpoint fixed at \code{k-hat}, so the gradient

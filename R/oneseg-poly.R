@@ -39,7 +39,7 @@ rc_poly <- function(
   checkmate::assert_count(degree, positive = TRUE)
   # the weighting scheme; specified weights are evaluated in `data`, and
   # kept aligned with the gaugings that remain
-  weighting <- rc_resolve_wts(
+  weighting <- resolve_wts(
     wts,
     data,
     keep = stats::complete.cases(discharge, stage)
@@ -48,7 +48,7 @@ rc_poly <- function(
   wts <- weighting$values
 
   # remove missing observations
-  qh <- rc_complete(discharge, stage)
+  qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
   qh_fit <- data.frame(discharge = discharge, stage = stage)
@@ -99,7 +99,7 @@ rc_poly <- function(
         start = start
       )
     }
-    res <- rc_irls(
+    res <- reweight_in_rounds(
       fit_fun,
       yp = as.numeric(stats::predict(mod_ols)),
       start = startlist,
@@ -154,7 +154,7 @@ predict.rc_poly <- function(
     message("Note: prediction limits cannot be computed for specified weights")
   }
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)

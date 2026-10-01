@@ -31,7 +31,7 @@
 #' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]).
 #' @param ... Passed on to the chosen limits function.
 #' @param stage Stages at which to return limits. Defaults to
-#'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
+#'   1000 points spanning the observed stage range.
 #' @param conflev Confidence level for the mean-curve (confidence) interval, or
 #'   `NULL` to omit it.
 #' @param predlev Confidence level for the prediction interval, or `NULL` to
@@ -115,7 +115,7 @@ predict.rc_2seg_nls <- function(
 #' covariance through that linearisation. Routed by weighting:
 #' \itemize{
 #'   \item [wts_none()] / [wts_spec()]: [investr::predFit()].
-#'   \item [wts_prop()]: [nlspw_limits()], which accounts for the proportional
+#'   \item [wts_prop()]: the delta method adapted to the proportional
 #'     error structure.
 #' }
 #' The linearisation holds the breakpoint fixed at `k-hat`, so the gradient
@@ -129,7 +129,7 @@ predict.rc_2seg_nls <- function(
 #'
 #' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]).
 #' @param stage Stages at which to return limits. Defaults to
-#'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
+#'   1000 points spanning the observed stage range.
 #' @param ... Passed on to [investr::predFit()] for the [wts_none()]/[wts_spec()]
 #'   cases.
 #' @param conflev,predlev Levels for the confidence and prediction intervals,
@@ -151,7 +151,7 @@ delta_limits_2seg <- function(
   predlev = NULL
 ) {
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1L, finite = TRUE)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)

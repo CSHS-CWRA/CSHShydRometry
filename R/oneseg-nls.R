@@ -42,7 +42,7 @@ rc_nls <- function(
   checkmate::assert_list(control, names = "named")
   # the weighting scheme; specified weights are evaluated in `data`, and
   # kept aligned with the gaugings that remain
-  weighting <- rc_resolve_wts(
+  weighting <- resolve_wts(
     wts,
     data,
     keep = stats::complete.cases(discharge, stage)
@@ -51,7 +51,7 @@ rc_nls <- function(
   wts <- weighting$values
 
   ## remove missing observations
-  qh <- rc_complete(discharge, stage)
+  qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
 
@@ -86,7 +86,7 @@ rc_nls <- function(
         control = control
       )
     }
-    res <- rc_irls(
+    res <- reweight_in_rounds(
       fit_fun,
       yp = astart * (stage - cstart)^bstart,
       start = list(a = astart, b = bstart, c = cstart),
@@ -137,7 +137,7 @@ predict.rc_nls <- function(
     message("Note: prediction limits cannot be computed for specified weights")
   }
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)

@@ -96,7 +96,7 @@ print.rc_wts <- function(x, ...) {
 #' @param type `"none"`, `"prop"` or `"spec"`.
 #' @param ... Its settings.
 #' @return An object of class `c("rc_wts_<type>", "rc_wts")`.
-#' @keywords internal
+#' @noRd
 new_wts <- function(type, ...) {
   structure(
     list(type = type, ...),
@@ -116,8 +116,8 @@ new_wts <- function(type, ...) {
 #' @param data The fit's `data`, or `NULL`.
 #' @param keep Logical vector: which gaugings are kept.
 #' @return An `"rc_wts"` object.
-#' @keywords internal
-rc_resolve_wts <- function(wts, data, keep) {
+#' @noRd
+resolve_wts <- function(wts, data, keep) {
   if (is.character(wts)) {
     wts <- switch(
       rlang::arg_match0(wts, c("none", "prop", "spec"), arg_nm = "wts"),

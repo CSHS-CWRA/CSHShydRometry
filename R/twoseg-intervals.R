@@ -24,7 +24,7 @@
 #'   `object$settings`. Under `wts_spec()` the supplied weights are
 #'   resampled along with the cases.
 #' @param stage Stages at which to return limits. Defaults to
-#'   [rc_stage_grid()]: 1000 points spanning the observed stage range.
+#'   1000 points spanning the observed stage range.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param conflev Coverage for the confidence (mean-curve) interval, or `NULL`.
@@ -81,7 +81,7 @@ boot_limits_2seg <- function(
 ) {
   checkmate::assert_class(object, "rc_2seg_nls")
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1L, finite = TRUE)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)

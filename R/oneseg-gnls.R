@@ -27,7 +27,7 @@ rc_gnls <- function(discharge, stage, ..., data = NULL, var_type = nlme::varPowe
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
   ## remove missing observations
-  qh <- rc_complete(discharge, stage)
+  qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
   ## generate starting values using lm on log-transformed data
@@ -76,7 +76,7 @@ predict.rc_gnls <- function(
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)

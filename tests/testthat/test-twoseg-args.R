@@ -194,12 +194,12 @@ test_that("a fit that fails from every start is an error", {
 test_that("the likelihood orders fixed-weight fits by residual sum of squares", {
   discharge <- c(1, 2, 3, 4)
   expect_equal(
-    rc_loglik(discharge, discharge + c(0.1, -0.1, 0.1, -0.1), rep(1, 4)),
+    profile_loglik(discharge, discharge + c(0.1, -0.1, 0.1, -0.1), rep(1, 4)),
     -2 * log(0.01)
   )
   expect_gt(
-    rc_loglik(discharge, discharge + 0.1, rep(1, 4)),
-    rc_loglik(discharge, discharge + 0.2, rep(1, 4))
+    profile_loglik(discharge, discharge + 0.1, rep(1, 4)),
+    profile_loglik(discharge, discharge + 0.2, rep(1, 4))
   )
 })
 

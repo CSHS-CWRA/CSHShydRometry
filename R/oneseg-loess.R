@@ -43,7 +43,7 @@ rc_loess <- function(
   checkmate::assert_numeric(stage, len = length(discharge))
   # the weighting scheme; specified weights are evaluated in `data`, and
   # kept aligned with the gaugings that remain
-  weighting <- rc_resolve_wts(
+  weighting <- resolve_wts(
     wts,
     data,
     keep = stats::complete.cases(discharge, stage)
@@ -51,7 +51,7 @@ rc_loess <- function(
   wts_code <- weighting$type
   wts <- weighting$values
   # remove missing observations
-  qh <- rc_complete(discharge, stage)
+  qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
   # fit a loess curve with the given weights (the reweighting helper passes
@@ -71,7 +71,7 @@ rc_loess <- function(
   if (wts_code == "prop") {
     # proportional weights, by iterative reweighting from the unweighted fit
     unweighted <- fit_lo(rep(1, length(discharge)))
-    res <- rc_irls(
+    res <- reweight_in_rounds(
       fit_lo,
       yp = as.numeric(stats::predict(unweighted)),
       start = NULL,
@@ -129,7 +129,7 @@ predict.rc_loess <- function(
     message("Note: prediction limits are not implemented for loess models")
   }
   if (is.null(stage)) {
-    stage <- rc_stage_grid(object)
+    stage <- stage_grid(object)
   }
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)

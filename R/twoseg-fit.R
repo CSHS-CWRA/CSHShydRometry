@@ -136,7 +136,7 @@ rc_2seg_nls <- function(
   checkmate::assert_list(control, names = "named")
   # the weighting scheme; specified weights are evaluated in `data`, and
   # kept aligned with the gaugings that remain
-  weighting <- rc_resolve_wts(
+  weighting <- resolve_wts(
     wts,
     data,
     keep = stats::complete.cases(discharge, stage)
@@ -144,7 +144,7 @@ rc_2seg_nls <- function(
   wts_code <- weighting$type
   wts <- weighting$values
   # remove missing values, and check the number of observations
-  qh <- rc_complete(discharge, stage)
+  qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
   hsort <- sort(stage)
@@ -358,7 +358,7 @@ rc_2seg_nls <- function(
           algorithm = "port"
         )
       }
-      res <- rc_irls(
+      res <- reweight_in_rounds(
         fit_fun,
         yp = yp,
         start = start_list,
@@ -389,7 +389,7 @@ rc_2seg_nls <- function(
   for (i in which(ok)) {
     mu <- as.numeric(stats::fitted(fits[[i]]$model))
     w_model <- if (wts_code == "prop") 1 / mu^2 else wts
-    loglik[i] <- rc_loglik(discharge, mu, w_model)
+    loglik[i] <- profile_loglik(discharge, mu, w_model)
     k_hat[i] <- stats::coef(fits[[i]]$model)[["k"]]
   }
   kstart_search <- data.frame(kstart = kstart, k = k_hat, loglik = loglik)

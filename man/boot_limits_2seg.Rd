@@ -25,7 +25,7 @@ resampled along with the cases.}
 to be named in full.}
 
 \item{stage}{Stages at which to return limits. Defaults to
-\code{\link[=rc_stage_grid]{rc_stage_grid()}}: 1000 points spanning the observed stage range.}
+1000 points spanning the observed stage range.}
 
 \item{conflev}{Coverage for the confidence (mean-curve) interval, or \code{NULL}.}
 
