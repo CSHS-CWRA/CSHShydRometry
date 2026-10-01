@@ -1,0 +1,42 @@
+# Not hosted yet: set `url` once there is a home for the site.
+url: ~
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Fitting a single-segment curve
+    desc: >
+      Each function fits one model, and returns a fit that `predict()` and
+      `coef()` work with.
+    contents:
+      - rc_power
+      - rc_power_log
+      - rc_poly
+      - rc_loess
+
+  - title: Fitting a two-segment curve
+    contents:
+      - rc_2seg_power
+
+  - title: Weighting
+    desc: How the scatter of the gaugings about the curve is modelled.
+    contents:
+      - wts
+
+  - title: Predicting, with confidence and prediction limits
+    contents:
+      - starts_with("predict.")
+      - delta_limits_2seg
+      - boot_limits_2seg
+
+  - title: Fitted curves
+    desc: What a fit contains, and the methods every fit shares.
+    contents:
+      - rating_curve
+      - coef.rating_curve
+      - print.rating_curve
+
+  - title: Data
+    contents:
+      - thompson
