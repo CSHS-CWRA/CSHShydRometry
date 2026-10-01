@@ -22,9 +22,10 @@
 #' }
 #'
 #' Constructors with a `wts` argument also return `weights`, the
-#' weights the final model was fitted with, and `irls`: `NULL`, or under
-#' [wts_prop()] a list giving the number of reweighting rounds
-#' (`iterations`) and whether they `converged`. Some constructors carry
+#' weights the final model was fitted with, and `irls` (for iteratively
+#' reweighted least squares): `NULL`, or under [wts_prop()], which refits in
+#' rounds, a list giving the number of rounds (`iterations`) and whether they
+#' `converged`. Some constructors carry
 #' further elements, documented on their own help pages.
 #'
 #' @name rating_curve

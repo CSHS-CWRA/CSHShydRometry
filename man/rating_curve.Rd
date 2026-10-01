@@ -25,8 +25,9 @@ log-scale fits).}
 }
 
 Constructors with a \code{wts} argument also return \code{weights}, the
-weights the final model was fitted with, and \code{irls}: \code{NULL}, or under
-\code{\link[=wts_prop]{wts_prop()}} a list giving the number of reweighting rounds
-(\code{iterations}) and whether they \code{converged}. Some constructors carry
+weights the final model was fitted with, and \code{irls} (for iteratively
+reweighted least squares): \code{NULL}, or under \code{\link[=wts_prop]{wts_prop()}}, which refits in
+rounds, a list giving the number of rounds (\code{iterations}) and whether they
+\code{converged}. Some constructors carry
 further elements, documented on their own help pages.
 }
