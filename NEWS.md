@@ -2,14 +2,26 @@
 
 ## Breaking changes
 
-* `rc_nls_2seg()` is renamed `rc_2seg_nls()`, and its class `rc_nls_2seg`
-  is now `rc_2seg_nls`. Functions are named by number of segments first:
-  one-segment curves keep their names (`rc_nls()`, `rc_poly()`, ...), and
-  two-segment curves are `rc_2seg_*()`, leaving room for more two-segment
-  methods and for curves with more segments.
+* Fitting functions are named for the model they fit, not the algorithm
+  that fits it, with the number of segments first for multi-segment curves:
+  * `rc_nls()` is now `rc_power()`: a power law, by least squares on the
+    original scale;
+  * `rc_log_nls()` is now `rc_power_log()`: a power law, by least squares on
+    the log-log scale;
+  * `rc_nls_2seg()` is now `rc_2seg_power()`.
 
-* Weighting is chosen by a single argument, `wts`, in `rc_nls()`, `rc_poly()`,
-  `rc_loess()` and `rc_2seg_nls()`. It replaces `wts_code`, `wts`, `wts_tol`
+  Their classes are renamed to match. This leaves room for more two-segment
+  methods (`rc_2seg_*()`) and for curves with more segments.
+
+* `rc_log_ols()` is removed. It gave the same estimates as `rc_log_nls()`,
+  but treated the estimated `c` as known when computing limits, which left
+  its uncertainty out. `rc_power_log()` instead gains a `c` argument: `NULL`
+  (the default) estimates it, and a value holds it fixed, for a stage of
+  zero flow known from a survey. Fixing `c` at its estimate reproduces the
+  old behaviour.
+
+* Weighting is chosen by a single argument, `wts`, in `rc_power()`, `rc_poly()`,
+  `rc_loess()` and `rc_2seg_power()`. It replaces `wts_code`, `wts`, `wts_tol`
   and `wts_maxiter`, whose meanings depended on one another. `wts` takes
   `wts_none()` (the default), `wts_prop(tol, maxiter)` or `wts_spec(values)`,
   or the shorthand `"none"` or `"prop"`; see `?wts`. The values given to
@@ -18,10 +30,10 @@
 
 * The settings passed to `nls()` are given as a single `control` argument,
   as from `stats::nls.control()`, like `nls()` itself. It replaces `nls_tol`
-  and `nls_maxiter` in `rc_nls()` and `rc_2seg_nls()`, and `tol` in
-  `rc_log_nls()`.
+  and `nls_maxiter` in `rc_power()` and `rc_2seg_power()`, and `tol` in
+  `rc_power_log()`.
 
-* `rc_2seg_nls()`'s `config` argument is renamed `controls`, since it says
+* `rc_2seg_power()`'s `config` argument is renamed `controls`, since it says
   how the two hydraulic controls combine above the breakpoint, and its values
   `"piecewise"` and `"compound"` are renamed `"successive"` (the upper power
   law takes over from the lower) and `"additive"` (it adds to the lower).
@@ -29,11 +41,11 @@
 * Every argument after the mandatory ones (`discharge` and `stage`, or `object`) must now
   be named in full: `...` sits between them, and the constructors reject
   anything passed through it. In particular `data` must be named, as in
-  `rc_nls(discharge, stage, data = thompson)`.
+  `rc_power(discharge, stage, data = thompson)`.
 
 * Stage and discharge are named in full throughout, rather than `h` and `q`:
   * the constructors take `discharge` and `stage` (formerly `q` and `h`), as
-    in `rc_nls(discharge, stage, data = thompson)`;
+    in `rc_power(discharge, stage, data = thompson)`;
   * `predict()` and the `*_limits_2seg()` functions take `stage` (formerly
     `hpred`), and return it as the column `stage` (formerly `h`);
   * the gaugings stored on a fit are `gaugings`, with columns `discharge` and
@@ -54,7 +66,7 @@
   astronomically large discharges) where a segment is poorly identified,
   making the limits meaningless. Use `method = "boot"` instead.
 
-* By default, `rc_2seg_nls()` now tries 10 starting breakpoints spread across
+* By default, `rc_2seg_power()` now tries 10 starting breakpoints spread across
   the search range and keeps the most likely fit, rather than starting once
   from the middle of the range. `kstart` may also be a vector of starting
   values to try. The fit is sensitive to where it starts: from some starts
@@ -68,11 +80,11 @@
   resample's best fit too often, which would understate the uncertainty in
   the breakpoint.
 
-* `rc_2seg_nls()` no longer takes `contcons`, which chose the parameter
+* `rc_2seg_power()` no longer takes `contcons`, which chose the parameter
   carrying the continuity constraint. Only `"a"` was implemented, and that
   is what `controls = "successive"` does.
 
-* `rc_2seg_nls()` no longer takes `conflev` or `predlev`. They were stored on
+* `rc_2seg_power()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
 
 * Fit objects are restructured, the same way for every model (see
@@ -124,8 +136,8 @@
 ## Bug fixes
 
 * `rc_poly(degree = 1)` fitted spurious quadratic and cubic terms.
-* `rc_2seg_nls()` ignored `nls_maxiter`.
-* `nls_tol` had no effect in `rc_2seg_nls()`: its `"port"` algorithm ignores
+* `rc_2seg_power()` ignored `nls_maxiter`.
+* `nls_tol` had no effect in `rc_2seg_power()`: its `"port"` algorithm ignores
   `tol`. `control` now says so, and passes on the port algorithm's own
   settings, such as `rel.tol`.
 * User-supplied weights (now `wts_spec()`) fell out of step with the

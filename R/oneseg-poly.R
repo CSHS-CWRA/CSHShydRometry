@@ -133,7 +133,7 @@ rc_poly <- function(
 
 #' Predict method for rc_poly objects
 #'
-#' @inheritParams predict.rc_log_ols
+#' @inheritParams predict.rc_power
 #' @param object An rc_poly object.
 #' @export
 predict.rc_poly <- function(

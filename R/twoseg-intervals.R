@@ -5,9 +5,9 @@
 #' Case-resampling ("pairs") bootstrap: repeatedly resample the gaugings with
 #' replacement, refit the two-segment model on each resample, and summarise the
 #' resulting spread of fitted rating curves. Returns the same column layout as
-#' [predict.rc_2seg_nls()] so the two can be plotted side by side.
+#' [predict.rc_2seg_power()] so the two can be plotted side by side.
 #'
-#' Why bootstrap? The delta-method limits in [predict.rc_2seg_nls()] (via
+#' Why bootstrap? The delta-method limits in [predict.rc_2seg_power()] (via
 #' [investr::predFit()]) linearise the mean function about the fitted
 #' parameters, but the two-segment mean is not differentiable in the breakpoint
 #' `k` (it is an `ifelse` at `stage = k`). That produces an artificial, near-
@@ -19,7 +19,7 @@
 #' the resamples reproduce the original call by construction rather than
 #' relying on the caller to restate it.
 #'
-#' @param object An `rc_2seg_nls` fit (from [rc_2seg_nls()]). The gaugings are
+#' @param object An `rc_2seg_power` fit (from [rc_2seg_power()]). The gaugings are
 #'   taken from `object$gaugings` and the fitting arguments from
 #'   `object$settings`. Under `wts_spec()` the supplied weights are
 #'   resampled along with the cases.
@@ -59,7 +59,7 @@
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
+#'   fit <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
 #'   boot_limits_2seg(
 #'     fit,
 #'     stage = c(1, 2, 4),
@@ -79,7 +79,7 @@ boot_limits_2seg <- function(
   seed = NULL,
   max_tries_factor = 3
 ) {
-  checkmate::assert_class(object, "rc_2seg_nls")
+  checkmate::assert_class(object, "rc_2seg_power")
   if (is.null(stage)) {
     stage <- stage_grid(object)
   }
@@ -138,7 +138,7 @@ boot_limits_2seg <- function(
     # like one whose fit errors, rather than warning once per resample
     fb <- tryCatch(
       suppressWarnings(
-        do.call(rc_2seg_nls, c(list(discharge = qc[s], stage = hc[s]), args_b))
+        do.call(rc_2seg_power, c(list(discharge = qc[s], stage = hc[s]), args_b))
       ),
       error = function(e) NULL
     )

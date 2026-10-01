@@ -1,6 +1,10 @@
-# Power law fitted by NLS on the natural scale.
+# Power law fitted by least squares on the original scale.
 
-#' Fit rating curve using nls on untransformed data
+#' Fit a power-law rating curve on the original scale
+#'
+#' Fits the power law \eqn{Q = a (h - c)^b} by nonlinear least squares on the
+#' original scale of discharge, with the scatter of the gaugings modelled as
+#' set by `wts`. The curve estimates the mean discharge at each stage.
 #'
 #' @param discharge <[`data-masking`][rlang::args_data_masking]> Discharge: a
 #'   vector, or an expression evaluated in `data`, such as a column name.
@@ -14,16 +18,16 @@
 #'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
 #'   with the weights. See [wts].
 #' @param control Settings for [stats::nls()], as from [stats::nls.control()].
-#' @return An `rc_nls` object; see [rating_curve] for its contents.
+#' @return An `rc_power` object; see [rating_curve] for its contents.
 #' @examples
-#' fit <- rc_nls(discharge, stage, data = thompson)
+#' fit <- rc_power(discharge, stage, data = thompson)
 #' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # constant coefficient of variation instead of constant variance
-#' fit_prop <- rc_nls(discharge, stage, data = thompson, wts = "prop")
+#' fit_prop <- rc_power(discharge, stage, data = thompson, wts = "prop")
 #' predict(fit_prop, stage = c(1, 3, 6), conflev = 0.95)
 #' @export
-rc_nls <- function(
+rc_power <- function(
   discharge,
   stage,
   ...,
@@ -110,16 +114,25 @@ rc_nls <- function(
     rse = mod_sum$sigma,
     model = mod_nls
   )
-  structure(outlist, class = c("rc_nls", "rating_curve"))
+  structure(outlist, class = c("rc_power", "rating_curve"))
 }
 
 
-#' Predict method for rc_nls objects
+#' Predict method for rc_power objects
 #'
-#' @inheritParams predict.rc_log_ols
-#' @param object An rc_nls object.
+#' @param object An `rc_power` object.
+#' @param stage Stages at which to predict discharge. If `NULL`, a grid of
+#'   1000 equally spaced stages spanning the observed range is used.
+#' @param ... Additional arguments passed to the inner `stats::predict()` function.
+#' @param conflev The confidence level for the confidence limits; if NULL, no
+#'   confidence limits are returned.
+#' @param predlev The prediction level for the prediction limits; if NULL, no
+#'   prediction limits are returned.
+#' @return A tibble with the stages (`stage`), the predicted discharges
+#'   (`fit`) and, if requested, the lower and upper confidence limits
+#'   (`ci_lwr`, `ci_upr`) and prediction limits (`pi_lwr`, `pi_upr`).
 #' @export
-predict.rc_nls <- function(
+predict.rc_power <- function(
   object,
   ...,
   stage = NULL,

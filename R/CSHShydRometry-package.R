@@ -12,9 +12,10 @@
 #'
 #' Single segment:
 #' \itemize{
-#'   \item [rc_log_ols()], [rc_log_nls()] — power law fitted on the log-log
-#'     scale, by ordinary or nonlinear least squares.
-#'   \item [rc_nls()] — power law fitted on the natural scale.
+#'   \item [rc_power()] — power law fitted by least squares on the original
+#'     scale.
+#'   \item [rc_power_log()] — power law fitted by least squares on the
+#'     log-log scale, with the stage of zero flow estimated or given.
 #'   \item [rc_gnls()] — power law by generalised nonlinear least squares,
 #'     with the error variance estimated as a power of the mean.
 #'   \item [rc_poly()], [rc_loess()] — polynomial and loess alternatives.
@@ -22,7 +23,7 @@
 #'
 #' Two segments, joined at an estimated breakpoint:
 #' \itemize{
-#'   \item [rc_2seg_nls()] — `controls = "successive"`: the upper power law
+#'   \item [rc_2seg_power()] — `controls = "successive"`: the upper power law
 #'     takes over from the lower at the breakpoint; `controls = "additive"`:
 #'     it adds to the discharge carried at the breakpoint.
 #' }
@@ -43,10 +44,10 @@
 #' come back as `NA` rather than as missing columns, so results from different
 #' approaches stack directly with `rbind()`.
 #'
-#' For two-segment curves, [predict.rc_2seg_nls()] takes a `method`. The
+#' For two-segment curves, [predict.rc_2seg_power()] takes a `method`. The
 #' default, `"delta"`, is fast but unreliable near the breakpoint, where the
 #' mean function is not differentiable; `"boot"` costs a refit per resample
-#' and behaves much better there. See [predict.rc_2seg_nls()] for the detail.
+#' and behaves much better there. See [predict.rc_2seg_power()] for the detail.
 #'
 #' @section Data:
 #' [thompson] ships with the package and suits the single-segment models. The

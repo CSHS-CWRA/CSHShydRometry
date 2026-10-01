@@ -11,13 +11,13 @@ spec_data <- function() {
 }
 
 test_that("discharge and stage may be vectors or columns of data", {
-  from_vectors <- rc_nls(thompson$discharge, thompson$stage)
-  from_columns <- rc_nls(discharge, stage, data = thompson)
+  from_vectors <- rc_power(thompson$discharge, thompson$stage)
+  from_columns <- rc_power(discharge, stage, data = thompson)
   expect_equal(from_vectors$pars, from_columns$pars)
 })
 
 test_that("arguments after discharge and stage must be named", {
-  expect_error(rc_nls(discharge, stage, thompson), class = "rlib_error_dots_nonempty")
+  expect_error(rc_power(discharge, stage, thompson), class = "rlib_error_dots_nonempty")
   expect_error(
     rc_poly(discharge, stage, data = thompson, degre = 3),
     class = "rlib_error_dots_nonempty"
@@ -25,12 +25,12 @@ test_that("arguments after discharge and stage must be named", {
 })
 
 test_that("column names are found when called from inside another function", {
-  wrapper <- function(d) rc_log_ols(discharge, stage, data = d)
-  expect_equal(wrapper(thompson)$pars, rc_log_ols(discharge, stage, data = thompson)$pars)
+  wrapper <- function(d) rc_power_log(discharge, stage, data = d)
+  expect_equal(wrapper(thompson)$pars, rc_power_log(discharge, stage, data = thompson)$pars)
   local_q <- thompson$discharge
   local_h <- thompson$stage
-  inner <- function() rc_log_nls(local_q, local_h)
-  expect_s3_class(inner(), "rc_log_nls")
+  inner <- function() rc_power_log(local_q, local_h)
+  expect_s3_class(inner(), "rc_power_log")
 })
 
 test_that("gaugings with a missing stage or discharge are dropped", {
@@ -46,13 +46,13 @@ test_that("weights may be an expression using columns of data", {
   d <- spec_data()
   d$sd <- d$uncertainty_pct / 100 * d$discharge / 2
   masked <- list(
-    rc_nls(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
+    rc_power(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
     rc_poly(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
     rc_loess(discharge, stage, data = d, wts = wts_spec(1 / sd^2),
              span = 1)
   )
   vectors <- list(
-    rc_nls(discharge, stage, data = d, wts = wts_spec(d$wts)),
+    rc_power(discharge, stage, data = d, wts = wts_spec(d$wts)),
     rc_poly(discharge, stage, data = d, wts = wts_spec(d$wts)),
     rc_loess(discharge, stage, data = d, wts = wts_spec(d$wts),
              span = 1)
@@ -64,7 +64,7 @@ test_that("weights may be an expression using columns of data", {
   # a variable outside the data still works
   w <- d$wts
   expect_equal(
-    rc_nls(discharge, stage, data = d, wts = wts_spec(w))$rse,
+    rc_power(discharge, stage, data = d, wts = wts_spec(w))$rse,
     vectors[[1]]$rse
   )
 })
@@ -73,44 +73,44 @@ test_that("specified weights stay aligned when gaugings are dropped", {
   d <- spec_data()
   w <- d$wts
   d$discharge[2] <- NA
-  fit <- rc_nls(discharge, stage, data = d, wts = wts_spec(w))
+  fit <- rc_power(discharge, stage, data = d, wts = wts_spec(w))
   expect_equal(fit$weights, w[-2])
 })
 
 test_that("weights of the wrong length are an error", {
-  expect_error(rc_nls(discharge, stage, data = thompson, wts = wts_spec(1:3)))
+  expect_error(rc_power(discharge, stage, data = thompson, wts = wts_spec(1:3)))
   expect_error(rc_poly(discharge, stage, data = thompson, wts = wts_spec(1:3)))
   expect_error(rc_loess(discharge, stage, data = thompson, wts = wts_spec(1:3)))
 })
 
 test_that("invalid levels are rejected", {
-  fit <- rc_nls(discharge, stage, data = thompson)
+  fit <- rc_power(discharge, stage, data = thompson)
   expect_error(predict(fit, stage = 3, conflev = 1.5))
   expect_error(predict(fit, stage = 3, predlev = -0.1))
 })
 
 test_that("an unknown weighting scheme is an error", {
-  expect_error(rc_nls(discharge, stage, data = thompson, wts = "bogus"))
+  expect_error(rc_power(discharge, stage, data = thompson, wts = "bogus"))
 })
 
 test_that("predict() defaults to the observed stage range", {
-  fit <- rc_log_ols(discharge, stage, data = thompson)
+  fit <- rc_power_log(discharge, stage, data = thompson)
   p <- predict(fit)
   expect_equal(nrow(p), 1000L)
   expect_equal(range(p$stage), range(thompson$stage))
 })
 
 test_that("print() describes the fit and returns it invisibly", {
-  fit <- rc_nls(discharge, stage, data = thompson)
-  expect_output(out <- withVisible(print(fit)), "Method: rc_nls")
+  fit <- rc_power(discharge, stage, data = thompson)
+  expect_output(out <- withVisible(print(fit)), "Method: rc_power")
   expect_false(out$visible)
   expect_identical(out$value, fit)
 })
 
-# -- rc_nls --------------------------------------------------------------------
+# -- rc_power --------------------------------------------------------------------
 
-test_that("rc_nls: proportional weights give sensible limits", {
-  fit <- rc_nls(discharge, stage, data = thompson, wts = "prop")
+test_that("rc_power: proportional weights give sensible limits", {
+  fit <- rc_power(discharge, stage, data = thompson, wts = "prop")
   expect_equal(fit$settings$wts$type, "prop")
   p <- predict(fit, stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
   expect_true(all(p$ci_lwr < p$fit & p$fit < p$ci_upr))
@@ -119,9 +119,9 @@ test_that("rc_nls: proportional weights give sensible limits", {
   expect_true(all(diff(p$pi_upr - p$pi_lwr) > 0))
 })
 
-test_that("rc_nls: specified weights give NA prediction limits with a note", {
+test_that("rc_power: specified weights give NA prediction limits with a note", {
   d <- spec_data()
-  fit <- rc_nls(discharge, stage, data = d, wts = wts_spec(d$wts))
+  fit <- rc_power(discharge, stage, data = d, wts = wts_spec(d$wts))
   expect_message(
     p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95),
     "specified weights"
@@ -203,17 +203,43 @@ test_that("rc_loess: prediction limits are NA with a note", {
 # -- log scale -----------------------------------------------------------------
 
 test_that("log-scale fits report bias-corrected coefficients", {
-  for (fit in list(rc_log_ols(discharge, stage, data = thompson),
-                   rc_log_nls(discharge, stage, data = thompson))) {
+  for (fit in list(rc_power_log(discharge, stage, data = thompson),
+                   rc_power_log(discharge, stage, data = thompson, c = -1.3))) {
     expect_gt(fit$a_corrected[["nbc"]], fit$pars$a)
     expect_true(fit$pars$c < min(thompson$stage))
   }
 })
 
 test_that("log-scale limits are positive", {
-  for (fit in list(rc_log_ols(discharge, stage, data = thompson),
-                   rc_log_nls(discharge, stage, data = thompson))) {
+  for (fit in list(rc_power_log(discharge, stage, data = thompson),
+                   rc_power_log(discharge, stage, data = thompson, c = -1.3))) {
     p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
     expect_true(all(p$pi_lwr > 0))
   }
 })
+
+test_that("a known c is held fixed, and gives a linear fit on the log scale", {
+  fit <- rc_power_log(discharge, stage, data = thompson, c = -1.3)
+  expect_equal(fit$pars$c, -1.3)
+  expect_equal(fit$settings$c, -1.3)
+  expect_s3_class(fit$model, "lm")
+  expect_null(rc_power_log(discharge, stage, data = thompson)$settings$c)
+  expect_error(
+    rc_power_log(discharge, stage, data = thompson, c = min(thompson$stage)),
+    "below every gauged stage"
+  )
+})
+
+test_that("fixing c at its estimate keeps the curve but narrows the limits", {
+  # this is what the former rc_log_ols() did: estimate c, then treat it as
+  # known, leaving its uncertainty out of the limits
+  est <- rc_power_log(discharge, stage, data = thompson)
+  fixed <- rc_power_log(discharge, stage, data = thompson, c = est$pars$c)
+  expect_equal(fixed$pars$a, est$pars$a, tolerance = 1e-6)
+  expect_equal(fixed$pars$b, est$pars$b, tolerance = 1e-6)
+  p_est <- predict(est, stage = 3, conflev = 0.95)
+  p_fixed <- predict(fixed, stage = 3, conflev = 0.95)
+  expect_equal(p_fixed$fit, p_est$fit, tolerance = 1e-6)
+  expect_lt(p_fixed$ci_upr - p_fixed$ci_lwr, p_est$ci_upr - p_est$ci_lwr)
+})
+

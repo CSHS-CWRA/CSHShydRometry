@@ -67,7 +67,7 @@
 #' A single `kstart` makes both the fit and the bootstrap faster, but both
 #' then rest on that one start.
 #'
-#' @return An object of class `c("rc_2seg_nls", "rating_curve")`; see
+#' @return An object of class `c("rc_2seg_power", "rating_curve")`; see
 #'   [rating_curve] for its contents. `pars` holds the estimated parameters by
 #'   type, one value per segment: under `"successive"`, `a` has a single value
 #'   because the upper segment's coefficient is fixed by continuity, and under
@@ -79,7 +79,7 @@
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs
 #' # proportional weights to converge.
-#' fit <- rc_2seg_nls(discharge, stage, data = thompson, wts = "prop")
+#' fit <- rc_2seg_power(discharge, stage, data = thompson, wts = "prop")
 #' fit
 #' coef(fit)
 #'
@@ -93,12 +93,12 @@
 #' # carries a reported uncertainty for every gauging.
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   succ <- rc_2seg_nls(Q, H, data = sauze, kstart = 1)
-#'   add <- rc_2seg_nls(Q, H, data = sauze, controls = "additive", kstart = 1)
+#'   succ <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
+#'   add <- rc_2seg_power(Q, H, data = sauze, controls = "additive", kstart = 1)
 #'   c(successive = succ$pars[["k"]], additive = add$pars[["k"]])
 #'
 #'   # weights from the reported gauging uncertainties
-#'   rc_2seg_nls(
+#'   rc_2seg_power(
 #'     Q,
 #'     H,
 #'     data = sauze,
@@ -107,7 +107,7 @@
 #'   )
 #' }
 #' @export
-rc_2seg_nls <- function(
+rc_2seg_power <- function(
   discharge,
   stage,
   ...,
@@ -450,5 +450,5 @@ rc_2seg_nls <- function(
     rse = mod_sum$sigma,
     model = mod_nls
   )
-  structure(outlist, class = c("rc_2seg_nls", "rating_curve"))
+  structure(outlist, class = c("rc_2seg_power", "rating_curve"))
 }

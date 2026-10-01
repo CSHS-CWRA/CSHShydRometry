@@ -7,9 +7,9 @@ one_seg_fits <- function() {
   discharge <- thompson$discharge
   stage <- thompson$stage
   list(
-    rc_log_ols = rc_log_ols(discharge, stage),
-    rc_log_nls = rc_log_nls(discharge, stage),
-    rc_nls = rc_nls(discharge, stage),
+    rc_power_log_c = rc_power_log(discharge, stage, c = -1.3),
+    rc_power_log = rc_power_log(discharge, stage),
+    rc_power = rc_power(discharge, stage),
     rc_gnls = rc_gnls(discharge, stage),
     rc_poly = rc_poly(discharge, stage),
     rc_loess = rc_loess(discharge, stage)
@@ -17,7 +17,7 @@ one_seg_fits <- function() {
 }
 
 two_seg_fit <- function() {
-  rc_2seg_nls(
+  rc_2seg_power(
     thompson$discharge,
     thompson$stage,
     wts = "prop",
@@ -49,13 +49,13 @@ test_that("results from different models stack with rbind()", {
 })
 
 test_that("asking for neither level returns neither set of columns", {
-  fit <- rc_nls(thompson$discharge, thompson$stage)
+  fit <- rc_power(thompson$discharge, thompson$stage)
   p <- predict(fit, stage = c(1, 3))
   expect_named(p, c("stage", "fit"))
 })
 
 test_that("conflev alone returns only confidence columns", {
-  fit <- rc_nls(thompson$discharge, thompson$stage)
+  fit <- rc_power(thompson$discharge, thompson$stage)
   p <- predict(fit, stage = c(1, 3), conflev = 0.95)
   expect_named(p, c("stage", "fit", "ci_lwr", "ci_upr"))
 })
@@ -80,7 +80,7 @@ test_that("specified weights give NA prediction limits, not missing columns", {
   d <- thompson[keep, ]
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   sd <- d$uncertainty_pct / 100 * d$discharge / 2
-  fit <- rc_nls(d$discharge, d$stage, wts = wts_spec(1 / sd^2))
+  fit <- rc_power(d$discharge, d$stage, wts = wts_spec(1 / sd^2))
   p <- suppressMessages(
     predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
   )

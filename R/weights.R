@@ -3,8 +3,8 @@
 #' Weighting schemes for rating-curve fits
 #'
 #' How the scatter of the gaugings about the curve is modelled. Pass one of
-#' these as the `wts` argument of [rc_nls()], [rc_poly()], [rc_loess()] or
-#' [rc_2seg_nls()].
+#' these as the `wts` argument of [rc_power()], [rc_poly()], [rc_loess()] or
+#' [rc_2seg_power()].
 #'
 #' * `wts_none()`: the scatter is the same at every flow (ordinary least
 #'   squares).
@@ -31,15 +31,15 @@
 #' @param maxiter Maximum number of reweighting rounds.
 #' @return An object of class `"rc_wts"`.
 #' @examples
-#' rc_nls(discharge, stage, data = thompson, wts = wts_prop())
+#' rc_power(discharge, stage, data = thompson, wts = wts_prop())
 #'
 #' # the same, with the defaults
-#' rc_nls(discharge, stage, data = thompson, wts = "prop")
+#' rc_power(discharge, stage, data = thompson, wts = "prop")
 #'
 #' # weights from each gauging's reported uncertainty
 #' d <- thompson[!is.na(thompson$uncertainty_pct), ]
 #' d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
-#' rc_nls(discharge, stage, data = d, wts = wts_spec(1 / uncertainty_sd^2))
+#' rc_power(discharge, stage, data = d, wts = wts_spec(1 / uncertainty_sd^2))
 #' @name wts
 NULL
 

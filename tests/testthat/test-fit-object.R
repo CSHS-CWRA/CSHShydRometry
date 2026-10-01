@@ -3,15 +3,15 @@
 
 all_fits <- function() {
   list(
-    rc_log_ols = rc_log_ols(discharge, stage, data = thompson),
-    rc_log_nls = rc_log_nls(discharge, stage, data = thompson),
-    rc_nls = rc_nls(discharge, stage, data = thompson),
-    rc_nls_prop = rc_nls(discharge, stage, data = thompson, wts = "prop"),
+    rc_power_log_c = rc_power_log(discharge, stage, data = thompson, c = -1.3),
+    rc_power_log = rc_power_log(discharge, stage, data = thompson),
+    rc_power = rc_power(discharge, stage, data = thompson),
+    rc_power_prop = rc_power(discharge, stage, data = thompson, wts = "prop"),
     rc_gnls = rc_gnls(discharge, stage, data = thompson),
     rc_poly = rc_poly(discharge, stage, data = thompson),
     rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts = "prop"),
     rc_loess = rc_loess(discharge, stage, data = thompson),
-    rc_2seg_nls = rc_2seg_nls(discharge, stage, data = thompson, wts = "prop",
+    rc_2seg_power = rc_2seg_power(discharge, stage, data = thompson, wts = "prop",
                               kstart = 2)
   )
 }
@@ -35,32 +35,32 @@ test_that("coef() flattens pars into a named numeric vector", {
     expect_length(cf, length(unlist(fits[[nm]]$pars)))
     expect_false(is.null(names(cf)), info = nm)
   }
-  expect_named(coef(rc_nls(discharge, stage, data = thompson)), c("a", "b", "c"))
+  expect_named(coef(rc_power(discharge, stage, data = thompson)), c("a", "b", "c"))
   expect_length(coef(rc_loess(discharge, stage, data = thompson)), 0L)
 })
 
 test_that("one-segment coef() agrees with the underlying nls model", {
-  fit <- rc_nls(discharge, stage, data = thompson)
+  fit <- rc_power(discharge, stage, data = thompson)
   expect_equal(coef(fit), stats::coef(fit$model))
 })
 
 test_that("two-segment pars hold one value per segment", {
   skip_if_not_installed("RBaM")
   d <- RBaM::SauzeGaugings
-  pw <- rc_2seg_nls(Q, H, data = d, kstart = 1)
+  pw <- rc_2seg_power(Q, H, data = d, kstart = 1)
   expect_named(pw$pars, c("a", "b", "c", "k"))
   expect_equal(lengths(pw$pars), c(a = 1L, b = 2L, c = 2L, k = 1L))
   expect_named(coef(pw), c("a1", "b1", "c1", "b2", "c2", "k"))
   expect_equal(unname(coef(pw)[["b2"]]), pw$pars$b[2])
 
-  cp <- rc_2seg_nls(Q, H, data = d, controls = "additive", kstart = 1)
+  cp <- rc_2seg_power(Q, H, data = d, controls = "additive", kstart = 1)
   expect_equal(lengths(cp$pars), c(a = 2L, b = 2L, c = 1L, k = 1L))
   expect_named(coef(cp), c("a1", "b1", "c1", "a2", "b2", "k"))
 })
 
 test_that("settings are enough to refit", {
-  fit <- rc_nls(discharge, stage, data = thompson, wts = "prop")
-  refit <- do.call(rc_nls, c(list(thompson$discharge, thompson$stage), fit$settings))
+  fit <- rc_power(discharge, stage, data = thompson, wts = "prop")
+  refit <- do.call(rc_power, c(list(thompson$discharge, thompson$stage), fit$settings))
   expect_equal(coef(refit), coef(fit))
   fit2 <- rc_poly(discharge, stage, data = thompson, degree = 3)
   refit2 <- do.call(rc_poly, c(list(thompson$discharge, thompson$stage), fit2$settings))
@@ -69,7 +69,7 @@ test_that("settings are enough to refit", {
 
 test_that("the two-segment fit no longer takes conflev or predlev", {
   expect_error(
-    rc_2seg_nls(discharge, stage, data = thompson, kstart = 2, wts = "prop",
+    rc_2seg_power(discharge, stage, data = thompson, kstart = 2, wts = "prop",
                 conflev = 0.9),
     class = "rlib_error_dots_nonempty"
   )
@@ -90,21 +90,21 @@ test_that("gnls records its variance parameters", {
 
 test_that("converged reweighting is recorded", {
   for (fit in list(
-    rc_nls(discharge, stage, data = thompson, wts = "prop"),
+    rc_power(discharge, stage, data = thompson, wts = "prop"),
     rc_poly(discharge, stage, data = thompson, wts = "prop"),
-    rc_2seg_nls(discharge, stage, data = thompson, wts = "prop", kstart = 2)
+    rc_2seg_power(discharge, stage, data = thompson, wts = "prop", kstart = 2)
   )) {
     expect_true(fit$irls$converged)
     expect_gt(fit$irls$iterations, 1L)
     # the weights are those the final model was fitted with
     expect_equal(unname(fit$weights), unname(stats::weights(fit$model)))
   }
-  expect_null(rc_nls(discharge, stage, data = thompson)$irls)
+  expect_null(rc_power(discharge, stage, data = thompson)$irls)
 })
 
 test_that("reweighting that runs out of rounds warns and says so", {
   expect_warning(
-    fit <- rc_nls(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1)),
+    fit <- rc_power(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1)),
     "did not converge in 1 rounds"
   )
   expect_false(fit$irls$converged)
@@ -114,14 +114,14 @@ test_that("reweighting that runs out of rounds warns and says so", {
     "did not converge"
   )
   expect_warning(
-    rc_2seg_nls(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1), kstart = 2),
+    rc_2seg_power(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1), kstart = 2),
     "did not converge"
   )
 })
 
 test_that("reweighting stops on the change in fitted discharge", {
-  fit <- rc_nls(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-3))
-  tight <- rc_nls(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-10))
+  fit <- rc_power(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-3))
+  tight <- rc_power(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-10))
   expect_lte(fit$irls$iterations, tight$irls$iterations)
   expect_equal(stats::fitted(fit$model), stats::fitted(tight$model),
                tolerance = 1e-2)
@@ -134,7 +134,7 @@ test_that("every table the package returns is a tibble", {
     p <- suppressMessages(predict(fits[[nm]], stage = 3, conflev = 0.95))
     expect_s3_class(p, "tbl_df")
   }
-  two <- fits$rc_2seg_nls
+  two <- fits$rc_2seg_power
   expect_s3_class(two$kstart_search, "tbl_df")
   expect_s3_class(
     suppressWarnings(boot_limits_2seg(two, stage = 3, conflev = 0.9, B = 5,

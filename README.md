@@ -66,11 +66,11 @@ $$
 Q = a (h - c)^b
 $$
 
-`rc_nls()` is one method, which fits this relationship by nonlinear
+`rc_power()` is one method, which fits this relationship by nonlinear
 least squares:
 
 ``` r
-fit <- rc_nls(discharge, stage, data = thompson)
+fit <- rc_power(discharge, stage, data = thompson)
 ```
 
 Like the result of `lm()` or `glm()`, `fit` is a fitted-model object.
@@ -81,7 +81,7 @@ is inside.
 ``` r
 fit
 #> Rating curve model.
-#> - Method: rc_nls
+#> - Method: rc_power
 coef(fit)
 #>          a          b          c 
 #> 80.6686540  1.7131161 -0.9044141
@@ -140,13 +140,12 @@ almost on the curve.
 
 Every model has an `rc_*()` function and a `predict()` method:
 
-- `rc_nls()`: power law, fitted on the natural scale.
-- `rc_log_ols()`, `rc_log_nls()`: power law, fitted on the log–log
-  scale.
+- `rc_power()`: power law, fitted on the original scale.
+- `rc_power_log()`: power law, fitted on the log–log scale.
 - `rc_gnls()`: power law, with the scatter estimated as a power of the
   flow.
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
-- `rc_2seg_nls()`: two power laws joined at a breakpoint (more below).
+- `rc_2seg_power()`: two power laws joined at a breakpoint (more below).
 
 Swapping one model for another changes one line:
 
@@ -211,11 +210,11 @@ plot(stage ~ discharge, data = sauze)
 
 <img src="man/figures/README-plot-sauze-1.png" alt="" width="100%" />
 
-`rc_2seg_nls()` fits two power laws that meet at a breakpoint, $k$. Here
-we weight each gauging by its reported uncertainty:
+`rc_2seg_power()` fits two power laws that meet at a breakpoint, $k$.
+Here we weight each gauging by its reported uncertainty:
 
 ``` r
-fit2 <- rc_2seg_nls(discharge, stage, data = sauze,
+fit2 <- rc_2seg_power(discharge, stage, data = sauze,
                     wts = wts_spec(1 / uncertainty_sd^2))
 fit2$pars$k
 #> [1] 1.621688

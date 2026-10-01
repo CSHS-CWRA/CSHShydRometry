@@ -59,7 +59,7 @@ rc_gnls <- function(discharge, stage, ..., data = NULL, var_type = nlme::varPowe
 
 #' Predict method for rc_gnls objects
 #'
-#' @inheritParams predict.rc_log_ols
+#' @inheritParams predict.rc_power
 #' @param object An rc_gnls object.
 #' @export
 predict.rc_gnls <- function(

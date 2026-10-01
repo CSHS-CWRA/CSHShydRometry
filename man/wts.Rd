@@ -35,8 +35,8 @@ An object of class \code{"rc_wts"}.
 }
 \description{
 How the scatter of the gaugings about the curve is modelled. Pass one of
-these as the \code{wts} argument of \code{\link[=rc_nls]{rc_nls()}}, \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} or
-\code{\link[=rc_2seg_nls]{rc_2seg_nls()}}.
+these as the \code{wts} argument of \code{\link[=rc_power]{rc_power()}}, \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} or
+\code{\link[=rc_2seg_power]{rc_2seg_power()}}.
 }
 \details{
 \itemize{
@@ -59,13 +59,13 @@ The strings \code{"none"} and \code{"prop"} are shorthand for \code{wts_none()} 
 \code{wts_prop()} with its defaults.
 }
 \examples{
-rc_nls(discharge, stage, data = thompson, wts = wts_prop())
+rc_power(discharge, stage, data = thompson, wts = wts_prop())
 
 # the same, with the defaults
-rc_nls(discharge, stage, data = thompson, wts = "prop")
+rc_power(discharge, stage, data = thompson, wts = "prop")
 
 # weights from each gauging's reported uncertainty
 d <- thompson[!is.na(thompson$uncertainty_pct), ]
 d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
-rc_nls(discharge, stage, data = d, wts = wts_spec(1 / uncertainty_sd^2))
+rc_power(discharge, stage, data = d, wts = wts_spec(1 / uncertainty_sd^2))
 }

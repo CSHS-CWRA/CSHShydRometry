@@ -17,9 +17,10 @@ or as column names with a \code{data} argument — and return an object carrying
 
 Single segment:
 \itemize{
-\item \code{\link[=rc_log_ols]{rc_log_ols()}}, \code{\link[=rc_log_nls]{rc_log_nls()}} — power law fitted on the log-log
-scale, by ordinary or nonlinear least squares.
-\item \code{\link[=rc_nls]{rc_nls()}} — power law fitted on the natural scale.
+\item \code{\link[=rc_power]{rc_power()}} — power law fitted by least squares on the original
+scale.
+\item \code{\link[=rc_power_log]{rc_power_log()}} — power law fitted by least squares on the
+log-log scale, with the stage of zero flow estimated or given.
 \item \code{\link[=rc_gnls]{rc_gnls()}} — power law by generalised nonlinear least squares,
 with the error variance estimated as a power of the mean.
 \item \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} — polynomial and loess alternatives.
@@ -27,7 +28,7 @@ with the error variance estimated as a power of the mean.
 
 Two segments, joined at an estimated breakpoint:
 \itemize{
-\item \code{\link[=rc_2seg_nls]{rc_2seg_nls()}} — \code{controls = "successive"}: the upper power law
+\item \code{\link[=rc_2seg_power]{rc_2seg_power()}} — \code{controls = "successive"}: the upper power law
 takes over from the lower at the breakpoint; \code{controls = "additive"}:
 it adds to the discharge carried at the breakpoint.
 }
@@ -52,10 +53,10 @@ weighting: \code{stage}, \code{fit}, and — when \code{conflev} or \code{predle
 come back as \code{NA} rather than as missing columns, so results from different
 approaches stack directly with \code{rbind()}.
 
-For two-segment curves, \code{\link[=predict.rc_2seg_nls]{predict.rc_2seg_nls()}} takes a \code{method}. The
+For two-segment curves, \code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} takes a \code{method}. The
 default, \code{"delta"}, is fast but unreliable near the breakpoint, where the
 mean function is not differentiable; \code{"boot"} costs a refit per resample
-and behaves much better there. See \code{\link[=predict.rc_2seg_nls]{predict.rc_2seg_nls()}} for the detail.
+and behaves much better there. See \code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} for the detail.
 }
 
 \section{Data}{

@@ -11,7 +11,7 @@ sauze_fit <- function(controls = "successive", wts = "none") {
   if (identical(wts, "spec")) {
     wts <- wts_spec(1 / uQ^2)
   }
-  rc_2seg_nls(Q, H, data = d, controls = controls, wts = wts, kstart = 1)
+  rc_2seg_power(Q, H, data = d, controls = controls, wts = wts, kstart = 1)
 }
 
 test_that("both ways of combining controls fit under every weighting", {
@@ -19,7 +19,7 @@ test_that("both ways of combining controls fit under every weighting", {
   for (cfg in c("successive", "additive")) {
     for (wc in c("none", "prop", "spec")) {
       fit <- sauze_fit(cfg, wc)
-      expect_s3_class(fit, "rc_2seg_nls")
+      expect_s3_class(fit, "rc_2seg_power")
       expect_s3_class(fit, "rating_curve")
       k <- fit$pars[["k"]]
       expect_true(
