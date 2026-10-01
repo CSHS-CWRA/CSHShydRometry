@@ -104,7 +104,8 @@ rc_poly <- function(
       yp = as.numeric(stats::predict(mod_ols)),
       start = startlist,
       tol = weighting$tol,
-      maxiter = weighting$maxiter
+      maxiter = weighting$maxiter,
+      exponent = weighting$exponent
     )
     mod_poly <- res$model
     wts <- res$weights
@@ -124,6 +125,7 @@ rc_poly <- function(
     settings = list(degree = degree, wts = weighting),
     weights = wts,
     irls = irls,
+    exponent = if (wts_code == "prop") weighting$exponent,
     rse = mod_sum$sigma,
     model = mod_poly
   )
@@ -210,7 +212,7 @@ predict.rc_poly <- function(
     } else if (wts_code == "prop") {
       # compute weights for new observations if wts_code == "prop"
       qp <- stats::predict(mod, newdata = stage_df)
-      wtsp <- 1 / qp^2
+      wtsp <- 1 / qp^(2 * object$exponent)
       # prediction limits, proportional weights
       pl_poly <- investr::predFit(
         mod,

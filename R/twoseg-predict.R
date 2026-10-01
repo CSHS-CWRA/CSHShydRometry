@@ -183,7 +183,8 @@ delta_limits_2seg <- function(
         mod,
         type = "confidence",
         level = conflev,
-        stage = stage
+        stage = stage,
+        exponent = object$exponent
       )
     }
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -212,7 +213,8 @@ delta_limits_2seg <- function(
           mod,
           type = "prediction",
           level = predlev,
-          stage = stage
+          stage = stage,
+          exponent = object$exponent
         )
       }
       pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]

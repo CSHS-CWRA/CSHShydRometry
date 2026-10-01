@@ -13,6 +13,17 @@
   Their classes are renamed to match. This leaves room for more two-segment
   methods (`rc_2seg_*()`) and for curves with more segments.
 
+* `rc_gnls()` is removed. The scatter it modelled, proportional to the flow
+  raised to an estimated power, is now a weighting scheme:
+  `rc_power(wts = wts_prop(exponent = NULL))`. `wts_prop()` gains
+  `exponent` (1 by default), the power of the flow to which the scatter is
+  proportional: a fixed value works in every fitting function, and `NULL`
+  estimates it, in `rc_power()` only, with `nlme::gnls()` as before. The
+  estimate now starts from the fit with `exponent = 1`, rather than from a
+  straight line on the log-log scale. The fit records the exponent in
+  `exponent`. `rc_gnls()` also took any nlme variance function (`var_type`);
+  only the power of the mean, which every example used, is kept.
+
 * `rc_log_ols()` is removed. It gave the same estimates as `rc_log_nls()`,
   but treated the estimated `c` as known when computing limits, which left
   its uncertainty out. `rc_power_log()` instead gains a `zero_flow_stage`
@@ -100,8 +111,8 @@
     (formerly `qh_obs`, with `qobs` and `hobs` for the one-segment models and
     `q` and `h` for the two-segment one).
   * The bias-corrected coefficients of the log-scale fits move from `pars` to
-    `a_corrected`, and the `rc_gnls()` variance parameter from `pars$t_gnls`
-    to `var_pars$power`.
+    `a_corrected`, and the variance exponent formerly in `pars$t_gnls` of
+    `rc_gnls()` fits to `exponent` (see `rc_gnls()` below).
 
 * Package dependencies: R >= 4.0.0 is now required (was 4.1). tidyr and nls2
   are no longer used, and MASS is no longer suggested.

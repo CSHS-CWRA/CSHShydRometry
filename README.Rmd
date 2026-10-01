@@ -121,7 +121,6 @@ Every model has an `rc_*()` function and a `predict()` method:
 
 - `rc_power()`: power law, fitted on the original scale.
 - `rc_power_log()`: power law, fitted on the log–log scale.
-- `rc_gnls()`: power law, with the scatter estimated as a power of the flow.
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
 - `rc_2seg_power()`: two power laws joined at a breakpoint (more below).
 

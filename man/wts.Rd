@@ -10,7 +10,7 @@
 \usage{
 wts_none()
 
-wts_prop(tol = 1e-06, maxiter = 100)
+wts_prop(tol = 1e-06, maxiter = 100, exponent = 1)
 
 wts_spec(values)
 
@@ -21,6 +21,9 @@ wts_spec(values)
 discharge changes by more than this fraction from one round to the next.}
 
 \item{maxiter}{Maximum number of reweighting rounds.}
+
+\item{exponent}{The power of the flow to which the scatter is
+proportional: a number (1 by default), or \code{NULL} to estimate it.}
 
 \item{values}{<\code{\link[rlang:args_data_masking]{data-masking}}> The weights, one
 per gauging: a vector, or an expression evaluated in the fit's \code{data},
@@ -42,13 +45,20 @@ these as the \code{wts} argument of \code{\link[=rc_power]{rc_power()}}, \code{\
 \itemize{
 \item \code{wts_none()}: the scatter is the same at every flow (ordinary least
 squares).
-\item \code{wts_prop()}: the scatter is proportional to the flow (a constant
-coefficient of variation). The weights, \code{1 / fitted^2}, depend on the fit
+\item \code{wts_prop()}: the scatter is proportional to the flow raised to
+\code{exponent}; with the default \code{exponent = 1}, a constant coefficient of
+variation. The weights, \code{1 / fitted^(2 * exponent)}, depend on the fit
 itself, so the fit is repeated in rounds: fit, recompute the weights from
 the fitted values, refit, each round starting from the previous round's
 estimates. The rounds stop once no fitted discharge changes by more than a
 fraction \code{tol} from one round to the next, or after \code{maxiter} rounds, with
 a warning.
+
+With \code{exponent = NULL}, the exponent is estimated along with the curve,
+by generalised least squares with \code{\link[nlme:gnls]{nlme::gnls()}}, starting from the fit
+with \code{exponent = 1}. This is available in \code{\link[=rc_power]{rc_power()}} only. The estimate
+can be unstable with few gaugings: check it against fits with the
+exponent fixed.
 \item \code{wts_spec()}: the scatter of each gauging is known, typically from its
 reported uncertainty, and given as weights: the reciprocal of each
 gauging's variance. A new gauging's scatter is then not estimated, so
@@ -63,6 +73,10 @@ rc_power(discharge, stage, data = thompson, wts = wts_prop())
 
 # the same, with the defaults
 rc_power(discharge, stage, data = thompson, wts = "prop")
+
+# scatter growing faster than the flow, or with the exponent estimated
+rc_power(discharge, stage, data = thompson, wts = wts_prop(exponent = 1.5))
+rc_power(discharge, stage, data = thompson, wts = wts_prop(exponent = NULL))
 
 # weights from each gauging's reported uncertainty
 d <- thompson[!is.na(thompson$uncertainty_pct), ]

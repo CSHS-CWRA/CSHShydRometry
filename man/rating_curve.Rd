@@ -28,6 +28,8 @@ Constructors with a \code{wts} argument also return \code{weights}, the
 weights the final model was fitted with, and \code{irls} (for iteratively
 reweighted least squares): \code{NULL}, or under \code{\link[=wts_prop]{wts_prop()}}, which refits in
 rounds, a list giving the number of rounds (\code{iterations}) and whether they
-\code{converged}. Some constructors carry
+\code{converged}; and \code{exponent}: under \code{\link[=wts_prop]{wts_prop()}}, the power of the flow to
+which the scatter is proportional, as given or as estimated, and \code{NULL}
+otherwise. Some constructors carry
 further elements, documented on their own help pages.
 }

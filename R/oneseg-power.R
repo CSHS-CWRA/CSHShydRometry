@@ -49,7 +49,8 @@ rc_power <- function(
   weighting <- resolve_wts(
     wts,
     data,
-    keep = stats::complete.cases(discharge, stage)
+    keep = stats::complete.cases(discharge, stage),
+    estimate_exponent = TRUE
   )
   wts_code <- weighting$type
   wts <- weighting$values
@@ -65,6 +66,7 @@ rc_power <- function(
   astart <- unname(exp(start_lm$coefficients[1]))
   bstart <- unname(start_lm$coefficients[2])
   irls <- NULL
+  exponent <- NULL
 
   # use nls to determine optimal parameters - no weights or specified weights
   if (wts_code != "prop") {
@@ -80,7 +82,9 @@ rc_power <- function(
       control = control
     )
   } else {
-    # proportional weights, by iterative reweighting from the log-log curve
+    # proportional weights, by iterative reweighting from the log-log curve;
+    # an exponent to be estimated starts from the fit with exponent 1
+    exponent <- if (is.null(weighting$exponent)) 1 else weighting$exponent
     fit_fun <- function(wts, start) {
       stats::nls(
         discharge ~ a * (stage - c)^b,
@@ -95,11 +99,28 @@ rc_power <- function(
       yp = astart * (stage - cstart)^bstart,
       start = list(a = astart, b = bstart, c = cstart),
       tol = weighting$tol,
-      maxiter = weighting$maxiter
+      maxiter = weighting$maxiter,
+      exponent = exponent
     )
     mod_nls <- res$model
     wts <- res$weights
     irls <- res$irls
+    if (is.null(weighting$exponent)) {
+      # estimate the exponent with the curve, by generalised least squares
+      mod_nls <- nlme::gnls(
+        discharge ~ a * (stage - c)^b,
+        data = data.frame(discharge = discharge, stage = stage),
+        start = as.list(stats::coef(mod_nls)),
+        weights = nlme::varPower(),
+        control = nlme::gnlsControl(maxIter = 1e5, minScale = 1e-5)
+      )
+      exponent <- unname(stats::coef(
+        mod_nls$modelStruct$varStruct,
+        unconstrained = FALSE
+      ))
+      wts <- 1 / as.numeric(stats::fitted(mod_nls))^(2 * exponent)
+      irls <- NULL
+    }
   }
   mod_sum <- summary(mod_nls)
   coefs <- stats::coef(mod_nls)
@@ -111,6 +132,7 @@ rc_power <- function(
     settings = list(wts = weighting, control = control),
     weights = wts,
     irls = irls,
+    exponent = exponent,
     rse = mod_sum$sigma,
     model = mod_nls
   )
@@ -153,6 +175,10 @@ predict.rc_power <- function(
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
+  if (inherits(mod, "gnls")) {
+    # the exponent was estimated: nlraa handles the gnls fit
+    return(gnls_limits(mod, stage_df, conflev, predlev, ...))
+  }
   yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
   out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
@@ -169,7 +195,8 @@ predict.rc_power <- function(
         mod,
         type = "confidence",
         level = conflev,
-        stage = stage
+        stage = stage,
+        exponent = object$exponent
       )
     }
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -198,7 +225,8 @@ predict.rc_power <- function(
         mod,
         type = "prediction",
         level = predlev,
-        stage = stage
+        stage = stage,
+        exponent = object$exponent
       )
     }
     pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]
@@ -207,4 +235,41 @@ predict.rc_power <- function(
   }
   out_df <- tibble::as_tibble(out_df)
   out_df
+}
+
+
+#' Limits for a power law fitted with its scatter exponent estimated
+#'
+#' @param mod An [nlme::gnls()] fit.
+#' @param stage_df Data frame of stages, with column `stage`.
+#' @param conflev,predlev Levels, or `NULL` to omit those limits.
+#' @param ... Passed on to [nlraa::predict_gnls()].
+#' @return A tibble of predictions and limits.
+#' @noRd
+gnls_limits <- function(mod, stage_df, conflev, predlev, ...) {
+  limits <- function(interval, level) {
+    lims <- nlraa::predict_gnls(
+      mod,
+      newdata = stage_df,
+      interval = interval,
+      level = level,
+      ...
+    )
+    lims[, c(3, 4), drop = FALSE]
+  }
+  out_df <- data.frame(
+    stage = stage_df$stage,
+    fit = unname(nlraa::predict_gnls(mod, newdata = stage_df, ...))
+  )
+  if (!is.null(conflev)) {
+    ci <- limits("confidence", conflev)
+    out_df$ci_lwr <- ci[, 1]
+    out_df$ci_upr <- ci[, 2]
+  }
+  if (!is.null(predlev)) {
+    pi <- limits("prediction", predlev)
+    out_df$pi_lwr <- pi[, 1]
+    out_df$pi_upr <- pi[, 2]
+  }
+  tibble::as_tibble(out_df)
 }

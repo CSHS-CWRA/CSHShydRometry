@@ -21,8 +21,6 @@ Single segment:
 scale.
 \item \code{\link[=rc_power_log]{rc_power_log()}} — power law fitted by least squares on the
 log-log scale, with the stage of zero flow estimated or given.
-\item \code{\link[=rc_gnls]{rc_gnls()}} — power law by generalised nonlinear least squares,
-with the error variance estimated as a power of the mean.
 \item \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} — polynomial and loess alternatives.
 }
 
@@ -37,8 +35,9 @@ it adds to the discharge carried at the breakpoint.
 \section{Weighting}{
 
 The constructors that take \code{wts} offer three error models: \code{\link[=wts_none]{wts_none()}}
-(constant variance), \code{\link[=wts_prop]{wts_prop()}} (constant coefficient of variation,
-fitted by iteratively reweighted least squares), and \code{\link[=wts_spec]{wts_spec()}}
+(constant variance), \code{\link[=wts_prop]{wts_prop()}} (scatter proportional to the flow, or
+to a power of it, which \code{\link[=rc_power]{rc_power()}} can also estimate; fitted by
+iteratively reweighted least squares), and \code{\link[=wts_spec]{wts_spec()}}
 (variances supplied by the user, typically from reported gauging
 uncertainties). Under \code{\link[=wts_spec]{wts_spec()}} a new observation's scatter is not
 identified by the fit, so prediction limits are returned as \code{NA}. See

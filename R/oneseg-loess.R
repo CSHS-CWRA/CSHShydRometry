@@ -76,7 +76,8 @@ rc_loess <- function(
       yp = as.numeric(stats::predict(unweighted)),
       start = NULL,
       tol = weighting$tol,
-      maxiter = weighting$maxiter
+      maxiter = weighting$maxiter,
+      exponent = weighting$exponent
     )
     mod_lo <- res$model
     wts <- res$weights
@@ -99,6 +100,7 @@ rc_loess <- function(
     ),
     weights = wts,
     irls = irls,
+    exponent = if (wts_code == "prop") weighting$exponent,
     enp = mod_lo$enp,
     rse = mod_lo$s,
     model = mod_lo

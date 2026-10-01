@@ -25,7 +25,9 @@
 #' weights the final model was fitted with, and `irls` (for iteratively
 #' reweighted least squares): `NULL`, or under [wts_prop()], which refits in
 #' rounds, a list giving the number of rounds (`iterations`) and whether they
-#' `converged`. Some constructors carry
+#' `converged`; and `exponent`: under [wts_prop()], the power of the flow to
+#' which the scatter is proportional, as given or as estimated, and `NULL`
+#' otherwise. Some constructors carry
 #' further elements, documented on their own help pages.
 #'
 #' @name rating_curve

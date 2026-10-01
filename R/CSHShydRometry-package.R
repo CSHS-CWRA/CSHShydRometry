@@ -16,8 +16,6 @@
 #'     scale.
 #'   \item [rc_power_log()] — power law fitted by least squares on the
 #'     log-log scale, with the stage of zero flow estimated or given.
-#'   \item [rc_gnls()] — power law by generalised nonlinear least squares,
-#'     with the error variance estimated as a power of the mean.
 #'   \item [rc_poly()], [rc_loess()] — polynomial and loess alternatives.
 #' }
 #'
@@ -30,8 +28,9 @@
 #'
 #' @section Weighting:
 #' The constructors that take `wts` offer three error models: [wts_none()]
-#' (constant variance), [wts_prop()] (constant coefficient of variation,
-#' fitted by iteratively reweighted least squares), and [wts_spec()]
+#' (constant variance), [wts_prop()] (scatter proportional to the flow, or
+#' to a power of it, which [rc_power()] can also estimate; fitted by
+#' iteratively reweighted least squares), and [wts_spec()]
 #' (variances supplied by the user, typically from reported gauging
 #' uncertainties). Under [wts_spec()] a new observation's scatter is not
 #' identified by the fit, so prediction limits are returned as `NA`. See

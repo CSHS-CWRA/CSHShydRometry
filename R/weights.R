@@ -8,13 +8,20 @@
 #'
 #' * `wts_none()`: the scatter is the same at every flow (ordinary least
 #'   squares).
-#' * `wts_prop()`: the scatter is proportional to the flow (a constant
-#'   coefficient of variation). The weights, `1 / fitted^2`, depend on the fit
+#' * `wts_prop()`: the scatter is proportional to the flow raised to
+#'   `exponent`; with the default `exponent = 1`, a constant coefficient of
+#'   variation. The weights, `1 / fitted^(2 * exponent)`, depend on the fit
 #'   itself, so the fit is repeated in rounds: fit, recompute the weights from
 #'   the fitted values, refit, each round starting from the previous round's
 #'   estimates. The rounds stop once no fitted discharge changes by more than a
 #'   fraction `tol` from one round to the next, or after `maxiter` rounds, with
 #'   a warning.
+#'
+#'   With `exponent = NULL`, the exponent is estimated along with the curve,
+#'   by generalised least squares with [nlme::gnls()], starting from the fit
+#'   with `exponent = 1`. This is available in [rc_power()] only. The estimate
+#'   can be unstable with few gaugings: check it against fits with the
+#'   exponent fixed.
 #' * `wts_spec()`: the scatter of each gauging is known, typically from its
 #'   reported uncertainty, and given as weights: the reciprocal of each
 #'   gauging's variance. A new gauging's scatter is then not estimated, so
@@ -29,12 +36,18 @@
 #' @param tol Convergence tolerance: the reweighting stops once no fitted
 #'   discharge changes by more than this fraction from one round to the next.
 #' @param maxiter Maximum number of reweighting rounds.
+#' @param exponent The power of the flow to which the scatter is
+#'   proportional: a number (1 by default), or `NULL` to estimate it.
 #' @return An object of class `"rc_wts"`.
 #' @examples
 #' rc_power(discharge, stage, data = thompson, wts = wts_prop())
 #'
 #' # the same, with the defaults
 #' rc_power(discharge, stage, data = thompson, wts = "prop")
+#'
+#' # scatter growing faster than the flow, or with the exponent estimated
+#' rc_power(discharge, stage, data = thompson, wts = wts_prop(exponent = 1.5))
+#' rc_power(discharge, stage, data = thompson, wts = wts_prop(exponent = NULL))
 #'
 #' # weights from each gauging's reported uncertainty
 #' d <- thompson[!is.na(thompson$uncertainty_pct), ]
@@ -53,10 +66,11 @@ wts_none <- function() {
 
 #' @rdname wts
 #' @export
-wts_prop <- function(tol = 1e-6, maxiter = 100) {
+wts_prop <- function(tol = 1e-6, maxiter = 100, exponent = 1) {
   checkmate::assert_number(tol, lower = 0)
   checkmate::assert_count(maxiter, positive = TRUE)
-  new_wts("prop", tol = tol, maxiter = maxiter)
+  checkmate::assert_number(exponent, null.ok = TRUE, finite = TRUE)
+  new_wts("prop", tol = tol, maxiter = maxiter, exponent = exponent)
 }
 
 
@@ -75,11 +89,22 @@ print.rc_wts <- function(x, ...) {
   desc <- switch(
     x$type,
     none = "none (the same scatter at every flow)",
-    prop = sprintf(
-      "proportional to the flow (tol = %g, maxiter = %d)",
-      x$tol,
-      as.integer(x$maxiter)
-    ),
+    prop = if (is.null(x$exponent)) {
+      "proportional to a power of the flow, the exponent estimated"
+    } else if (x$exponent == 1) {
+      sprintf(
+        "proportional to the flow (tol = %g, maxiter = %d)",
+        x$tol,
+        as.integer(x$maxiter)
+      )
+    } else {
+      sprintf(
+        "proportional to the flow to the power %g (tol = %g, maxiter = %d)",
+        x$exponent,
+        x$tol,
+        as.integer(x$maxiter)
+      )
+    },
     spec = if (rlang::is_quosure(x$values)) {
       paste("specified:", rlang::as_label(x$values))
     } else {
@@ -115,9 +140,11 @@ new_wts <- function(type, ...) {
 #' @param wts The argument as given.
 #' @param data The fit's `data`, or `NULL`.
 #' @param keep Logical vector: which gaugings are kept.
+#' @param estimate_exponent Whether the fit can estimate the exponent of
+#'   [wts_prop()].
 #' @return An `"rc_wts"` object.
 #' @noRd
-resolve_wts <- function(wts, data, keep) {
+resolve_wts <- function(wts, data, keep, estimate_exponent = FALSE) {
   if (is.character(wts)) {
     wts <- switch(
       rlang::arg_match0(wts, c("none", "prop", "spec"), arg_nm = "wts"),
@@ -133,6 +160,13 @@ resolve_wts <- function(wts, data, keep) {
     stop(
       "`wts` must be \"none\", \"prop\", or made by `wts_none()`, ",
       "`wts_prop()` or `wts_spec()`.",
+      call. = FALSE
+    )
+  }
+  if (wts$type == "prop" && is.null(wts$exponent) && !estimate_exponent) {
+    stop(
+      "Estimating the exponent of `wts_prop()` is available in `rc_power()` ",
+      "only; give a value for `exponent` here.",
       call. = FALSE
     )
   }

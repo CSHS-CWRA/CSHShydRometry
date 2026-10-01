@@ -74,7 +74,7 @@ observation-noise sd follows the error model:
 \itemize{
 \item \code{\link[=wts_none]{wts_none()}}: homoscedastic, \code{sd(discharge - fitted)}.
 \item \code{\link[=wts_prop]{wts_prop()}}: constant coefficient of variation,
-\code{fit * sd((discharge - fitted) / fitted)}.
+\code{fit^exponent * sd((discharge - fitted) / fitted^exponent)}.
 \item \code{\link[=wts_spec]{wts_spec()}}: a new observation's uncertainty is not identified by the
 fit, so \code{pi_lwr}/\code{pi_upr} are returned as \code{NA}, as in every other
 method.

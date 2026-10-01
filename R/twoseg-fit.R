@@ -327,7 +327,7 @@ rc_2seg_power <- function(
         algorithm = "port"
       )
       # Path 2: proportional weights (constant coefficient of variation). The
-      # weights 1/fitted^2 depend on the (unknown) fitted discharge, so we iterate:
+      # weights 1/fitted^(2 * exponent) depend on the (unknown) fitted discharge, so we iterate:
       # fit -> recompute weights from the new fitted values -> refit, stopping when
       # the fitted discharges change by less than tol (or after maxiter). The
       # initial weights use the log-log starting-value curve.
@@ -363,7 +363,8 @@ rc_2seg_power <- function(
         yp = yp,
         start = start_list,
         tol = weighting$tol,
-        maxiter = weighting$maxiter
+        maxiter = weighting$maxiter,
+        exponent = weighting$exponent
       )
       return(res)
     }
@@ -388,7 +389,7 @@ rc_2seg_power <- function(
   k_hat <- rep(NA_real_, length(fits))
   for (i in which(ok)) {
     mu <- as.numeric(stats::fitted(fits[[i]]$model))
-    w_model <- if (wts_code == "prop") 1 / mu^2 else wts
+    w_model <- if (wts_code == "prop") 1 / mu^(2 * weighting$exponent) else wts
     loglik[i] <- profile_loglik(discharge, mu, w_model)
     k_hat[i] <- stats::coef(fits[[i]]$model)[["k"]]
   }
@@ -446,6 +447,7 @@ rc_2seg_power <- function(
     ),
     weights = wts,
     irls = irls,
+    exponent = if (wts_code == "prop") weighting$exponent,
     kstart_search = kstart_search,
     rse = mod_sum$sigma,
     model = mod_nls

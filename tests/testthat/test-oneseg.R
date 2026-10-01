@@ -37,7 +37,7 @@ test_that("gaugings with a missing stage or discharge are dropped", {
   d <- thompson
   d$discharge[c(3, 10)] <- NA
   d$stage[20] <- NA
-  fit <- rc_gnls(discharge, stage, data = d)
+  fit <- rc_power(discharge, stage, data = d)
   expect_equal(nrow(fit$gaugings), nrow(thompson) - 3L)
   expect_false(anyNA(fit$gaugings))
 })

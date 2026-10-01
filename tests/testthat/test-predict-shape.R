@@ -10,7 +10,7 @@ one_seg_fits <- function() {
     rc_power_log_c = rc_power_log(discharge, stage, zero_flow_stage = -1.3),
     rc_power_log = rc_power_log(discharge, stage),
     rc_power = rc_power(discharge, stage),
-    rc_gnls = rc_gnls(discharge, stage),
+    rc_power_estimated_exponent = rc_power(discharge, stage, wts = wts_prop(exponent = NULL)),
     rc_poly = rc_poly(discharge, stage),
     rc_loess = rc_loess(discharge, stage)
   )

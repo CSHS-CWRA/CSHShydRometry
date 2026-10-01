@@ -47,7 +47,7 @@
 #' \itemize{
 #'   \item [wts_none()]: homoscedastic, `sd(discharge - fitted)`.
 #'   \item [wts_prop()]: constant coefficient of variation,
-#'         `fit * sd((discharge - fitted) / fitted)`.
+#'         `fit^exponent * sd((discharge - fitted) / fitted^exponent)`.
 #'   \item [wts_spec()]: a new observation's uncertainty is not identified by the
 #'         fit, so `pi_lwr`/`pi_upr` are returned as `NA`, as in every other
 #'         method.
@@ -117,7 +117,7 @@ boot_limits_2seg <- function(
   # Residual pool for prediction limits (model-appropriate scaling).
   mu_obs <- as.numeric(stats::predict(mod0, newdata = data.frame(stage = hc)))
   resid_pool <- if (wts_code == "prop") {
-    (qc - mu_obs) / mu_obs
+    (qc - mu_obs) / mu_obs^object$exponent
   } else {
     (qc - mu_obs)
   }
@@ -195,7 +195,7 @@ boot_limits_2seg <- function(
       # curve uncertainty
       se_boot <- apply(boot_mat, 2, stats::sd, na.rm = TRUE)
       s_obs <- if (wts_code == "prop") {
-        fit_grid * stats::sd(resid_pool) # constant-CV noise
+        fit_grid^object$exponent * stats::sd(resid_pool) # proportional
       } else {
         rep(stats::sd(resid_pool), length(fit_grid)) # homoscedastic
       }

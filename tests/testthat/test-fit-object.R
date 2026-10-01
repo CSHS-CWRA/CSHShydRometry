@@ -7,7 +7,8 @@ all_fits <- function() {
     rc_power_log = rc_power_log(discharge, stage, data = thompson),
     rc_power = rc_power(discharge, stage, data = thompson),
     rc_power_prop = rc_power(discharge, stage, data = thompson, wts = "prop"),
-    rc_gnls = rc_gnls(discharge, stage, data = thompson),
+    rc_power_exponent = rc_power(discharge, stage, data = thompson,
+                                 wts = wts_prop(exponent = NULL)),
     rc_poly = rc_poly(discharge, stage, data = thompson),
     rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts = "prop"),
     rc_loess = rc_loess(discharge, stage, data = thompson),
@@ -81,9 +82,13 @@ test_that("loess records its residual scale and equivalent parameters", {
   expect_gt(fit$enp, 1)
 })
 
-test_that("gnls records its variance parameters", {
-  fit <- rc_gnls(discharge, stage, data = thompson)
-  expect_named(fit$var_pars, "power")
+test_that("the exponent of proportional scatter is recorded", {
+  expect_equal(rc_power(discharge, stage, data = thompson, wts = "prop")$exponent, 1)
+  fit <- rc_power(discharge, stage, data = thompson,
+                  wts = wts_prop(exponent = NULL))
+  expect_s3_class(fit$model, "gnls")
+  expect_true(is.numeric(fit$exponent) && length(fit$exponent) == 1L)
+  expect_null(rc_power(discharge, stage, data = thompson)$exponent)
 })
 
 # -- reweighting ---------------------------------------------------------------
