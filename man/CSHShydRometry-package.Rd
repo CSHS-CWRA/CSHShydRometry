@@ -13,7 +13,7 @@ Fits stage-discharge rating curves by a range of statistical methods, and attach
 Every model is fitted by a \verb{rc_*()} constructor and evaluated by a
 \code{predict()} method. The constructors take discharge and stage — as vectors,
 or as column names with a \code{data} argument — and return an object carrying
-\code{"rating_curve"} as its second class; see \link{rating_curve}.
+\code{"rating_curve"} as its top-level class; see \link{rating_curve}.
 
 Single segment:
 \itemize{
@@ -75,7 +75,7 @@ Useful links:
 
 }
 \author{
-Authors, in order: Vincenzo Coia (maintainer,
+Vincenzo Coia (maintainer,
 \email{vincenzo.coia@gmail.com}), Daniel Moore, and Paul Whitfield.
 }
 \keyword{internal}

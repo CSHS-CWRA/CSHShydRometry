@@ -55,7 +55,7 @@
 #' only as a source of that data.
 #'
 #' @author
-#' Authors, in order: Vincenzo Coia (maintainer,
+#' Vincenzo Coia (maintainer,
 #' \email{vincenzo.coia@@gmail.com}), Daniel Moore, and Paul Whitfield.
 #' @keywords internal
 "_PACKAGE"
