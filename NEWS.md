@@ -14,15 +14,15 @@
   methods (`rc_2seg_*()`) and for curves with more segments.
 
 * `rc_gnls()` is removed. The scatter it modelled, proportional to the flow
-  raised to an estimated power, is now a weighting scheme:
-  `rc_power(wts = wts_prop(exponent = NULL))`. `wts_prop()` gains
-  `exponent` (1 by default), the power of the flow to which the scatter is
-  proportional: a fixed value works in every fitting function, and `NULL`
-  estimates it, in `rc_power()` only, with `nlme::gnls()` as before. The
-  estimate now starts from the fit with `exponent = 1`, rather than from a
-  straight line on the log-log scale. The fit records the exponent in
-  `exponent`. `rc_gnls()` also took any nlme variance function (`var_type`);
-  only the power of the mean, which every example used, is kept.
+  raised to an estimated power, is now a weighting scheme of its own,
+  `wts_power()`: `rc_power(wts = wts_power())`, or `wts = "power"`. It adds
+  a parameter, the power, so it is fitted by generalised least squares with
+  `nlme::gnls()` as before, and is available in `rc_power()` only. The fit
+  now starts from the fit under `wts_prop()`, rather than from a straight
+  line on the log-log scale, and records the estimated power in
+  `fit$wts$exponent`. `rc_gnls()` also took any nlme variance function
+  (`var_type`); only the power of the mean, which every example used, is
+  kept.
 
 * `rc_log_ols()` is removed. It gave the same estimates as `rc_log_nls()`,
   but treated the estimated `c` as known when computing limits, which left
@@ -34,8 +34,9 @@
 * Weighting is chosen by a single argument, `wts`, in `rc_power()`, `rc_poly()`,
   `rc_loess()` and `rc_2seg_power()`. It replaces `wts_code`, `wts`, `wts_tol`
   and `wts_maxiter`, whose meanings depended on one another. `wts` takes
-  `wts_none()` (the default), `wts_prop(tol, maxiter)` or `wts_spec(values)`,
-  or the shorthand `"none"` or `"prop"`; see `?wts`. The values given to
+  `wts_none()` (the default), `wts_prop(tol, maxiter)`, `wts_power()` or
+  `wts_spec(values)`, or the shorthand `"none"`, `"prop"` or `"power"`; see
+  `?wts`. The values given to
   `wts_spec()` are evaluated in `data`, so they can refer to its columns, as
   in `wts = wts_spec(1 / uncertainty_sd^2)`.
 
@@ -111,8 +112,8 @@
     (formerly `qh_obs`, with `qobs` and `hobs` for the one-segment models and
     `q` and `h` for the two-segment one).
   * The bias-corrected coefficients of the log-scale fits move from `pars` to
-    `a_corrected`, and the variance exponent formerly in `pars$t_gnls` of
-    `rc_gnls()` fits to `exponent` (see `rc_gnls()` below).
+    `a_corrected`, and the power formerly in `pars$t_gnls` of `rc_gnls()`
+    fits to `wts$exponent` (see `rc_gnls()` above).
 
 * Package dependencies: R >= 4.0.0 is now required (was 4.1). tidyr and nls2
   are no longer used, and MASS is no longer suggested.

@@ -42,7 +42,8 @@ rc_poly <- function(
   weighting <- resolve_wts(
     wts,
     data,
-    keep = stats::complete.cases(discharge, stage)
+    keep = stats::complete.cases(discharge, stage),
+    fitter = "rc_poly"
   )
   wts_code <- weighting$type
   wts <- weighting$values
@@ -104,8 +105,7 @@ rc_poly <- function(
       yp = as.numeric(stats::predict(mod_ols)),
       start = startlist,
       tol = weighting$tol,
-      maxiter = weighting$maxiter,
-      exponent = weighting$exponent
+      maxiter = weighting$maxiter
     )
     mod_poly <- res$model
     wts <- res$weights
@@ -125,7 +125,7 @@ rc_poly <- function(
     settings = list(degree = degree, wts = weighting),
     weights = wts,
     irls = irls,
-    exponent = if (wts_code == "prop") weighting$exponent,
+    wts = weighting,
     rse = mod_sum$sigma,
     model = mod_poly
   )
@@ -212,7 +212,7 @@ predict.rc_poly <- function(
     } else if (wts_code == "prop") {
       # compute weights for new observations if wts_code == "prop"
       qp <- stats::predict(mod, newdata = stage_df)
-      wtsp <- 1 / qp^(2 * object$exponent)
+      wtsp <- 1 / qp^2
       # prediction limits, proportional weights
       pl_poly <- investr::predFit(
         mod,

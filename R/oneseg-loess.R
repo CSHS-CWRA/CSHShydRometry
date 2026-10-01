@@ -46,7 +46,8 @@ rc_loess <- function(
   weighting <- resolve_wts(
     wts,
     data,
-    keep = stats::complete.cases(discharge, stage)
+    keep = stats::complete.cases(discharge, stage),
+    fitter = "rc_loess"
   )
   wts_code <- weighting$type
   wts <- weighting$values
@@ -76,8 +77,7 @@ rc_loess <- function(
       yp = as.numeric(stats::predict(unweighted)),
       start = NULL,
       tol = weighting$tol,
-      maxiter = weighting$maxiter,
-      exponent = weighting$exponent
+      maxiter = weighting$maxiter
     )
     mod_lo <- res$model
     wts <- res$weights
@@ -100,7 +100,7 @@ rc_loess <- function(
     ),
     weights = wts,
     irls = irls,
-    exponent = if (wts_code == "prop") weighting$exponent,
+    wts = weighting,
     enp = mod_lo$enp,
     rse = mod_lo$s,
     model = mod_lo

@@ -15,7 +15,6 @@
 #' @param type `"confidence"` (uncertainty in the mean curve only) or
 #'   `"prediction"` (adds the scatter of an individual observation).
 #' @param level Coverage probability, e.g. `0.95`.
-#' @param exponent The scatter is proportional to the flow to this power.
 #' @param stage Numeric vector of stages at which to evaluate the limits.
 #' @return A data frame with columns `fit`, `lwr`, `upr`.
 #' @details For a confidence interval the half-width is `t * se(fit)`. For a
@@ -27,8 +26,7 @@ nlspw_limits <- function(
   mod,
   stage,
   type = c("confidence", "prediction"),
-  level = 0.95,
-  exponent = 1
+  level = 0.95
 ) {
   type <- rlang::arg_match(type)
 
@@ -44,7 +42,7 @@ nlspw_limits <- function(
   nlsw_df <- nlsw_predfit$df
 
   ## compute weights for predicted values
-  wtsp <- 1 / yp_nlsw^(2 * exponent)
+  wtsp <- 1 / yp_nlsw^2
 
   ## compute limits for confidence and prediction intervals
   if (type == "confidence") {
@@ -111,15 +109,14 @@ drop_incomplete <- function(discharge, stage) {
 #' @param start Named list of starting values for the first round, or
 #'   `NULL` for a model, such as loess, that needs none.
 #' @param tol,maxiter Convergence tolerance and maximum number of rounds.
-#' @param exponent The scatter is proportional to the flow to this power.
 #' @return A list with the final `model`, the `weights` it was fitted with,
 #'   and `irls`: a list of the number of `iterations` (rounds) and whether
 #'   the rounds `converged`.
 #' @noRd
-reweight_in_rounds <- function(fit_fun, yp, start, tol, maxiter, exponent = 1) {
+reweight_in_rounds <- function(fit_fun, yp, start, tol, maxiter) {
   converged <- FALSE
   for (i in seq_len(maxiter)) {
-    wts <- 1 / yp^(2 * exponent)
+    wts <- 1 / yp^2
     mod <- fit_fun(wts, start)
     yp_new <- as.numeric(stats::predict(mod))
     change <- max(abs(yp_new - yp) / abs(yp))

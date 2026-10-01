@@ -7,8 +7,8 @@ all_fits <- function() {
     rc_power_log = rc_power_log(discharge, stage, data = thompson),
     rc_power = rc_power(discharge, stage, data = thompson),
     rc_power_prop = rc_power(discharge, stage, data = thompson, wts = "prop"),
-    rc_power_exponent = rc_power(discharge, stage, data = thompson,
-                                 wts = wts_prop(exponent = NULL)),
+    rc_power_wts_power = rc_power(discharge, stage, data = thompson,
+                                  wts = wts_power()),
     rc_poly = rc_poly(discharge, stage, data = thompson),
     rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts = "prop"),
     rc_loess = rc_loess(discharge, stage, data = thompson),
@@ -82,13 +82,16 @@ test_that("loess records its residual scale and equivalent parameters", {
   expect_gt(fit$enp, 1)
 })
 
-test_that("the exponent of proportional scatter is recorded", {
-  expect_equal(rc_power(discharge, stage, data = thompson, wts = "prop")$exponent, 1)
-  fit <- rc_power(discharge, stage, data = thompson,
-                  wts = wts_prop(exponent = NULL))
+test_that("the fit records its weighting scheme, with any estimate", {
+  fit <- rc_power(discharge, stage, data = thompson, wts = "power")
   expect_s3_class(fit$model, "gnls")
-  expect_true(is.numeric(fit$exponent) && length(fit$exponent) == 1L)
-  expect_null(rc_power(discharge, stage, data = thompson)$exponent)
+  expect_true(is.numeric(fit$wts$exponent) && length(fit$wts$exponent) == 1L)
+  # settings keep the scheme as given, for refitting
+  expect_null(fit$settings$wts$exponent)
+  expect_s3_class(rc_power(discharge, stage, data = thompson)$wts, "rc_wts_none")
+  # the power describes the scatter, not the curve
+  expect_named(coef(fit), c("a", "b", "c"))
+  expect_named(fit$pars, c("a", "b", "c"))
 })
 
 # -- reweighting ---------------------------------------------------------------

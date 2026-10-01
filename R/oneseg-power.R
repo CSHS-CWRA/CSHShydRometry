@@ -50,8 +50,11 @@ rc_power <- function(
     wts,
     data,
     keep = stats::complete.cases(discharge, stage),
-    estimate_exponent = TRUE
+    fitter = "rc_power",
+    power_ok = TRUE
   )
+  # as given, for refitting; `weighting` may gain an estimate below
+  wts_given <- weighting
   wts_code <- weighting$type
   wts <- weighting$values
 
@@ -66,10 +69,9 @@ rc_power <- function(
   astart <- unname(exp(start_lm$coefficients[1]))
   bstart <- unname(start_lm$coefficients[2])
   irls <- NULL
-  exponent <- NULL
 
   # use nls to determine optimal parameters - no weights or specified weights
-  if (wts_code != "prop") {
+  if (wts_code %in% c("none", "spec")) {
     if (wts_code == "none") {
       wts <- rep(1, length(discharge))
     }
@@ -83,8 +85,8 @@ rc_power <- function(
     )
   } else {
     # proportional weights, by iterative reweighting from the log-log curve;
-    # an exponent to be estimated starts from the fit with exponent 1
-    exponent <- if (is.null(weighting$exponent)) 1 else weighting$exponent
+    # under wts_power() this is the starting point for estimating the power
+    rounds <- if (wts_code == "prop") weighting else wts_prop()
     fit_fun <- function(wts, start) {
       stats::nls(
         discharge ~ a * (stage - c)^b,
@@ -98,27 +100,26 @@ rc_power <- function(
       fit_fun,
       yp = astart * (stage - cstart)^bstart,
       start = list(a = astart, b = bstart, c = cstart),
-      tol = weighting$tol,
-      maxiter = weighting$maxiter,
-      exponent = exponent
+      tol = rounds$tol,
+      maxiter = rounds$maxiter
     )
     mod_nls <- res$model
     wts <- res$weights
     irls <- res$irls
-    if (is.null(weighting$exponent)) {
-      # estimate the exponent with the curve, by generalised least squares
+    if (wts_code == "power") {
+      # estimate the power with the curve, by generalised least squares
       mod_nls <- nlme::gnls(
         discharge ~ a * (stage - c)^b,
         data = data.frame(discharge = discharge, stage = stage),
         start = as.list(stats::coef(mod_nls)),
-        weights = nlme::varPower(),
+        weights = weighting$variance,
         control = nlme::gnlsControl(maxIter = 1e5, minScale = 1e-5)
       )
-      exponent <- unname(stats::coef(
+      weighting$exponent <- unname(stats::coef(
         mod_nls$modelStruct$varStruct,
         unconstrained = FALSE
       ))
-      wts <- 1 / as.numeric(stats::fitted(mod_nls))^(2 * exponent)
+      wts <- 1 / as.numeric(stats::fitted(mod_nls))^(2 * weighting$exponent)
       irls <- NULL
     }
   }
@@ -129,10 +130,10 @@ rc_power <- function(
   outlist <- list(
     gaugings = qh,
     pars = list(a = coefs[["a"]], b = coefs[["b"]], c = coefs[["c"]]),
-    settings = list(wts = weighting, control = control),
+    settings = list(wts = wts_given, control = control),
     weights = wts,
     irls = irls,
-    exponent = exponent,
+    wts = weighting,
     rse = mod_sum$sigma,
     model = mod_nls
   )
@@ -176,7 +177,7 @@ predict.rc_power <- function(
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
   if (inherits(mod, "gnls")) {
-    # the exponent was estimated: nlraa handles the gnls fit
+    # the power was estimated: nlraa handles the gnls fit
     return(gnls_limits(mod, stage_df, conflev, predlev, ...))
   }
   yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
@@ -195,8 +196,7 @@ predict.rc_power <- function(
         mod,
         type = "confidence",
         level = conflev,
-        stage = stage,
-        exponent = object$exponent
+        stage = stage
       )
     }
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
@@ -225,8 +225,7 @@ predict.rc_power <- function(
         mod,
         type = "prediction",
         level = predlev,
-        stage = stage,
-        exponent = object$exponent
+        stage = stage
       )
     }
     pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]
@@ -238,7 +237,7 @@ predict.rc_power <- function(
 }
 
 
-#' Limits for a power law fitted with its scatter exponent estimated
+#' Limits for a power law fitted with the power of its scatter estimated
 #'
 #' @param mod An [nlme::gnls()] fit.
 #' @param stage_df Data frame of stages, with column `stage`.
