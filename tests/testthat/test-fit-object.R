@@ -54,7 +54,7 @@ test_that("two-segment pars hold one value per segment", {
   expect_named(coef(pw), c("a1", "b1", "c1", "b2", "c2", "k"))
   expect_equal(unname(coef(pw)[["b2"]]), pw$pars$b[2])
 
-  cp <- rc_2seg_power(Q, H, data = d, controls = "additive", kstart = 1)
+  cp <- rc_2seg_power(Q, H, data = d, combine = "add", kstart = 1)
   expect_equal(lengths(cp$pars), c(a = 2L, b = 2L, c = 1L, k = 1L))
   expect_named(coef(cp), c("a1", "b1", "c1", "a2", "b2", "k"))
 })

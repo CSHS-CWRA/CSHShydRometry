@@ -21,8 +21,8 @@
 #'
 #' Two segments, joined at an estimated breakpoint:
 #' \itemize{
-#'   \item [rc_2seg_power()] — `controls = "successive"`: the upper power law
-#'     takes over from the lower at the breakpoint; `controls = "additive"`:
+#'   \item [rc_2seg_power()] — `combine = "replace"`: the upper power law
+#'     takes over from the lower at the breakpoint; `combine = "add"`:
 #'     it adds to the discharge carried at the breakpoint.
 #' }
 #'

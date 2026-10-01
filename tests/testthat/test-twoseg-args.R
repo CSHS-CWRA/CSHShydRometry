@@ -19,12 +19,12 @@ two_control <- function() {
   data.frame(stage = stage, discharge = mu * (1 + 0.03 * sin(7 * seq_along(stage))))
 }
 
-sauze_fit <- function(controls = "successive", wts = "none") {
+sauze_fit <- function(combine = "replace", wts = "none") {
   d <- sauze()
   if (identical(wts, "spec")) {
     wts <- wts_spec(1 / uQ^2)
   }
-  rc_2seg_power(Q, H, data = d, controls = controls, wts = wts, kstart = 1)
+  rc_2seg_power(Q, H, data = d, combine = combine, wts = wts, kstart = 1)
 }
 
 # -- arguments -----------------------------------------------------------------
@@ -98,7 +98,7 @@ test_that("specified weights stay aligned when gaugings are dropped", {
 
 test_that("delta prediction limits under each weighting", {
   for (wc in c("none", "prop")) {
-    fit <- sauze_fit("successive", wc)
+    fit <- sauze_fit("replace", wc)
     p <- predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
     expect_true(all(p$pi_lwr < p$ci_lwr & p$ci_upr < p$pi_upr), info = wc)
   }
@@ -108,7 +108,7 @@ test_that("delta prediction limits under each weighting", {
 
 test_that("boot prediction limits under each weighting", {
   for (wc in c("none", "prop", "spec")) {
-    fit <- sauze_fit("successive", wc)
+    fit <- sauze_fit("replace", wc)
     p <- suppressWarnings(
       boot_limits_2seg(fit, stage = c(1, 3), conflev = 0.9, predlev = 0.9,
                        B = 10, seed = 1)
@@ -124,13 +124,13 @@ test_that("boot prediction limits under each weighting", {
 })
 
 test_that("boot refuses spec weights it cannot resample", {
-  fit <- sauze_fit("successive", "spec")
+  fit <- sauze_fit("replace", "spec")
   fit$settings$wts$values <- NULL
   expect_error(boot_limits_2seg(fit, stage = 2, B = 5), "spec weights")
 })
 
 test_that("boot warns when too few resamples converge", {
-  fit <- sauze_fit("successive", "none")
+  fit <- sauze_fit("replace", "none")
   # corrupt the arguments so that every refit fails
   fit$settings$kstart <- -100
   expect_warning(

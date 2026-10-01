@@ -239,17 +239,17 @@ plot(stage ~ discharge, data = sauze,
 ```
 
 The reported uncertainties give the weights directly, through `wts_spec()`.
-How the two segments combine above the breakpoint is set by `controls`:
-`"successive"` (the default) lets the upper power law take over from the
-lower one, and `"additive"` adds it to the discharge the lower one carries.
+How the two segments combine above the breakpoint is set by `combine`:
+`"replace"` (the default) lets the upper power law take over from the lower
+one, and `"add"` adds it to the discharge the lower one carries.
 
 ```{r, eval = has_rbam}
-fit_succ <- rc_2seg_power(discharge, stage, data = sauze,
+fit_repl <- rc_2seg_power(discharge, stage, data = sauze,
                           wts = wts_spec(1 / uncertainty_sd^2))
 fit_add <- rc_2seg_power(discharge, stage, data = sauze,
-                         controls = "additive",
+                         combine = "add",
                          wts = wts_spec(1 / uncertainty_sd^2))
-c(successive = fit_succ$pars$k, additive = fit_add$pars$k)
+c(replace = fit_repl$pars$k, add = fit_add$pars$k)
 ```
 
 The fit is sensitive to where the search for the breakpoint starts, so by
@@ -257,16 +257,16 @@ default it tries several starting values and keeps the best. What each
 start led to is recorded:
 
 ```{r, eval = has_rbam}
-fit_succ$kstart_search
+fit_repl$kstart_search
 ```
 
 ```{r, eval = has_rbam}
 plot(stage ~ discharge, data = sauze, col = "grey50",
      xlab = "Discharge (m³/s)", ylab = "Stage (m)")
-lines(stage ~ fit, data = predict(fit_succ), lwd = 2)
+lines(stage ~ fit, data = predict(fit_repl), lwd = 2)
 lines(stage ~ fit, data = predict(fit_add), lwd = 2, lty = 2)
-abline(h = fit_succ$pars$k, col = "grey", lty = 3)
-legend("bottomright", c("Successive controls", "Additive controls"),
+abline(h = fit_repl$pars$k, col = "grey", lty = 3)
+legend("bottomright", c("Upper segment replaces", "Upper segment adds"),
        lty = 1:2, lwd = 2, bty = "n")
 ```
 

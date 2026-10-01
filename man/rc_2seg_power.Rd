@@ -9,7 +9,7 @@ rc_2seg_power(
   stage,
   ...,
   data = NULL,
-  controls = c("successive", "additive"),
+  combine = c("replace", "add"),
   kstart = NULL,
   kfixed = FALSE,
   kbounds = NULL,
@@ -31,10 +31,10 @@ positional mistakes.}
 \item{data}{Optional data frame in which \code{discharge}, \code{stage} and \code{wts}
 are evaluated.}
 
-\item{controls}{How the two hydraulic controls combine above the
-breakpoint. \code{"successive"} (the default): the upper power law takes over
+\item{combine}{How the two segments combine above the
+breakpoint. \code{"replace"} (the default): the upper power law takes over
 from the lower one, with its coefficient set so that the two meet at the
-breakpoint. \code{"additive"}: the upper power law adds to the discharge the
+breakpoint. \code{"add"}: the upper power law adds to the discharge the
 lower one carries at the breakpoint, as when flow spills onto a
 floodplain.}
 
@@ -59,9 +59,9 @@ settings, such as \code{rel.tol}, can be added to the list (see
 \value{
 An object of class \code{c("rc_2seg_power", "rating_curve")}; see
 \link{rating_curve} for its contents. \code{pars} holds the estimated parameters by
-type, one value per segment: under \code{"successive"}, \code{a} has a single value
+type, one value per segment: under \code{"replace"}, \code{a} has a single value
 because the upper segment's coefficient is fixed by continuity, and under
-\code{"additive"}, \code{c} has a single value because the upper segment is
+\code{"add"}, \code{c} has a single value because the upper segment is
 measured from \code{k}. \code{coef()} gives the same estimates by their model
 names (\code{a1}, \code{b1}, \code{c1}, ...). \code{kstart_search} is a tibble with a row
 per starting breakpoint tried: the estimated breakpoint \code{k} it led to and
@@ -119,13 +119,13 @@ fit$kstart_search
 predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 
 # A river with a clearer change of control is far less fussy. The Ardeche
-# at Sauze, in the RBaM package, fits however the controls combine, and
+# at Sauze, in the RBaM package, fits however the segments combine, and
 # carries a reported uncertainty for every gauging.
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
-  succ <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
-  add <- rc_2seg_power(Q, H, data = sauze, controls = "additive", kstart = 1)
-  c(successive = succ$pars[["k"]], additive = add$pars[["k"]])
+  repl <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
+  add <- rc_2seg_power(Q, H, data = sauze, combine = "add", kstart = 1)
+  c(replace = repl$pars[["k"]], add = add$pars[["k"]])
 
   # weights from the reported gauging uncertainties
   rc_2seg_power(

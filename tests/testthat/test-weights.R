@@ -74,7 +74,7 @@ test_that("control is passed to nls()", {
 test_that("the old arguments are gone", {
   for (old in list(
     list(wts_code = "prop"), list(wts_tol = 1e-3), list(wts_maxiter = 5),
-    list(nls_tol = 1e-3), list(nls_maxiter = 5), list(config = "additive")
+    list(nls_tol = 1e-3), list(nls_maxiter = 5), list(config = "add")
   )) {
     expect_error(
       do.call(rc_2seg_power, c(list(thompson$discharge, thompson$stage), old)),

@@ -1,10 +1,10 @@
 # The two-segment interval methods, and the dispatcher over them.
 
-two_seg_fit <- function(controls = "successive", kstart = 2) {
+two_seg_fit <- function(combine = "replace", kstart = 2) {
   rc_2seg_power(
     thompson$discharge,
     thompson$stage,
-    controls = controls,
+    combine = combine,
     wts = "prop",
     kstart = kstart
   )
@@ -54,9 +54,9 @@ test_that("the fitted curve is the same whichever method is asked for", {
   expect_equal(d$fit, b$fit)
 })
 
-test_that("both ways of combining controls fit and predict", {
+test_that("both ways of combining the segments fit and predict", {
   # the compound fit needs the default search over starting breakpoints
-  for (cfg in c("successive", "additive")) {
+  for (cfg in c("replace", "add")) {
     fit <- two_seg_fit(cfg, kstart = NULL)
     expect_s3_class(fit, "rc_2seg_power")
     expect_s3_class(fit, "rating_curve")
@@ -67,7 +67,7 @@ test_that("both ways of combining controls fit and predict", {
 
 test_that("the bootstrap refits with the arguments the fit was made with", {
   fit <- two_seg_fit()
-  expect_equal(fit$settings$controls, "successive")
+  expect_equal(fit$settings$combine, "replace")
   expect_equal(fit$settings$wts$type, "prop")
   expect_equal(fit$settings$kstart, 2)
 })

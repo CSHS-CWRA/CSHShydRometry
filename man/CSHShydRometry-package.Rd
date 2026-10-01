@@ -26,8 +26,8 @@ log-log scale, with the stage of zero flow estimated or given.
 
 Two segments, joined at an estimated breakpoint:
 \itemize{
-\item \code{\link[=rc_2seg_power]{rc_2seg_power()}} — \code{controls = "successive"}: the upper power law
-takes over from the lower at the breakpoint; \code{controls = "additive"}:
+\item \code{\link[=rc_2seg_power]{rc_2seg_power()}} — \code{combine = "replace"}: the upper power law
+takes over from the lower at the breakpoint; \code{combine = "add"}:
 it adds to the discharge carried at the breakpoint.
 }
 }

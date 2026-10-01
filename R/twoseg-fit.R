@@ -11,10 +11,10 @@
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named, which keeps calls readable and guards against
 #'   positional mistakes.
-#' @param controls How the two hydraulic controls combine above the
-#'   breakpoint. `"successive"` (the default): the upper power law takes over
+#' @param combine How the two segments combine above the
+#'   breakpoint. `"replace"` (the default): the upper power law takes over
 #'   from the lower one, with its coefficient set so that the two meet at the
-#'   breakpoint. `"additive"`: the upper power law adds to the discharge the
+#'   breakpoint. `"add"`: the upper power law adds to the discharge the
 #'   lower one carries at the breakpoint, as when flow spills onto a
 #'   floodplain.
 #' @param kstart Starting value(s) for the breakpoint `k`. `NULL`, the
@@ -69,9 +69,9 @@
 #'
 #' @return An object of class `c("rc_2seg_power", "rating_curve")`; see
 #'   [rating_curve] for its contents. `pars` holds the estimated parameters by
-#'   type, one value per segment: under `"successive"`, `a` has a single value
+#'   type, one value per segment: under `"replace"`, `a` has a single value
 #'   because the upper segment's coefficient is fixed by continuity, and under
-#'   `"additive"`, `c` has a single value because the upper segment is
+#'   `"add"`, `c` has a single value because the upper segment is
 #'   measured from `k`. `coef()` gives the same estimates by their model
 #'   names (`a1`, `b1`, `c1`, ...). `kstart_search` is a tibble with a row
 #'   per starting breakpoint tried: the estimated breakpoint `k` it led to and
@@ -89,13 +89,13 @@
 #' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # A river with a clearer change of control is far less fussy. The Ardeche
-#' # at Sauze, in the RBaM package, fits however the controls combine, and
+#' # at Sauze, in the RBaM package, fits however the segments combine, and
 #' # carries a reported uncertainty for every gauging.
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   succ <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
-#'   add <- rc_2seg_power(Q, H, data = sauze, controls = "additive", kstart = 1)
-#'   c(successive = succ$pars[["k"]], additive = add$pars[["k"]])
+#'   repl <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
+#'   add <- rc_2seg_power(Q, H, data = sauze, combine = "add", kstart = 1)
+#'   c(replace = repl$pars[["k"]], add = add$pars[["k"]])
 #'
 #'   # weights from the reported gauging uncertainties
 #'   rc_2seg_power(
@@ -112,7 +112,7 @@ rc_2seg_power <- function(
   stage,
   ...,
   data = NULL,
-  controls = c("successive", "additive"),
+  combine = c("replace", "add"),
   kstart = NULL,
   kfixed = FALSE,
   kbounds = NULL,
@@ -127,7 +127,7 @@ rc_2seg_power <- function(
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
 
   # error checks
-  controls <- rlang::arg_match(controls)
+  combine <- rlang::arg_match(combine)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_flag(kfixed)
@@ -191,16 +191,16 @@ rc_2seg_power <- function(
 
   # -- 4. Model formula ----
   # Model formula (see the header for the full derivation). The upper branch
-  # of the successive form has no free a2: the leading coefficient
+  # of the replace form has no free a2: the leading coefficient
   # a1*(k - c1)^b1 / (k - c2)^b2 is exactly what makes the two branches equal
   # at stage = k, enforcing continuity through the `a` parameter.
-  if (controls == "successive") {
+  if (combine == "replace") {
     modform <- discharge ~ ifelse(
       stage < k,
       a1 * (stage - c1)^b1,
       (a1 * (k - c1)^b1 / (k - c2)^b2) * (stage - c2)^b2
     )
-  } else if (controls == "additive") {
+  } else if (combine == "add") {
     # Upper branch adds an extra power law to the low-flow discharge at k.
     modform <- discharge ~ ifelse(
       stage < k,
@@ -235,14 +235,14 @@ rc_2seg_power <- function(
     b1start <- pars_1[2]
 
     # Upper segment: starting values depend on how the segments are joined.
-    if (controls == "successive") {
+    if (combine == "replace") {
       # Independent power law on the upper data; offset c2 placed between c1 and k.
       c2start <- 0.5 * (kstart + c1start)
       lm_mod <- stats::lm(log(qh2$discharge) ~ log(qh2$stage - c2start))
       pars_2 <- as.numeric(stats::coefficients(lm_mod))
       a2start <- exp(pars_2[1])
       b2start <- pars_2[2]
-    } else if (controls == "additive") {
+    } else if (combine == "add") {
       # Remove the low-flow discharge carried up to the breakpoint, then fit the
       # remaining "excess" discharge against depth above k, (stage - k). Keep only
       # positive residuals so the log is defined.
@@ -259,7 +259,7 @@ rc_2seg_power <- function(
 
     # -- 5. Assemble start values and bounds for the port algorithm ----
     # starting values and bounds for nls arguments
-    if (controls == "successive") {
+    if (combine == "replace") {
       start_list <- list(
         a1 = a1start,
         b1 = b1start,
@@ -284,7 +284,7 @@ rc_2seg_power <- function(
         c2 = max(stage),
         k = kupr
       )
-    } else if (controls == "additive") {
+    } else if (combine == "add") {
       start_list <- list(
         a1 = a1start,
         b1 = b1start,
@@ -333,14 +333,14 @@ rc_2seg_power <- function(
       # the fitted discharges change by less than tol (or after maxiter). The
       # initial weights use the log-log starting-value curve.
     } else if (wts_code == "prop") {
-      if (controls == "successive") {
+      if (combine == "replace") {
         yp <- ifelse(
           stage < kstart,
           a1start * (stage - c1start)^b1start,
           a2start * (stage - c2start)^b2start
         )
       } else {
-        # controls = "additive"
+        # combine = "add"
         yp <- ifelse(
           stage < kstart,
           a1start * (stage - c1start)^b1start,
@@ -416,7 +416,7 @@ rc_2seg_power <- function(
   qh <- tibble::as_tibble(qh)
   mod_sum <- summary(mod_nls)
   th <- stats::coef(mod_nls)
-  pars <- if (controls == "successive") {
+  pars <- if (combine == "replace") {
     list(
       a = th[["a1"]],
       b = unname(th[c("b1", "b2")]),
@@ -438,7 +438,7 @@ rc_2seg_power <- function(
     # resamples and refits, so it has to reproduce the original call exactly;
     # without this it would silently fall back on the argument defaults.
     settings = list(
-      controls = controls,
+      combine = combine,
       kstart = kstart_input,
       kfixed = kfixed,
       kbounds = kbounds,

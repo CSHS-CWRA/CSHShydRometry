@@ -45,10 +45,11 @@
   and `nls_maxiter` in `rc_power()` and `rc_2seg_power()`, and `tol` in
   `rc_power_log()`.
 
-* `rc_2seg_power()`'s `config` argument is renamed `controls`, since it says
-  how the two hydraulic controls combine above the breakpoint, and its values
-  `"piecewise"` and `"compound"` are renamed `"successive"` (the upper power
-  law takes over from the lower) and `"additive"` (it adds to the lower).
+* `rc_2seg_power()`'s `config` argument is renamed `combine`, since it says
+  how the two segments combine above the breakpoint, and its values
+  `"piecewise"` and `"compound"` are renamed `"replace"` (the upper power law
+  takes over from the lower) and `"add"` (it adds to the lower). Both kinds
+  of curve are piecewise, so the old values did not tell them apart.
 
 * Every argument after the mandatory ones (`discharge` and `stage`, or `object`) must now
   be named in full: `...` sits between them, and the constructors reject
@@ -94,7 +95,7 @@
 
 * `rc_2seg_power()` no longer takes `contcons`, which chose the parameter
   carrying the continuity constraint. Only `"a"` was implemented, and that
-  is what `controls = "successive"` does.
+  is what `combine = "replace"` does.
 
 * `rc_2seg_power()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
