@@ -204,6 +204,13 @@ only about two-thirds of the time just above the breakpoint, against roughly
 97% for the bootstrap. Away from the breakpoint the two agree. So use
 `"delta"` for a quick look, and `"boot"` where the interval matters.
 
+## Learn more
+
+- `vignette("fitting")`: choosing gaugings, looking at their scatter, and
+  every way the package fits a curve.
+- `vignette("uncertainty")`: confidence and prediction limits, and where they
+  mislead.
+
 ## Citation
 
 To cite CSHShydRometry in publications, please use the following (which

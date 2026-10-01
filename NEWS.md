@@ -120,6 +120,15 @@
 
 ## New features
 
+* Two vignettes: `vignette("fitting")` walks through the fitting functions,
+  from choosing gaugings and looking at their scatter to two-segment curves,
+  and `vignette("uncertainty")` covers confidence and prediction limits, how
+  the weighting shapes them, and where they mislead.
+
+* `thompson` gains `rating_table`, the Water Survey's rating table in force
+  at each gauging, where recorded (2020 onwards). The rating has shifted
+  over the decades, and its documentation now says so.
+
 * Tables are always tibbles: `predict()` and the limits functions return
   them, fits store their gaugings as one, and `thompson` is one. tibble is
   now a dependency (it was suggested). Previously the output was a tibble

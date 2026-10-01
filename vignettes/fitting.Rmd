@@ -1,0 +1,275 @@
+---
+title: "Fitting rating curves"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Fitting rating curves}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4.2,
+  out.width = "100%"
+)
+has_rbam <- requireNamespace("RBaM", quietly = TRUE)
+```
+
+This vignette walks through the ways CSHShydRometry fits a rating curve: the
+relationship between a river's stage (its water level) and its discharge
+(the flow). It starts by looking at the data, which tells you which model to
+use, then fits single-segment curves in several ways, and ends with a curve
+in two segments. How sure we can be about the fitted curves is the subject
+of `vignette("uncertainty")`.
+
+```{r setup}
+library(CSHShydRometry)
+```
+
+## The gaugings
+
+A rating curve is fitted to gaugings: occasions when both stage and discharge
+were measured. The package comes with `r nrow(thompson)` gaugings from the
+Thompson River near Spences Bridge, British Columbia, made between
+`r format(min(thompson$date), "%Y")` and `r format(max(thompson$date), "%Y")`.
+
+```{r}
+thompson
+```
+
+Rating curves are drawn with stage on the vertical axis:
+
+```{r}
+plot(stage ~ discharge, data = thompson,
+     xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+```
+
+## Which gaugings to use
+
+A rating curve describes the river while its channel stays the same. Channels
+change, through erosion, deposition or work on the control, so a curve is
+usually fitted to gaugings from one period of stable conditions.
+
+One way to check is to fit a single curve to every gauging and see whether
+the gaugings drift away from it over time. The fit here, `rc_power_log()`, is
+explained below; its residuals are on the log scale, so 0.05 means about 5%.
+
+```{r}
+fit_all <- rc_power_log(discharge, stage, data = thompson)
+departure <- residuals(fit_all$model)
+
+plot(thompson$date, 100 * departure,
+     xlab = "Date of gauging", ylab = "Departure from the curve (%)")
+abline(h = 0, col = "grey")
+lines(lowess(thompson$date, 100 * departure, f = 0.3), lwd = 2)
+```
+
+The gaugings drift by several percent, up in the 1990s, down in the 2000s,
+and so on: as much as their scatter about the curve. The Water Survey's own
+rating changed too, three times between 2020 and 2024, as the `rating_table`
+column records:
+
+```{r}
+table(thompson$rating_table, useNA = "ifany")
+```
+
+For a rating to use in practice, you would choose a stable period and keep
+only its gaugings, for example with `subset(thompson, rating_table == "11")`.
+This vignette uses all `r nrow(thompson)` gaugings to illustrate the methods,
+which is fine for that purpose, but the fitted curves average over several
+ratings.
+
+## Looking at the scatter
+
+Before choosing a model, look at how the gaugings scatter about a curve.
+A loess smooth makes few assumptions about the curve's shape, so its
+residuals show the scatter fairly:
+
+```{r, fig.height = 3.4}
+smooth <- rc_loess(discharge, stage, data = thompson)
+fitted_q <- fitted(smooth$model)
+residual_q <- thompson$discharge - fitted_q
+
+op <- par(mfrow = c(1, 2))
+plot(fitted_q, residual_q, xlab = "Fitted discharge (m³/s)",
+     ylab = "Residual (m³/s)", main = "Residuals")
+abline(h = 0, col = "grey")
+plot(fitted_q, 100 * residual_q / fitted_q, xlab = "Fitted discharge (m³/s)",
+     ylab = "Residual (%)", main = "Relative residuals")
+abline(h = 0, col = "grey")
+par(op)
+```
+
+The residuals fan out as the flow grows, while the relative residuals stay
+roughly even. The scatter is roughly proportional to the flow: a constant
+percentage, not a constant amount. That matters for the fit, because
+ordinary least squares assumes the same scatter at every flow. There are two
+ways to allow for it, both below: weight the fit, or fit on the log scale.
+
+## A power law on the original scale
+
+The usual rating curve is a power law, $Q = a (h - c)^b$, where $Q$ is
+discharge, $h$ is stage, and $c$ is the stage at which the flow would stop.
+`rc_power()` fits it by least squares on the original scale:
+
+```{r}
+fit <- rc_power(discharge, stage, data = thompson)
+coef(fit)
+```
+
+By default every gauging counts equally (`wts_none()`). With
+`wts_prop()` the scatter is taken to be proportional to the flow, as the
+residuals suggested. The weights then depend on the fitted curve, so the fit
+is repeated, reweighting each time, until it settles:
+
+```{r}
+fit_prop <- rc_power(discharge, stage, data = thompson, wts = wts_prop())
+coef(fit_prop)
+fit_prop$irls$iterations
+```
+
+`wts_power()` goes one step further and estimates the power of the flow to
+which the scatter is proportional:
+
+```{r}
+fit_power <- rc_power(discharge, stage, data = thompson, wts = wts_power())
+fit_power$wts$exponent
+```
+
+An estimated power close to 1 supports `wts_prop()`. The estimate can be
+unstable with few gaugings, so compare it with the fit under `wts_prop()`.
+
+When each gauging comes with its own reported uncertainty, `wts_spec()` uses
+it directly; there is an example with the two-segment curve below. See
+`?wts` for all the weighting schemes.
+
+## A power law on the log scale
+
+Taking logs turns the power law into a straight line in $\log(h - c)$:
+
+$$
+\log Q = \log a + b \log(h - c)
+$$
+
+Equal scatter on the log scale is scatter proportional to the flow, so
+`rc_power_log()` allows for the fanning out by its choice of scale, without
+weights:
+
+```{r}
+fit_log <- rc_power_log(discharge, stage, data = thompson)
+coef(fit_log)
+```
+
+Back on the original scale, this curve estimates the geometric mean
+discharge at each stage, which is a little below the arithmetic mean.
+`fit_log$a_corrected` holds two versions of $a$ corrected for that.
+
+If the stage of zero flow is known, say from a survey of the control, give it
+as `zero_flow_stage` and only $a$ and $b$ are estimated:
+
+```{r}
+coef(rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3))
+```
+
+## Other curve shapes
+
+Not every rating follows a power law. `rc_poly()` fits a polynomial in stage,
+and `rc_loess()` a smooth curve with no set shape. Both accept the same
+weighting schemes as `rc_power()`.
+
+```{r}
+fit_cubic <- rc_poly(discharge, stage, data = thompson, degree = 3)
+fit_smooth <- rc_loess(discharge, stage, data = thompson)
+```
+
+## Comparing the fits
+
+Every fit has a `predict()` method that returns the same columns, so the
+curves can be compared side by side at chosen stages:
+
+```{r}
+at <- c(1, 4, 8)
+data.frame(
+  stage = at,
+  power = predict(fit, stage = at)$fit,
+  power_prop = predict(fit_prop, stage = at)$fit,
+  power_log = predict(fit_log, stage = at)$fit,
+  cubic = predict(fit_cubic, stage = at)$fit,
+  loess = predict(fit_smooth, stage = at)$fit
+)
+```
+
+Without `stage`, `predict()` covers the range of the gaugings, which makes it
+easy to draw the curves:
+
+```{r}
+plot(stage ~ discharge, data = thompson, col = "grey50",
+     xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+lines(stage ~ fit, data = predict(fit_prop), lwd = 2)
+lines(stage ~ fit, data = predict(fit_log), lwd = 2, lty = 2)
+lines(stage ~ fit, data = predict(fit_cubic), lwd = 2, lty = 3)
+legend("bottomright", c("Power law, proportional weights", "Power law, log scale",
+       "Cubic polynomial"), lty = 1:3, lwd = 2, bty = "n")
+```
+
+Within the range of the gaugings the curves barely differ. They part company
+beyond it; `vignette("uncertainty")` takes that up.
+
+## A curve in two segments
+
+Where the control changes, for example when the water rises out of the
+channel onto a floodplain, one power law is not enough. `rc_2seg_power()`
+fits two power laws that meet at a breakpoint stage, $k$.
+
+The Ardèche at Sauze, from the RBaM package, has such a change. RBaM calls
+its columns `H`, `Q` and `uQ`; here they get the names used in this package.
+Each gauging comes with its standard uncertainty, in cubic metres per second.
+
+```{r, eval = has_rbam}
+sauze <- data.frame(
+  stage = RBaM::SauzeGaugings$H,
+  discharge = RBaM::SauzeGaugings$Q,
+  uncertainty_sd = RBaM::SauzeGaugings$uQ
+)
+plot(stage ~ discharge, data = sauze,
+     xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+```
+
+The reported uncertainties give the weights directly, through `wts_spec()`.
+How the two segments combine above the breakpoint is set by `controls`:
+`"successive"` (the default) lets the upper power law take over from the
+lower one, and `"additive"` adds it to the discharge the lower one carries.
+
+```{r, eval = has_rbam}
+fit_succ <- rc_2seg_power(discharge, stage, data = sauze,
+                          wts = wts_spec(1 / uncertainty_sd^2))
+fit_add <- rc_2seg_power(discharge, stage, data = sauze,
+                         controls = "additive",
+                         wts = wts_spec(1 / uncertainty_sd^2))
+c(successive = fit_succ$pars$k, additive = fit_add$pars$k)
+```
+
+The fit is sensitive to where the search for the breakpoint starts, so by
+default it tries several starting values and keeps the best. What each
+start led to is recorded:
+
+```{r, eval = has_rbam}
+fit_succ$kstart_search
+```
+
+```{r, eval = has_rbam}
+plot(stage ~ discharge, data = sauze, col = "grey50",
+     xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+lines(stage ~ fit, data = predict(fit_succ), lwd = 2)
+lines(stage ~ fit, data = predict(fit_add), lwd = 2, lty = 2)
+abline(h = fit_succ$pars$k, col = "grey", lty = 3)
+legend("bottomright", c("Successive controls", "Additive controls"),
+       lty = 1:2, lwd = 2, bty = "n")
+```
+
+Gaugings are sparse near the breakpoint at Sauze, so where exactly it lies is
+uncertain, which affects the limits on the curve there; see
+`vignette("uncertainty")`.

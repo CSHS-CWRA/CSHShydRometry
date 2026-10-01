@@ -1,0 +1,198 @@
+---
+title: "Uncertainty in predicted discharge"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Uncertainty in predicted discharge}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4.2,
+  out.width = "100%"
+)
+has_rbam <- requireNamespace("RBaM", quietly = TRUE)
+```
+
+A rating curve turns a recorded stage into a discharge, and that discharge is
+uncertain. This vignette shows how CSHShydRometry puts limits on it, what the
+limits mean, and where they can mislead. The fits themselves are covered in
+`vignette("fitting")`, which also explains why the Thompson gaugings used here
+illustrate the methods rather than give a rating for any one period.
+
+```{r setup}
+library(CSHShydRometry)
+```
+
+## Two kinds of limits
+
+`predict()` gives two kinds of limits, each at a level you choose:
+
+- **Confidence limits** (`conflev`) bound the *curve*: the mean discharge at
+  a stage. They reflect only how well the gaugings pin the curve down, and
+  narrow as gaugings accumulate.
+- **Prediction limits** (`predlev`) bound a *single new gauging* at that
+  stage. They add the scatter of individual gaugings about the curve, so they
+  are always wider, and do not narrow below that scatter however many
+  gaugings there are.
+
+```{r}
+fit <- rc_power(discharge, stage, data = thompson, wts = "prop")
+predict(fit, stage = c(1, 4, 8), conflev = 0.95, predlev = 0.95)
+```
+
+Which to use depends on the question. Discharge averaged over a period, where
+the scatter of individual gaugings largely cancels, calls for confidence
+limits. Discharge at a particular moment calls for prediction limits.
+
+```{r}
+band <- predict(fit, conflev = 0.95, predlev = 0.95)
+
+plot(stage ~ discharge, data = thompson, col = "grey50",
+     xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+lines(stage ~ fit, data = band, lwd = 2)
+lines(stage ~ ci_lwr, data = band, lty = 2)
+lines(stage ~ ci_upr, data = band, lty = 2)
+lines(stage ~ pi_lwr, data = band, lty = 3)
+lines(stage ~ pi_upr, data = band, lty = 3)
+legend("bottomright", c("Fitted curve", "95% confidence limits",
+       "95% prediction limits"), lty = 1:3, lwd = c(2, 1, 1), bty = "n")
+```
+
+## The weighting shapes the limits
+
+The weighting scheme is a statement about the scatter, so it decides how the
+prediction limits change with the flow. With `wts_none()` the scatter is the
+same at every flow; with `wts_prop()` it grows in proportion to the flow.
+
+```{r}
+at <- c(1, 8)
+widths <- function(fit) {
+  p <- predict(fit, stage = at, predlev = 0.95)
+  p$pi_upr - p$pi_lwr
+}
+data.frame(
+  stage = at,
+  none = widths(rc_power(discharge, stage, data = thompson)),
+  prop = widths(fit)
+)
+```
+
+Under `wts_none()` the prediction band is nearly as wide at low flow as at
+high flow, which is implausible here: the gaugings in `vignette("fitting")`
+scatter in proportion to the flow. Under `wts_prop()` the band is narrow at
+low flow and wide at high flow, as the gaugings are.
+
+Under `wts_spec()`, each gauging's scatter is supplied rather than estimated,
+so the fit says nothing about the scatter of a new gauging. Its prediction
+limits come back as `NA`, while its confidence limits are computed as usual.
+
+## Fits on the log scale
+
+`rc_power_log()` works on the log scale, where the limits are symmetric.
+Transformed back to discharge they are lopsided, stretching further above
+the curve than below it:
+
+```{r}
+fit_log <- rc_power_log(discharge, stage, data = thompson)
+p <- predict(fit_log, stage = 8, predlev = 0.95)
+c(below = p$fit - p$pi_lwr, above = p$pi_upr - p$fit)
+```
+
+The curve itself estimates the geometric mean discharge, which is below the
+arithmetic mean by a factor that grows with the scatter. With scatter of
+about `r round(100 * fit_log$rse)`% here, the difference is small:
+
+```{r}
+fit_log$a_corrected / fit_log$pars$a
+```
+
+### The stage of zero flow
+
+When the stage of zero flow, $c$, is estimated, its uncertainty is part of
+the limits. Holding it fixed removes that part. That is right when $c$ is
+known independently, say from a survey of the control. Fixing it at the value
+estimated from the same gaugings, though, gives the same curve with limits
+that are too narrow:
+
+```{r}
+fixed <- rc_power_log(discharge, stage, data = thompson,
+                      zero_flow_stage = fit_log$pars$c)
+width_at <- function(fit, at) {
+  p <- predict(fit, stage = at, conflev = 0.95)
+  p$ci_upr - p$ci_lwr
+}
+c(c_estimated = width_at(fit_log, 3), c_fixed = width_at(fixed, 3))
+```
+
+## Beyond the gaugings
+
+Limits are only as good as the model, and the model is only checked where
+there are gaugings. Beyond them, the choice of curve matters more than any
+limit suggests. Here three curves that agree within the gaugings are taken
+half again past the highest one:
+
+```{r}
+top <- max(thompson$stage)
+beyond <- seq(top, 1.5 * top, length.out = 50)
+fits <- list(
+  "Power law" = fit,
+  "Cubic polynomial" = rc_poly(discharge, stage, data = thompson, degree = 3),
+  "Loess" = rc_loess(discharge, stage, data = thompson)
+)
+curves <- lapply(fits, predict, stage = beyond)
+
+plot(NULL, xlim = range(sapply(curves, function(p) range(p$fit))),
+     ylim = range(beyond), xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+for (i in seq_along(curves)) {
+  lines(stage ~ fit, data = curves[[i]], lty = i, lwd = 2)
+}
+legend("bottomright", names(fits), lty = seq_along(fits), lwd = 2, bty = "n")
+```
+
+The power law follows the physics of flow through a control, so it is the
+safer guide for modest extrapolation. A polynomial or loess curve has no such
+basis outside the data. None of their limits accounts for the chance that
+the control itself changes at higher stages.
+
+## Two-segment curves: limits near the breakpoint
+
+For a two-segment curve, `predict()` offers two methods. The default,
+`method = "delta"`, approximates the curve by a straight line in its
+parameters. That works well away from the breakpoint, but the curve has a
+corner there, and the approximation jumps across it. `method = "boot"` refits
+the curve to resampled gaugings instead, which makes no such approximation.
+
+```{r, eval = has_rbam}
+sauze <- data.frame(
+  stage = RBaM::SauzeGaugings$H,
+  discharge = RBaM::SauzeGaugings$Q,
+  uncertainty_sd = RBaM::SauzeGaugings$uQ
+)
+fit2 <- rc_2seg_power(discharge, stage, data = sauze,
+                      wts = wts_spec(1 / uncertainty_sd^2))
+near_k <- fit2$pars$k + c(-0.05, 0.05)
+
+delta <- predict(fit2, stage = near_k, conflev = 0.95)
+boot <- predict(fit2, stage = near_k, conflev = 0.95,
+                method = "boot", B = 200, seed = 1)
+data.frame(
+  stage = near_k,
+  delta_width = delta$ci_upr - delta$ci_lwr,
+  boot_width = boot$ci_upr - boot$ci_lwr
+)
+```
+
+Just above the breakpoint the delta band is several times wider than just
+below it, a jump that comes from the approximation, not the data. In a
+simulation study, a nominal 95% delta interval covered the true curve only
+about two-thirds of the time just above the breakpoint, against roughly 97%
+for the bootstrap.
+
+The bootstrap costs a full refit per resample, and the refits repeat the
+search over starting breakpoints. So use `"delta"` for a quick look, and
+`"boot"` where the limits near the breakpoint matter.

@@ -39,15 +39,15 @@ carry a reported uncertainty.
 
 ``` r
 head(thompson)
-#> # A tibble: 6 × 4
-#>   date       stage discharge uncertainty_pct
-#>   <date>     <dbl>     <dbl>           <dbl>
-#> 1 1994-03-29 1.01        266              NA
-#> 2 1994-05-20 5.58       2000              NA
-#> 3 1994-09-15 1.76        451              NA
-#> 4 1995-03-17 0.645       197              NA
-#> 5 1995-06-09 6.40       2440              NA
-#> 6 1996-06-27 6.03       2290              NA
+#> # A tibble: 6 × 5
+#>   date       stage discharge uncertainty_pct rating_table
+#>   <date>     <dbl>     <dbl>           <dbl> <chr>       
+#> 1 1994-03-29 1.01        266              NA <NA>        
+#> 2 1994-05-20 5.58       2000              NA <NA>        
+#> 3 1994-09-15 1.76        451              NA <NA>        
+#> 4 1995-03-17 0.645       197              NA <NA>        
+#> 5 1995-06-09 6.40       2440              NA <NA>        
+#> 6 1996-06-27 6.03       2290              NA <NA>
 ```
 
 By convention, rating curves are drawn with stage on the vertical axis.
@@ -249,6 +249,13 @@ curve only about two-thirds of the time just above the breakpoint,
 against roughly 97% for the bootstrap. Away from the breakpoint the two
 agree. So use `"delta"` for a quick look, and `"boot"` where the
 interval matters.
+
+## Learn more
+
+- `vignette("fitting")`: choosing gaugings, looking at their scatter,
+  and every way the package fits a curve.
+- `vignette("uncertainty")`: confidence and prediction limits, and where
+  they mislead.
 
 ## Citation
 

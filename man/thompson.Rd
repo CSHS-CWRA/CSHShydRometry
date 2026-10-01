@@ -5,7 +5,7 @@
 \alias{thompson}
 \title{Thompson River gaugings}
 \format{
-A tibble with 93 rows and 4 columns:
+A tibble with 93 rows and 5 columns:
 \describe{
 \item{date}{Date of the measurement.}
 \item{stage}{Stage, in meters (the mean gauge height for the visit).}
@@ -13,6 +13,9 @@ A tibble with 93 rows and 4 columns:
 \item{uncertainty_pct}{Reported uncertainty of the discharge, as a
 percentage of it at two standard deviations (the "IVE method, 2-sigma
 value"), or \code{NA} where none was given.}
+\item{rating_table}{The Water Survey's rating table in force at the
+gauging, such as \code{"11"}, or \code{NA} where none was recorded (all gaugings
+before 2020).}
 }
 }
 \source{
@@ -35,6 +38,13 @@ two standard deviations, so the standard uncertainty of a discharge, in
 cubic meters per second, is \code{uncertainty_pct / 100 * discharge / 2}.
 Fits using \code{wts_code = "spec"} need a complete weight vector, and so need
 either the subset with an uncertainty or weights from elsewhere.
+
+The rating at the station has shifted over the decades: gaugings from
+different periods depart from a single fitted curve by several percent in
+opposite directions, and the Water Survey's rating table changed three
+times between 2020 and 2024. A curve fitted to all 93 gaugings is fine for
+illustration, but a rating for a given period should use gaugings from a
+period of stable channel conditions; see \code{vignette("fitting")}.
 
 One uncertainty may be incorrect: the gauging of 2018-11-01 has 0.0226,
 where the others lie between about 2.5 and 11. It may have been entered as
