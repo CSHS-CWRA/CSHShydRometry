@@ -253,7 +253,18 @@ gnls_limits <- function(mod, stage_df, conflev, predlev, ...) {
       level = level,
       ...
     )
-    lims[, c(3, 4), drop = FALSE]
+    # predict_gnls() names the limits after their quantiles, e.g. Q2.5 and
+    # Q97.5 at level 0.95; build the names the same way, and select by them
+    lwr <- paste0("Q", (1 - level) / 2 * 100)
+    upr <- paste0("Q", (1 - (1 - level) / 2) * 100)
+    if (!all(c(lwr, upr) %in% colnames(lims))) {
+      stop(
+        "Unexpected columns from nlraa::predict_gnls(): expected ", lwr,
+        " and ", upr, ", found ", paste(colnames(lims), collapse = ", "), ".",
+        call. = FALSE
+      )
+    }
+    list(lwr = unname(lims[, lwr]), upr = unname(lims[, upr]))
   }
   out_df <- data.frame(
     stage = stage_df$stage,
@@ -261,13 +272,13 @@ gnls_limits <- function(mod, stage_df, conflev, predlev, ...) {
   )
   if (!is.null(conflev)) {
     ci <- limits("confidence", conflev)
-    out_df$ci_lwr <- ci[, 1]
-    out_df$ci_upr <- ci[, 2]
+    out_df$ci_lwr <- ci$lwr
+    out_df$ci_upr <- ci$upr
   }
   if (!is.null(predlev)) {
     pi <- limits("prediction", predlev)
-    out_df$pi_lwr <- pi[, 1]
-    out_df$pi_upr <- pi[, 2]
+    out_df$pi_lwr <- pi$lwr
+    out_df$pi_upr <- pi$upr
   }
   tibble::as_tibble(out_df)
 }
