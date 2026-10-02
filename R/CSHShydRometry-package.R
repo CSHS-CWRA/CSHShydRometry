@@ -21,16 +21,16 @@
 #'
 #' Two segments, joined at an estimated breakpoint:
 #' \itemize{
-#'   \item [rc_2seg_power()] — `combine = "replace"`: the upper power law
-#'     takes over from the lower at the breakpoint; `combine = "add"`:
-#'     it adds to the discharge carried at the breakpoint.
+#'   \item [rc_2seg_power()] — with `combine = "replace"`: the upper power
+#'     law takes over from the lower at the breakpoint; with 
+#'     `combine = "add"`: it adds to the discharge carried at the breakpoint.
 #' }
 #'
 #' @section Weighting:
 #' The constructors that take `wts` offer three error models: [wts_none()]
-#' (constant variance), [wts_prop()] (scatter proportional to the flow, or
-#' to a power of it, which [rc_power()] can also estimate; fitted by
-#' iteratively reweighted least squares), and [wts_spec()]
+#' (constant variance), [wts_prop()] (scatter proportional to the flow),
+#' [rc_power()] (proportional to a power of flow, with the power estimated),
+#' and [wts_spec()]
 #' (variances supplied by the user, typically from reported gauging
 #' uncertainties). Under [wts_spec()] a new observation's scatter is not
 #' identified by the fit, so prediction limits are returned as `NA`. See
