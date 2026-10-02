@@ -138,9 +138,10 @@ new_wts <- function(type, ...) {
 #' A weighting scheme described by an nlme variance function
 #'
 #' The scatter as a function of the fitted values, in the terms of
-#' [nlme::varFunc()]. `wts_prop()` and `wts_power()` are built on this, so
-#' that a public version could later accept any of nlme's variance functions,
-#' fitted by [nlme::gnls()]. A variance function with no free parameters,
+#' [nlme::varFunc()], for `wts_power()`, whose power [nlme::gnls()]
+#' estimates; `wts_prop()` is built on it too, for consistency. This is
+#' internal, and not a commitment to nlme: if the estimation moves in-house,
+#' it can go. A variance function with no free parameters,
 #' like `wts_prop()`'s, need not be fitted by [nlme::gnls()]: the fitting
 #' functions reweight in rounds instead.
 #'

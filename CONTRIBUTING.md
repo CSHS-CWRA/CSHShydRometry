@@ -68,8 +68,8 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
   by reweighting in rounds. That would make it available in every fitting
   function, not only `rc_power()`, and remove the dependence on
   `nlme::gnls()`.
-* Further estimated shapes, such as an exponential (`wts_exp()`), and a
-  public `wts_nlme()` accepting any of nlme's variance functions.
+* Further estimated shapes for the scatter, such as an exponential
+  (`wts_exp()`).
 * Known uncertainty plus extra scatter that grows with the flow, as one
   scheme (`wts_comb()`).
 * Weighting on the log-log scale, in `rc_power_log()`.

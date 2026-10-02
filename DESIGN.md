@@ -21,7 +21,9 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
   the power *estimated*. Estimating a variance parameter needs a likelihood,
   which `nlme::gnls()` provides, so it is available in `rc_power()` only.
 - Both are built on an internal `wts_nlme()`, which records the variance
-  function in nlme's terms: `varPower(fixed = 1)` and `varPower()`.
+  function in nlme's terms: `varPower(fixed = 1)` and `varPower()`. This is
+  an internal convenience while `gnls()` does the estimating, not a
+  commitment to nlme: see below.
 
 **Why.**
 
@@ -41,9 +43,10 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
 
 **What it leaves open.**
 
-- A public `wts_nlme()` accepting any of nlme's variance functions, fitted
-  by `gnls()` in `rc_power()`. Further estimated families, such as an
-  exponential (`varExp()`), would sit beside `wts_power()`.
+- Further estimated shapes for the scatter, such as an exponential
+  (`wts_exp()`), would sit beside `wts_power()`. A public interface to
+  nlme's variance functions is deliberately not planned, since the package
+  may move away from nlme.
 - `gnls()` is an implementation choice, not a statistical necessity. The
   power could be estimated for any fitting function, for example by
   maximising the profile likelihood over the power, refitting at each value
