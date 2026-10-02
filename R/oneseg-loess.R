@@ -13,7 +13,9 @@
 #' @param degree Degree of local polynomials (1 or 2).
 #' @param span Smoothing parameter, passed to `stats::loess()`.
 #' @param extrapolate Single logical; allow extrapolation beyond the
-#'   observed stage range? Default is `TRUE`.
+#'   observed stage range? Default is `TRUE`. If `FALSE`, predictions outside
+#'   the range of the gaugings are `NA`. (This sets loess's `surface` to
+#'   `"direct"` or `"interpolate"`; see [stats::predict.loess()].)
 #' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
 #'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
 #'   with the weights. See [wts]. Under `wts_prop()`
@@ -57,6 +59,9 @@ rc_loess <- function(
   stage <- qh$stage
   # fit a loess curve with the given weights (the reweighting helper passes
   # starting values too, which loess does not need)
+  # loess's default surface, "interpolate", gives NA outside the range of
+  # the gaugings; "direct" computes the local fit at any stage, and so
+  # extrapolates. This is documented in ?predict.loess, not ?loess.control.
   surface <- if (extrapolate) "direct" else "interpolate"
   fit_lo <- function(wts, start = NULL) {
     stats::loess(
@@ -137,6 +142,11 @@ predict.rc_loess <- function(
   yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
   out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
+    # se.fit is the standard error of the fitted curve, not of a new gauging
+    # (?predict.loess calls it `se`, but the element is named se.fit). Loess
+    # is a linear smoother, and se.fit equals residual.scale times the root
+    # sum of squares of the smoother weights, each divided by its gauging's
+    # weight; it leaves out any smoothing bias.
     lo_pred <- stats::predict(mod, se = TRUE, newdata = stage_df, ...)
     tc <- stats::qt(0.5 + 0.5 * conflev, lo_pred[["df"]])
     ci_mat <- cbind(

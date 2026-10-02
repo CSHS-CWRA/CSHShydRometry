@@ -33,7 +33,9 @@ evaluated.}
 \item{span}{Smoothing parameter, passed to \code{stats::loess()}.}
 
 \item{extrapolate}{Single logical; allow extrapolation beyond the
-observed stage range? Default is \code{TRUE}.}
+observed stage range? Default is \code{TRUE}. If \code{FALSE}, predictions outside
+the range of the gaugings are \code{NA}. (This sets loess's \code{surface} to
+\code{"direct"} or \code{"interpolate"}; see \code{\link[stats:predict.loess]{stats::predict.loess()}}.)}
 
 \item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
 \code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
