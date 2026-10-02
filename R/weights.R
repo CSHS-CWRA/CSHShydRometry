@@ -22,7 +22,8 @@
 #'   that is a matter of implementation, as the other fitting functions are not
 #'   made with [nlme::gnls()]. The estimate can be unstable with few gaugings;
 #'   compare it with the fit under `wts_prop()`. The estimated power is kept on
-#'   the fit, in `fit$wts$exponent`.
+#'   the fit, in `fit$wts$exponent`. The limits from `predict()` treat it as
+#'   known, so they leave out the uncertainty in the power.
 #' * `wts_spec()`: the scatter of each gauging is known, typically from its
 #'   reported uncertainty, and given as weights: the reciprocal of each
 #'   gauging's variance. A new gauging's scatter is then not estimated, so

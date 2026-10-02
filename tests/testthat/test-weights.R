@@ -133,3 +133,30 @@ test_that("both schemes record nlme's description of the scatter", {
   expect_s3_class(wts_prop()$variance, "varPower")
   expect_s3_class(wts_power()$variance, "varPower")
 })
+
+test_that("wts_power() limits are reproducible", {
+  fit <- rc_power(discharge, stage, data = thompson, wts = wts_power())
+  at <- c(1, 4, 8)
+  expect_identical(
+    predict(fit, stage = at, conflev = 0.95, predlev = 0.95),
+    predict(fit, stage = at, conflev = 0.95, predlev = 0.95)
+  )
+})
+
+test_that("wts_power() limits at a power of 1 match those under wts_prop()", {
+  # gnls() with the power fixed at 1 reaches the same fit as the rounds
+  prop <- rc_power(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-10))
+  ref <- nlme::gnls(
+    discharge ~ a * (stage - c)^b,
+    data = as.data.frame(thompson[, c("discharge", "stage")]),
+    start = as.list(coef(prop)),
+    weights = nlme::varPower(fixed = 1)
+  )
+  at <- c(1, 4, 8)
+  expect_equal(
+    gnls_limits(ref, data.frame(stage = at), power = 1, conflev = 0.9,
+                predlev = 0.9),
+    predict(prop, stage = at, conflev = 0.9, predlev = 0.9),
+    tolerance = 1e-5
+  )
+})

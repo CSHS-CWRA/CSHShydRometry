@@ -176,8 +176,8 @@ predict.rc_power <- function(
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
   if (inherits(mod, "gnls")) {
-    # the power was estimated: nlraa handles the gnls fit
-    return(gnls_limits(mod, stage_df, conflev, predlev, ...))
+    # the power was estimated, by nlme::gnls()
+    return(gnls_limits(mod, stage_df, object$wts$exponent, conflev, predlev))
   }
   yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
   out_df <- data.frame(stage = stage, fit = yvec)
@@ -238,47 +238,45 @@ predict.rc_power <- function(
 
 #' Limits for a power law fitted with the power of its scatter estimated
 #'
-#' @param mod An [nlme::gnls()] fit.
+#' Delta-method limits for a power law fitted by [nlme::gnls()] with the
+#' scatter proportional to a power of the fitted flow. The curve's standard
+#' error is `sqrt(g' V g)`, where `g` is the gradient of `a (h - c)^b` in its
+#' parameters and `V` their covariance matrix. A new gauging adds its scatter,
+#' `sigma^2 fit^(2 power)`. The estimated power is treated as known, and the
+#' limits use the t distribution on the fit's residual degrees of freedom.
+#'
+#' @param mod An [nlme::gnls()] fit of `a * (stage - c)^b`.
 #' @param stage_df Data frame of stages, with column `stage`.
+#' @param power The estimated power of the scatter.
 #' @param conflev,predlev Levels, or `NULL` to omit those limits.
-#' @param ... Passed on to [nlraa::predict_gnls()].
 #' @return A tibble of predictions and limits.
 #' @noRd
-gnls_limits <- function(mod, stage_df, conflev, predlev, ...) {
-  limits <- function(interval, level) {
-    lims <- nlraa::predict_gnls(
-      mod,
-      newdata = stage_df,
-      interval = interval,
-      level = level,
-      ...
-    )
-    # predict_gnls() names the limits after their quantiles, e.g. Q2.5 and
-    # Q97.5 at level 0.95; build the names the same way, and select by them
-    lwr <- paste0("Q", (1 - level) / 2 * 100)
-    upr <- paste0("Q", (1 - (1 - level) / 2) * 100)
-    if (!all(c(lwr, upr) %in% colnames(lims))) {
-      stop(
-        "Unexpected columns from nlraa::predict_gnls(): expected ", lwr,
-        " and ", upr, ", found ", paste(colnames(lims), collapse = ", "), ".",
-        call. = FALSE
-      )
-    }
-    list(lwr = unname(lims[, lwr]), upr = unname(lims[, upr]))
-  }
-  out_df <- data.frame(
-    stage = stage_df$stage,
-    fit = unname(nlraa::predict_gnls(mod, newdata = stage_df, ...))
+gnls_limits <- function(mod, stage_df, power, conflev, predlev) {
+  coefs <- stats::coef(mod)
+  a <- coefs[["a"]]
+  b <- coefs[["b"]]
+  c <- coefs[["c"]]
+  depth <- stage_df$stage - c
+  fit <- a * depth^b
+  gradient <- cbind(
+    a = depth^b,
+    b = fit * log(depth),
+    c = -a * b * depth^(b - 1)
   )
+  vcov_mat <- stats::vcov(mod)[colnames(gradient), colnames(gradient)]
+  se_fit <- sqrt(rowSums((gradient %*% vcov_mat) * gradient))
+  df <- mod$dims$N - mod$dims$p
+  out_df <- data.frame(stage = stage_df$stage, fit = fit)
   if (!is.null(conflev)) {
-    ci <- limits("confidence", conflev)
-    out_df$ci_lwr <- ci$lwr
-    out_df$ci_upr <- ci$upr
+    margin <- stats::qt((1 + conflev) / 2, df) * se_fit
+    out_df$ci_lwr <- fit - margin
+    out_df$ci_upr <- fit + margin
   }
   if (!is.null(predlev)) {
-    pi <- limits("prediction", predlev)
-    out_df$pi_lwr <- pi$lwr
-    out_df$pi_upr <- pi$upr
+    se_new <- sqrt(se_fit^2 + mod$sigma^2 * fit^(2 * power))
+    margin <- stats::qt((1 + predlev) / 2, df) * se_new
+    out_df$pi_lwr <- fit - margin
+    out_df$pi_upr <- fit + margin
   }
   tibble::as_tibble(out_df)
 }

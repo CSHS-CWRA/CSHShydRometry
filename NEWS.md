@@ -24,6 +24,16 @@
   (`var_type`); only the power of the mean, which every example used, is
   kept.
 
+* Limits for fits under `wts_power()` are now computed by the delta method,
+  as for the other power-law fits, rather than simulated by
+  `nlraa::predict_gnls()`. They are the same every time `predict()` is
+  called, and treat the estimated power as known. The simulated confidence
+  limits were also too wide: the parameters of a power law are strongly
+  correlated, and draws from their approximate normal distribution stray
+  where the curve is far from linear in them. On the Thompson gaugings, a
+  case bootstrap agrees with the delta method. nlraa is no longer a
+  dependency, and `predict()` no longer passes `...` on to it.
+
 * `rc_log_ols()` is removed. It gave the same estimates as `rc_log_nls()`,
   but treated the estimated `c` as known when computing limits, which left
   its uncertainty out. `rc_power_log()` instead gains a `zero_flow_stage`

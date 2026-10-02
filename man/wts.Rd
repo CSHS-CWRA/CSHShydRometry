@@ -63,7 +63,8 @@ from the fit under \code{wts_prop()}. It is available in \code{\link[=rc_power]{
 that is a matter of implementation, as the other fitting functions are not
 made with \code{\link[nlme:gnls]{nlme::gnls()}}. The estimate can be unstable with few gaugings;
 compare it with the fit under \code{wts_prop()}. The estimated power is kept on
-the fit, in \code{fit$wts$exponent}.
+the fit, in \code{fit$wts$exponent}. The limits from \code{predict()} treat it as
+known, so they leave out the uncertainty in the power.
 \item \code{wts_spec()}: the scatter of each gauging is known, typically from its
 reported uncertainty, and given as weights: the reciprocal of each
 gauging's variance. A new gauging's scatter is then not estimated, so
