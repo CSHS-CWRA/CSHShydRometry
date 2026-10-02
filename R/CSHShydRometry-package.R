@@ -27,14 +27,18 @@
 #' }
 #'
 #' @section Weighting:
-#' The constructors that take `wts` offer three error models: [wts_none()]
-#' (constant variance), [wts_prop()] (scatter proportional to the flow),
-#' [rc_power()] (proportional to a power of flow, with the power estimated),
-#' and [wts_spec()]
-#' (variances supplied by the user, typically from reported gauging
-#' uncertainties). Under [wts_spec()] a new observation's scatter is not
-#' identified by the fit, so prediction limits are returned as `NA`. See
-#' [wts].
+#' The constructors that take `wts` offer four models of how the gaugings
+#' scatter about the curve:
+#' \itemize{
+#'   \item [wts_none()] — the same scatter at every flow (constant variance).
+#'   \item [wts_prop()] — scatter proportional to the flow.
+#'   \item [wts_power()] — scatter proportional to a power of the flow, with
+#'     the power estimated; [rc_power()] only.
+#'   \item [wts_spec()] — variances supplied by the user, typically from
+#'     reported gauging uncertainties. A new observation's scatter is then
+#'     not identified by the fit, so prediction limits are returned as `NA`.
+#' }
+#' See [wts].
 #'
 #' @section Confidence and prediction limits:
 #' `predict()` returns the same columns whatever the model, the method or the

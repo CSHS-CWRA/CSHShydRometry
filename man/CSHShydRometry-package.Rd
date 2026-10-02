@@ -26,22 +26,26 @@ log-log scale, with the stage of zero flow estimated or given.
 
 Two segments, joined at an estimated breakpoint:
 \itemize{
-\item \code{\link[=rc_2seg_power]{rc_2seg_power()}} — \code{combine = "replace"}: the upper power law
-takes over from the lower at the breakpoint; \code{combine = "add"}:
-it adds to the discharge carried at the breakpoint.
+\item \code{\link[=rc_2seg_power]{rc_2seg_power()}} — with \code{combine = "replace"}: the upper power
+law takes over from the lower at the breakpoint; with
+\code{combine = "add"}: it adds to the discharge carried at the breakpoint.
 }
 }
 
 \section{Weighting}{
 
-The constructors that take \code{wts} offer three error models: \code{\link[=wts_none]{wts_none()}}
-(constant variance), \code{\link[=wts_prop]{wts_prop()}} (scatter proportional to the flow, or
-to a power of it, which \code{\link[=rc_power]{rc_power()}} can also estimate; fitted by
-iteratively reweighted least squares), and \code{\link[=wts_spec]{wts_spec()}}
-(variances supplied by the user, typically from reported gauging
-uncertainties). Under \code{\link[=wts_spec]{wts_spec()}} a new observation's scatter is not
-identified by the fit, so prediction limits are returned as \code{NA}. See
-\link{wts}.
+The constructors that take \code{wts} offer four models of how the gaugings
+scatter about the curve:
+\itemize{
+\item \code{\link[=wts_none]{wts_none()}} — the same scatter at every flow (constant variance).
+\item \code{\link[=wts_prop]{wts_prop()}} — scatter proportional to the flow.
+\item \code{\link[=wts_power]{wts_power()}} — scatter proportional to a power of the flow, with
+the power estimated; \code{\link[=rc_power]{rc_power()}} only.
+\item \code{\link[=wts_spec]{wts_spec()}} — variances supplied by the user, typically from
+reported gauging uncertainties. A new observation's scatter is then
+not identified by the fit, so prediction limits are returned as \code{NA}.
+}
+See \link{wts}.
 }
 
 \section{Confidence and prediction limits}{
