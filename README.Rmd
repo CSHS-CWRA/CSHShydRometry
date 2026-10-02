@@ -62,27 +62,33 @@ plot(stage ~ discharge, data = thompson)
 The classic rating curve is a power law relating discharge $Q$ to stage $h$:
 
 $$
-Q = a (h - c)^b
+Q = a (h - c)^b.
 $$
 
-`rc_power()` is one method, which fits this relationship by nonlinear least squares:
+Here $c$ is the stage at which the flow would stop, $b$ says how quickly the
+flow grows as the water rises above that, and $a$ sets the scale: it is the
+discharge when the water is (a hypothetical) one meter above $c$.
+
+`rc_power()` is one method, which fits this relationship by (nonlinear) least squares:
 
 ```{r fit}
 fit <- rc_power(discharge, stage, data = thompson)
 ```
 
-Like the result of `lm()` or `glm()`, `fit` is a fitted-model object. Printing
+Like the result of statistical models commonly used in R, such as `lm()` or `glm()`, 
+`fit` is a fitted-model object. Printing
 it says what kind of model it is, and it works with the usual tools, such as
 `coef()` and `predict()`. `?rating_curve` describes what is inside.
 
 ```{r fit-print}
 fit
-coef(fit)
 ```
 
-Here $c$ is the stage at which the flow would stop, $b$ says how quickly the
-flow grows as the water rises above that, and $a$ sets the scale: it is the
-discharge when the water is one meter above $c$.
+Here are the estimates of the parameters $a$, $b$, and $c$:
+
+```{r coef}
+coef(fit)
+```
 
 ## Predicting discharge
 
@@ -170,8 +176,11 @@ plot(stage ~ discharge, data = sauze)
 weight each gauging by its reported uncertainty:
 
 ```{r twoseg}
-fit2 <- rc_2seg_power(discharge, stage, data = sauze,
-                    wts = wts_spec(1 / uncertainty_sd^2))
+fit2 <- rc_2seg_power(
+  discharge, stage,
+  data = sauze,
+  wts = wts_spec(1 / uncertainty_sd^2)
+)
 fit2$pars$k
 ```
 
@@ -191,9 +200,19 @@ band does not:
 
 ```{r delta-boot}
 near_k <- fit2$pars$k + c(-0.05, 0.05)
-delta <- predict(fit2, stage = near_k, conflev = 0.95)
-boot <- predict(fit2, stage = near_k, conflev = 0.95, method = "boot", B = 200,
-                seed = 1)
+delta <- predict(
+  fit2,
+  stage = near_k,
+  conflev = 0.95
+)
+boot <- predict(
+  fit2,
+  stage = near_k,
+  conflev = 0.95,
+  method = "boot",
+  B = 200,
+  seed = 1
+)
 
 delta$ci_upr - delta$ci_lwr
 boot$ci_upr - boot$ci_lwr
