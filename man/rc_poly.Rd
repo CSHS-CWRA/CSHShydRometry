@@ -16,8 +16,8 @@ or an expression evaluated in \code{data}, such as a column name.}
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{data}{Optional data frame in which \code{discharge}, \code{stage} and \code{wts}
-are evaluated.}
+\item{data}{Optional data frame in which \code{discharge} and \code{stage} are
+evaluated.}
 
 \item{degree}{Polynomial degree.}
 

@@ -108,8 +108,9 @@ leave open. If your change revisits one of them, update its entry.
   `stage`, not `q` and `h`.
 * In exported functions, put `...` straight after the required arguments, so
   that every optional argument has to be named in full.
-* Per-gauging arguments (discharge, stage, weights) are looked up in `data`,
-  so users can refer to its columns directly.
+* `discharge` and `stage` are looked up in `data`, so users can refer to its
+  columns directly. Arguments of the `wts_*()` functions are ordinary
+  arguments; see [DESIGN.md](DESIGN.md).
 
 ### Prefer to email?
 

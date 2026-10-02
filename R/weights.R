@@ -31,9 +31,13 @@
 #' The strings `"none"`, `"prop"` and `"power"` are shorthand for
 #' `wts_none()`, `wts_prop()` and `wts_power()` with their defaults.
 #'
-#' @param values <[`data-masking`][rlang::args_data_masking]> The weights, one
-#'   per gauging: a vector, or an expression evaluated in the fit's `data`,
-#'   such as `1 / uncertainty_sd^2`.
+#' @param values The weights, one per gauging, as a numeric vector: for
+#'   example `1 / sd^2`, where `sd` is the standard uncertainty of each
+#'   discharge. They are evaluated where `wts_spec()` is called, as an
+#'   ordinary argument, not looked up in the fit's `data`; write
+#'   `1 / sauze$uncertainty_sd^2`, not `1 / uncertainty_sd^2`. The weights of
+#'   gaugings that the fit drops, for a missing stage or discharge, are
+#'   dropped with them.
 #' @param tol Convergence tolerance: the reweighting stops once no fitted
 #'   discharge changes by more than this fraction from one round to the next.
 #' @param maxiter Maximum number of reweighting rounds.
@@ -51,7 +55,7 @@
 #' # weights from each gauging's reported uncertainty
 #' d <- thompson[!is.na(thompson$uncertainty_pct), ]
 #' d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
-#' rc_power(discharge, stage, data = d, wts = wts_spec(1 / uncertainty_sd^2))
+#' rc_power(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
 #' @name wts
 NULL
 
@@ -85,7 +89,8 @@ wts_power <- function() {
 #' @rdname wts
 #' @export
 wts_spec <- function(values) {
-  new_wts("spec", values = rlang::enquo(values))
+  checkmate::assert_numeric(values, min.len = 1L)
+  new_wts("spec", values = values)
 }
 
 
@@ -110,11 +115,7 @@ print.rc_wts <- function(x, ...) {
         x$exponent
       )
     },
-    spec = if (rlang::is_quosure(x$values)) {
-      paste("specified:", rlang::as_label(x$values))
-    } else {
-      sprintf("specified, for %d gaugings", length(x$values))
-    }
+    spec = sprintf("specified, for %d gaugings", length(x$values))
   )
   cat("Weighting:", desc, "\n")
   invisible(x)
@@ -159,19 +160,17 @@ wts_nlme <- function(variance, type, ...) {
 #' Resolve the `wts` argument of a fitting function
 #'
 #' Accepts an `"rc_wts"` object or the shorthand `"none"`, `"prop"` or
-#' `"power"`, and, for specified weights, evaluates the values in `data` and
-#' drops those of gaugings with a missing stage or discharge. The result
-#' holds the values themselves, so it can be stored on the fit and reused to
-#' refit.
+#' `"power"`, and, for specified weights, drops those of gaugings with a
+#' missing stage or discharge, so that the weights stay aligned with the
+#' gaugings the fit keeps.
 #'
 #' @param wts The argument as given.
-#' @param data The fit's `data`, or `NULL`.
 #' @param keep Logical vector: which gaugings are kept.
 #' @param fitter The fitting function, for error messages.
 #' @param power_ok Whether the fitting function supports [wts_power()].
 #' @return An `"rc_wts"` object.
 #' @noRd
-resolve_wts <- function(wts, data, keep, fitter, power_ok = FALSE) {
+resolve_wts <- function(wts, keep, fitter, power_ok = FALSE) {
   if (is.character(wts)) {
     wts <- switch(
       rlang::arg_match0(
@@ -205,9 +204,12 @@ resolve_wts <- function(wts, data, keep, fitter, power_ok = FALSE) {
     )
   }
   if (wts$type == "spec") {
-    values <- rlang::eval_tidy(wts$values, data)
-    checkmate::assert_numeric(values, len = length(keep), .var.name = "wts")
-    wts$values <- values[keep]
+    checkmate::assert_numeric(
+      wts$values,
+      len = length(keep),
+      .var.name = "the values of wts_spec()"
+    )
+    wts$values <- wts$values[keep]
   }
   wts
 }

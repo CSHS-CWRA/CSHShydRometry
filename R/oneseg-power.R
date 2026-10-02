@@ -10,8 +10,8 @@
 #'   vector, or an expression evaluated in `data`, such as a column name.
 #' @param stage <[`data-masking`][rlang::args_data_masking]> Stage: a vector,
 #'   or an expression evaluated in `data`, such as a column name.
-#' @param data Optional data frame in which `discharge`, `stage` and `wts`
-#'   are evaluated.
+#' @param data Optional data frame in which `discharge` and `stage` are
+#'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
@@ -36,7 +36,7 @@ rc_power <- function(
   control = stats::nls.control(maxiter = 1000, tol = 1e-6)
 ) {
   ## error checks and warnings
-  # discharge, stage and wts may use columns of `data`, or be vectors
+  # discharge and stage may use columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
@@ -44,11 +44,10 @@ rc_power <- function(
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
   checkmate::assert_list(control, names = "named")
-  # the weighting scheme; specified weights are evaluated in `data`, and
-  # kept aligned with the gaugings that remain
+  # the weighting scheme; specified weights are kept aligned with the
+  # gaugings that remain
   weighting <- resolve_wts(
     wts,
-    data,
     keep = stats::complete.cases(discharge, stage),
     fitter = "rc_power",
     power_ok = TRUE

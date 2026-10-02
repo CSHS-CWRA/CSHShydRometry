@@ -28,8 +28,8 @@ or an expression evaluated in \code{data}, such as a column name.}
 to be named, which keeps calls readable and guards against
 positional mistakes.}
 
-\item{data}{Optional data frame in which \code{discharge}, \code{stage} and \code{wts}
-are evaluated.}
+\item{data}{Optional data frame in which \code{discharge} and \code{stage} are
+evaluated.}
 
 \item{combine}{How the two segments combine above the
 breakpoint. \code{"replace"} (the default): the upper power law takes over
@@ -132,7 +132,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
     Q,
     H,
     data = sauze,
-    wts = wts_spec(1 / uQ^2),
+    wts = wts_spec(1 / sauze$uQ^2),
     kstart = 1
   )
 }

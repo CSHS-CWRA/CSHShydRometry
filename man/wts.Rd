@@ -25,9 +25,13 @@ discharge changes by more than this fraction from one round to the next.}
 
 \item{maxiter}{Maximum number of reweighting rounds.}
 
-\item{values}{<\code{\link[rlang:args_data_masking]{data-masking}}> The weights, one
-per gauging: a vector, or an expression evaluated in the fit's \code{data},
-such as \code{1 / uncertainty_sd^2}.}
+\item{values}{The weights, one per gauging, as a numeric vector: for
+example \code{1 / sd^2}, where \code{sd} is the standard uncertainty of each
+discharge. They are evaluated where \code{wts_spec()} is called, as an
+ordinary argument, not looked up in the fit's \code{data}; write
+\code{1 / sauze$uncertainty_sd^2}, not \code{1 / uncertainty_sd^2}. The weights of
+gaugings that the fit drops, for a missing stage or discharge, are
+dropped with them.}
 
 \item{x}{An \code{"rc_wts"} object.}
 
@@ -82,5 +86,5 @@ fit$wts$exponent
 # weights from each gauging's reported uncertainty
 d <- thompson[!is.na(thompson$uncertainty_pct), ]
 d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
-rc_power(discharge, stage, data = d, wts = wts_spec(1 / uncertainty_sd^2))
+rc_power(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
 }

@@ -31,11 +31,11 @@ test_that("the fit records its weighting scheme", {
 test_that("weighting schemes print what they are", {
   expect_output(print(wts_none()), "none")
   expect_output(print(wts_prop(maxiter = 20)), "maxiter = 20")
-  expect_output(print(wts_spec(1 / uncertainty_sd^2)), "1/uncertainty_sd\\^2")
+  expect_output(print(wts_spec(c(1, 2, 3))), "for 3 gaugings")
   d <- thompson[!is.na(thompson$uncertainty_pct), ]
   d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
   fit <- rc_power(discharge, stage, data = d,
-                wts = wts_spec(1 / uncertainty_sd^2))
+                wts = wts_spec(1 / d$uncertainty_sd^2))
   expect_output(print(fit$settings$wts), "for 19 gaugings")
 })
 

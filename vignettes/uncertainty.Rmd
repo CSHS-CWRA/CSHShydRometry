@@ -174,7 +174,7 @@ sauze <- data.frame(
   uncertainty_sd = RBaM::SauzeGaugings$uQ
 )
 fit2 <- rc_2seg_power(discharge, stage, data = sauze,
-                      wts = wts_spec(1 / uncertainty_sd^2))
+                      wts = wts_spec(1 / sauze$uncertainty_sd^2))
 near_k <- fit2$pars$k + c(-0.05, 0.05)
 
 delta <- predict(fit2, stage = near_k, conflev = 0.95)

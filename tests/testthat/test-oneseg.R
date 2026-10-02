@@ -42,31 +42,21 @@ test_that("gaugings with a missing stage or discharge are dropped", {
   expect_false(anyNA(fit$gaugings))
 })
 
-test_that("weights may be an expression using columns of data", {
+test_that("wts_spec() takes a vector, not a column of the fit's data", {
   d <- spec_data()
-  d$sd <- d$uncertainty_pct / 100 * d$discharge / 2
-  masked <- list(
-    rc_power(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
-    rc_poly(discharge, stage, data = d, wts = wts_spec(1 / sd^2)),
-    rc_loess(discharge, stage, data = d, wts = wts_spec(1 / sd^2),
+  d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
+  # evaluated where it is called, so a bare column name is not found
+  expect_error(wts_spec(1 / uncertainty_sd^2), "uncertainty_sd")
+  expect_error(wts_spec("not numbers"))
+  fits <- list(
+    rc_power(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2)),
+    rc_poly(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2)),
+    rc_loess(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2),
              span = 1)
   )
-  vectors <- list(
-    rc_power(discharge, stage, data = d, wts = wts_spec(d$wts)),
-    rc_poly(discharge, stage, data = d, wts = wts_spec(d$wts)),
-    rc_loess(discharge, stage, data = d, wts = wts_spec(d$wts),
-             span = 1)
-  )
-  for (i in seq_along(masked)) {
-    expect_equal(masked[[i]]$weights, vectors[[i]]$weights)
-    expect_equal(masked[[i]]$rse, vectors[[i]]$rse)
+  for (fit in fits) {
+    expect_equal(fit$settings$wts$values, 1 / d$uncertainty_sd^2)
   }
-  # a variable outside the data still works
-  w <- d$wts
-  expect_equal(
-    rc_power(discharge, stage, data = d, wts = wts_spec(w))$rse,
-    vectors[[1]]$rse
-  )
 })
 
 test_that("specified weights stay aligned when gaugings are dropped", {

@@ -9,7 +9,7 @@
 sauze_fit <- function(combine = "replace", wts = "none") {
   d <- RBaM::SauzeGaugings
   if (identical(wts, "spec")) {
-    wts <- wts_spec(1 / uQ^2)
+    wts <- wts_spec(1 / d$uQ^2)
   }
   rc_2seg_power(Q, H, data = d, combine = combine, wts = wts, kstart = 1)
 }

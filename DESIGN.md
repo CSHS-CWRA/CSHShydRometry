@@ -78,8 +78,17 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
 - In exported functions, `...` sits straight after the required arguments,
   so every optional argument must be named in full. Fitting functions reject
   anything passed through `...` with `rlang::check_dots_empty()`.
-- Arguments with one value per gauging (`discharge`, `stage`, and the values
-  of `wts_spec()`) are evaluated in `data`, so they can refer to its columns.
+- `discharge` and `stage` are evaluated in `data`, so they can refer to its
+  columns.
+- The weights given to `wts_spec()` are *not*: they are an ordinary vector,
+  evaluated where `wts_spec()` is called. A weighting scheme is an object in
+  its own right, which can be made in one place and used in another, so an
+  expression captured inside it would take its meaning from whichever fit's
+  `data` it later met: a column could silently stand in for a variable of
+  the same name, and a misspelt column would only fail inside the fit. The
+  convenience (not writing `data$`) is small. Adding evaluation in `data`
+  later would not break anyone's code, whereas removing it would, so it was
+  left out until it is asked for.
 
 ## What a fit contains
 

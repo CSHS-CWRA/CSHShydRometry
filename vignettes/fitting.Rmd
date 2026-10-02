@@ -245,10 +245,10 @@ one, and `"add"` adds it to the discharge the lower one carries.
 
 ```{r, eval = has_rbam}
 fit_repl <- rc_2seg_power(discharge, stage, data = sauze,
-                          wts = wts_spec(1 / uncertainty_sd^2))
+                          wts = wts_spec(1 / sauze$uncertainty_sd^2))
 fit_add <- rc_2seg_power(discharge, stage, data = sauze,
                          combine = "add",
-                         wts = wts_spec(1 / uncertainty_sd^2))
+                         wts = wts_spec(1 / sauze$uncertainty_sd^2))
 c(replace = fit_repl$pars$k, add = fit_add$pars$k)
 ```
 

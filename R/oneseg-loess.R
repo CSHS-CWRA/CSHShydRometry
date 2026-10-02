@@ -6,13 +6,14 @@
 #'   vector, or an expression evaluated in `data`, such as a column name.
 #' @param stage <[`data-masking`][rlang::args_data_masking]> Stage: a vector,
 #'   or an expression evaluated in `data`, such as a column name.
-#' @param data Optional data frame in which `discharge`, `stage` and `wts`
-#'   are evaluated.
+#' @param data Optional data frame in which `discharge` and `stage` are
+#'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param degree Degree of local polynomials (1 or 2).
-#' @param span Smoothing parameter.
-#' @param extrapolate Allow extrapolation beyond the observed stage range.
+#' @param span Smoothing parameter, passed to `stats::loess()`.
+#' @param extrapolate Single logical; allow extrapolation beyond the
+#'   observed stage range? Default is `TRUE`.
 #' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
 #'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
 #'   with the weights. See [wts]. Under `wts_prop()`
@@ -34,18 +35,17 @@ rc_loess <- function(
   wts = wts_none()
 ) {
   # error checks
-  # discharge, stage and wts may use columns of `data`, or be vectors
+  # discharge and stage may use columns of `data`, or be vectors
   rlang::check_dots_empty()
   checkmate::assert_data_frame(data, null.ok = TRUE)
   discharge <- rlang::eval_tidy(rlang::enquo(discharge), data)
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
-  # the weighting scheme; specified weights are evaluated in `data`, and
-  # kept aligned with the gaugings that remain
+  # the weighting scheme; specified weights are kept aligned with the
+  # gaugings that remain
   weighting <- resolve_wts(
     wts,
-    data,
     keep = stats::complete.cases(discharge, stage),
     fitter = "rc_loess"
   )

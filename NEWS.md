@@ -36,9 +36,8 @@
   and `wts_maxiter`, whose meanings depended on one another. `wts` takes
   `wts_none()` (the default), `wts_prop(tol, maxiter)`, `wts_power()` or
   `wts_spec(values)`, or the shorthand `"none"`, `"prop"` or `"power"`; see
-  `?wts`. The values given to
-  `wts_spec()` are evaluated in `data`, so they can refer to its columns, as
-  in `wts = wts_spec(1 / uncertainty_sd^2)`.
+  `?wts`. The weights given to `wts_spec()` are an ordinary vector, such as
+  `wts_spec(1 / sauze$uncertainty_sd^2)`.
 
 * The settings passed to `nls()` are given as a single `control` argument,
   as from `stats::nls.control()`, like `nls()` itself. It replaces `nls_tol`
