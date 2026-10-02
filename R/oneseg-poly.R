@@ -170,22 +170,13 @@ predict.rc_poly <- function(
         ...
       )
     } else {
-      # confidence limits, proportional weights
-      cl_poly <- investr::predFit(
+      # proportional weights: the same limits as for rc_power()
+      ci_mat <- nlspw_limits(
         mod,
-        newdata = stage_df,
-        se.fit = TRUE
+        type = "confidence",
+        level = conflev,
+        stage = stage
       )
-      se_fit <- cl_poly$se.fit
-      fit <- cl_poly$fit
-      df <- cl_poly$df
-      tc <- stats::qt(p = 0.5 + 0.5 * conflev, df = df)
-      cl_lims <- data.frame(
-        fit = fit,
-        lwr = fit - tc * se_fit,
-        upr = fit + tc * se_fit
-      )
-      ci_mat <- cl_lims
     }
     ci_mat <- ci_mat[, c("lwr", "upr"), drop = FALSE]
     colnames(ci_mat) <- paste0("ci_", colnames(ci_mat))
@@ -194,7 +185,7 @@ predict.rc_poly <- function(
   # Under "spec" weights the observation variances are supplied rather than
   # estimated, so a new observation's scatter is not identified. Return the
   # columns as NA rather than dropping them, so that the set of columns
-  # depends only on what was asked for (Dan, 2026-08-03; Paul agreed).
+  # depends only on what was asked for.
   if (predlim && wts_code == "spec") {
     out_df$pi_lwr <- NA_real_
     out_df$pi_upr <- NA_real_
@@ -209,27 +200,13 @@ predict.rc_poly <- function(
         ...
       )
     } else if (wts_code == "prop") {
-      # compute weights for new observations if wts_code == "prop"
-      qp <- stats::predict(mod, newdata = stage_df)
-      wtsp <- 1 / qp^2
-      # prediction limits, proportional weights
-      pl_poly <- investr::predFit(
+      # proportional weights: the same limits as for rc_power()
+      pi_mat <- nlspw_limits(
         mod,
-        newdata = stage_df,
-        se.fit = TRUE
+        type = "prediction",
+        level = predlev,
+        stage = stage
       )
-      se_fit <- pl_poly$se.fit
-      res_scale <- pl_poly$residual.scale
-      fit <- pl_poly$fit
-      df <- pl_poly$df
-      tc <- stats::qt(p = 0.5 + 0.5 * predlev, df = df)
-      sp <- sqrt(se_fit^2 + (res_scale^2 / wtsp))
-      pl_lims <- data.frame(
-        fit = fit,
-        lwr = fit - tc * sp,
-        upr = fit + tc * sp
-      )
-      pi_mat <- pl_lims
     }
     pi_mat <- pi_mat[, c("lwr", "upr"), drop = FALSE]
     colnames(pi_mat) <- paste0("pi_", colnames(pi_mat))
