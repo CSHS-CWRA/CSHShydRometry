@@ -170,7 +170,7 @@
 
 # CSHShydRometry 0.0.1
 
-* First packaged version. Derived from rating-curve functions written by Dan
+* First packaged version. Derived from rating-curve functions written by R. Dan
   Moore, restructured into a model–predict form: every model is fitted by an
   `rc_*()` constructor and summarised by a `predict()` method returning the
   same columns, so results from different approaches stack with `rbind()`.

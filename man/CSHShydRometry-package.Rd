@@ -40,7 +40,7 @@ scatter about the curve:
 \item \code{\link[=wts_none]{wts_none()}} — the same scatter at every flow (constant variance).
 \item \code{\link[=wts_prop]{wts_prop()}} — scatter proportional to the flow.
 \item \code{\link[=wts_power]{wts_power()}} — scatter proportional to a power of the flow, with
-the power estimated; \code{\link[=rc_power]{rc_power()}} only.
+the power estimated; \code{\link[=rc_power]{rc_power()}} only at this time.
 \item \code{\link[=wts_spec]{wts_spec()}} — variances supplied by the user, typically from
 reported gauging uncertainties. A new observation's scatter is then
 not identified by the fit, so prediction limits are returned as \code{NA}.
@@ -54,7 +54,7 @@ See \link{wts}.
 weighting: \code{stage}, \code{fit}, and — when \code{conflev} or \code{predlev} is given —
 \code{ci_lwr}/\code{ci_upr} and \code{pi_lwr}/\code{pi_upr}. Quantities that cannot be computed
 come back as \code{NA} rather than as missing columns, so results from different
-approaches stack directly with \code{rbind()}.
+approaches stack directly.
 
 For two-segment curves, \code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} takes a \code{method}. The
 default, \code{"delta"}, is fast but unreliable near the breakpoint, where the
@@ -80,6 +80,6 @@ Useful links:
 }
 \author{
 Vincenzo Coia (maintainer,
-\email{vincenzo.coia@gmail.com}), Daniel Moore, and Paul Whitfield.
+\email{vincenzo.coia@gmail.com}), R. Dan Moore, and Paul Whitfield.
 }
 \keyword{internal}

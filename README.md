@@ -282,7 +282,7 @@ To cite CSHShydRometry in publications, please use the following (which
 
     To cite package 'CSHShydRometry' in publications use:
 
-      Coia V, Moore D, Whitfield P (2026). _CSHShydRometry: Statistical
+      Coia V, Moore RD, Whitfield P (2026). _CSHShydRometry: Statistical
       Methods for Rating Curves_. R package version 0.0.1.9000,
       <https://github.com/CSHS-CWRA/CSHShydRometry>.
 
@@ -290,7 +290,7 @@ To cite CSHShydRometry in publications, please use the following (which
 
       @Manual{,
         title = {CSHShydRometry: Statistical Methods for Rating Curves},
-        author = {Vincenzo Coia and Daniel Moore and Paul Whitfield},
+        author = {Vincenzo Coia and R. Dan Moore and Paul Whitfield},
         year = {2026},
         note = {R package version 0.0.1.9000},
         url = {https://github.com/CSHS-CWRA/CSHShydRometry},
