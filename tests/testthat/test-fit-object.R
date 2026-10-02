@@ -156,3 +156,28 @@ test_that("loading the package loads tibble", {
   # the package's tibbles would behave like plain data frames
   expect_true("tibble" %in% names(getNamespaceImports("CSHShydRometry")))
 })
+
+test_that("no code relies on partial matching", {
+  withr::local_options(
+    warnPartialMatchDollar = TRUE,
+    warnPartialMatchArgs = TRUE,
+    warnPartialMatchAttr = TRUE
+  )
+  expect_no_warning({
+    fits <- c(
+      all_fits(),
+      list(rc_power_log(discharge, stage, data = thompson,
+                        zero_flow_stage = -1.3),
+           rc_loess(discharge, stage, data = thompson, wts = "prop"))
+    )
+    for (fit in fits) {
+      suppressMessages(
+        predict(fit, stage = c(1, 3), conflev = 0.9, predlev = 0.9)
+      )
+      coef(fit)
+    }
+    boot_limits_2seg(fits$rc_2seg_power, stage = 2, conflev = 0.9,
+                     predlev = 0.9, B = 3, seed = 1)
+  })
+})
+

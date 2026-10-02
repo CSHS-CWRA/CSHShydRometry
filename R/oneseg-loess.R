@@ -138,10 +138,10 @@ predict.rc_loess <- function(
   out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     lo_pred <- stats::predict(mod, se = TRUE, newdata = stage_df, ...)
-    tc <- stats::qt(0.5 + 0.5 * conflev, lo_pred$df)
+    tc <- stats::qt(0.5 + 0.5 * conflev, lo_pred[["df"]])
     ci_mat <- cbind(
-      lwr = lo_pred$fit - tc * lo_pred$se,
-      upr = lo_pred$fit + tc * lo_pred$se
+      lwr = lo_pred[["fit"]] - tc * lo_pred[["se.fit"]],
+      upr = lo_pred[["fit"]] + tc * lo_pred[["se.fit"]]
     )
     colnames(ci_mat) <- paste0("ci_", colnames(ci_mat))
     out_df <- cbind(out_df, as.data.frame(ci_mat))

@@ -99,8 +99,8 @@ rc_power_log <- function(
       log(discharge) ~ b0 + b1 * log(stage - c),
       data = data.frame(discharge = discharge, stage = stage),
       start = list(
-        b0 = unname(lm_mod$coef[1]),
-        b1 = unname(lm_mod$coef[2]),
+        b0 = unname(stats::coef(lm_mod)[1]),
+        b1 = unname(stats::coef(lm_mod)[2]),
         c = cstart
       ),
       control = control
