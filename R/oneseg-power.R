@@ -130,7 +130,7 @@ rc_power <- function(
     gaugings = qh,
     pars = list(a = coefs[["a"]], b = coefs[["b"]], c = coefs[["c"]]),
     settings = list(wts = wts_given, control = control),
-    weights = wts,
+    weights_used = wts,
     irls = irls,
     wts = weighting,
     rse = mod_sum$sigma,

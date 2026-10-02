@@ -444,7 +444,7 @@ rc_2seg_power <- function(
       wts = weighting,
       control = control
     ),
-    weights = wts,
+    weights_used = wts,
     irls = irls,
     wts = weighting,
     kstart_search = kstart_search,

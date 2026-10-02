@@ -21,7 +21,7 @@
 #'   \item{`model`}{The underlying model object, e.g. from [stats::nls()].}
 #' }
 #'
-#' Constructors with a `wts` argument also return `weights`, the
+#' Constructors with a `wts` argument also return `weights_used`, the
 #' weights the final model was fitted with, and `irls` (for iteratively
 #' reweighted least squares): `NULL`, or under [wts_prop()], which refits in
 #' rounds, a list giving the number of rounds (`iterations`) and whether they

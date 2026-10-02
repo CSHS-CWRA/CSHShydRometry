@@ -10,7 +10,7 @@
 #'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
-#' @param degree Polynomial degree.
+#' @param degree Polynomial degree; positive whole number. Default 2.
 #' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
 #'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
 #'   with the weights. See [wts].
@@ -122,7 +122,7 @@ rc_poly <- function(
     gaugings = qh,
     pars = pars,
     settings = list(degree = degree, wts = weighting),
-    weights = wts,
+    weights_used = wts,
     irls = irls,
     wts = weighting,
     rse = mod_sum$sigma,

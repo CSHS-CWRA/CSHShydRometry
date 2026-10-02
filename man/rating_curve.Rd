@@ -24,7 +24,7 @@ log-scale fits).}
 \item{\code{model}}{The underlying model object, e.g. from \code{\link[stats:nls]{stats::nls()}}.}
 }
 
-Constructors with a \code{wts} argument also return \code{weights}, the
+Constructors with a \code{wts} argument also return \code{weights_used}, the
 weights the final model was fitted with, and \code{irls} (for iteratively
 reweighted least squares): \code{NULL}, or under \code{\link[=wts_prop]{wts_prop()}}, which refits in
 rounds, a list giving the number of rounds (\code{iterations}) and whether they

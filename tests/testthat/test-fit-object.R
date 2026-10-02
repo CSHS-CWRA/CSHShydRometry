@@ -105,7 +105,7 @@ test_that("converged reweighting is recorded", {
     expect_true(fit$irls$converged)
     expect_gt(fit$irls$iterations, 1L)
     # the weights are those the final model was fitted with
-    expect_equal(unname(fit$weights), unname(stats::weights(fit$model)))
+    expect_equal(unname(fit$weights_used), unname(stats::weights(fit$model)))
   }
   expect_null(rc_power(discharge, stage, data = thompson)$irls)
 })

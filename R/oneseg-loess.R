@@ -103,7 +103,7 @@ rc_loess <- function(
       extrapolate = extrapolate,
       wts = weighting
     ),
-    weights = wts,
+    weights_used = wts,
     irls = irls,
     wts = weighting,
     enp = mod_lo$enp,

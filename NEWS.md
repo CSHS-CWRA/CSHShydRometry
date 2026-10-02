@@ -105,6 +105,8 @@
     parameter type. For two-segment fits each element holds one value per
     segment, so `pars$b` is `c(b1, b2)`. `rc_poly()` names its coefficients
     `b0`, `b1`, ...; `rc_loess()` has none.
+  * `weights_used` holds the weights the final model was fitted with
+    (formerly `weights`).
   * `settings` holds the arguments the fit was made with. It replaces
     `fit_args` and the separate `wts_code`, `formula` and `configuration`
     elements, and the loess tuning values formerly in `pars`.

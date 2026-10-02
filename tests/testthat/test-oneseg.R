@@ -64,7 +64,7 @@ test_that("specified weights stay aligned when gaugings are dropped", {
   w <- d$wts
   d$discharge[2] <- NA
   fit <- rc_power(discharge, stage, data = d, wts = wts_spec(w))
-  expect_equal(fit$weights, w[-2])
+  expect_equal(fit$weights_used, w[-2])
 })
 
 test_that("weights of the wrong length are an error", {

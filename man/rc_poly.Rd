@@ -19,7 +19,7 @@ to be named in full.}
 \item{data}{Optional data frame in which \code{discharge} and \code{stage} are
 evaluated.}
 
-\item{degree}{Polynomial degree.}
+\item{degree}{Polynomial degree; positive whole number. Default 2.}
 
 \item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
 \code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
