@@ -223,6 +223,33 @@ only about two-thirds of the time just above the breakpoint, against roughly
 97% for the bootstrap. Away from the breakpoint the two agree. So use
 `"delta"` for a quick look, and `"boot"` where the interval matters.
 
+## Related software
+
+Most agencies build ratings in commercial hydrometric data systems:
+[AQUARIUS Time-Series](https://aquaticinformatics.com/) (Aquatic
+Informatics), used by the Water Survey of Canada and the USGS, and
+[WISKI](https://www.kisters.net/) and
+[Hydstra](https://www.kisters.net/hydstra/) (KISTERS). They manage the whole
+workflow, from gaugings to published discharge, but are proprietary.
+
+Open-source tools for fitting rating curves are mostly Bayesian:
+
+| Software | Language | Approach |
+|---|---|---|
+| [BaRatin / BaRatinAGE](https://github.com/BaRatin-tools/BaRatinAGE) (INRAE) | Fortran, with a graphical interface | Bayesian; priors from the hydraulic controls; multi-segment curves through a configuration matrix |
+| [RBaM](https://CRAN.R-project.org/package=RBaM) (INRAE) | R | R interface to BaM, the engine behind BaRatin |
+| [bdrc](https://CRAN.R-project.org/package=bdrc) | R | Bayesian hierarchical power law and generalized power law, with constant or varying scatter |
+| [ratingcurve](https://github.com/thodson-usgs/ratingcurve) (USGS, provisional) | Python | Bayesian segmented power law, with PyMC |
+
+CSHShydRometry instead fits by least squares, with no priors to specify. Its
+limits come from the delta method or a bootstrap, and it has explicit
+schemes for how the scatter changes with the flow. That makes it quick to
+use, and a classical reference against which to compare the Bayesian
+methods. For a comparison of methods for rating-curve uncertainty, see
+Kiang et al. (2018), "A comparison of methods for streamflow uncertainty
+estimation", *Water Resources Research*,
+[doi:10.1029/2018WR022708](https://doi.org/10.1029/2018WR022708).
+
 ## Learn more
 
 - `vignette("fitting")`: choosing gaugings, looking at their scatter, and
