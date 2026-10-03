@@ -4,15 +4,21 @@
 \alias{delta_limits_2seg}
 \title{Delta-method confidence and prediction limits for a two-segment fit}
 \usage{
-delta_limits_2seg(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
+delta_limits_2seg(
+  object,
+  ...,
+  new_stage = NULL,
+  conflev = NULL,
+  predlev = NULL
+)
 }
 \arguments{
-\item{object}{An \code{rc_2seg_power} fit (from \code{\link[=rc_2seg_power]{rc_2seg_power()}}).}
+\item{object}{An \code{rc_2seg_powerlaw} fit (from \code{\link[=rc_2seg_powerlaw]{rc_2seg_powerlaw()}}).}
 
-\item{...}{Passed on to \code{\link[investr:predFit]{investr::predFit()}} for the \code{\link[=wts_none]{wts_none()}}/\code{\link[=wts_spec]{wts_spec()}}
-cases.}
+\item{...}{Must be empty. Present so that every argument after it has
+to be named in full.}
 
-\item{stage}{Stages at which to return limits. Defaults to
+\item{new_stage}{Stages at which to return limits. Defaults to
 1000 points spanning the observed stage range.}
 
 \item{conflev, predlev}{Levels for the confidence and prediction intervals,
@@ -20,7 +26,7 @@ or \code{NULL} to omit either.}
 }
 \value{
 A tibble; see
-\code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} for the columns.
+\code{\link[=predict.rc_2seg_powerlaw]{predict.rc_2seg_powerlaw()}} for the columns.
 }
 \description{
 Linearises the fitted curve about \code{theta-hat} and propagates the parameter
@@ -43,7 +49,7 @@ single scatter to add to the mean curve. Those columns come back \code{NA}.
 \examples{
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
-  fit <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
-  delta_limits_2seg(fit, stage = c(1, 2, 4), conflev = 0.95)
+  fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
+  delta_limits_2seg(fit, new_stage = c(1, 2, 4), conflev = 0.95)
 }
 }

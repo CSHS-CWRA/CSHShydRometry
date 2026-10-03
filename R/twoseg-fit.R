@@ -67,7 +67,7 @@
 #' A single `kstart` makes both the fit and the bootstrap faster, but both
 #' then rest on that one start.
 #'
-#' @return An object of class `c("rc_2seg_power", "rating_curve")`; see
+#' @return An object of class `c("rc_2seg_powerlaw", "rating_curve")`; see
 #'   [rating_curve] for its contents. `pars` holds the estimated parameters by
 #'   type, one value per segment: under `"replace"`, `a` has a single value
 #'   because the upper segment's coefficient is fixed by continuity, and under
@@ -79,26 +79,26 @@
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs
 #' # proportional weights to converge.
-#' fit <- rc_2seg_power(discharge, stage, data = thompson, wts = "prop")
+#' fit <- rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop")
 #' fit
 #' coef(fit)
 #'
 #' # what each starting breakpoint led to
 #' fit$kstart_search
 #'
-#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+#' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # A river with a clearer change of control is far less fussy. The Ardeche
 #' # at Sauze, in the RBaM package, fits however the segments combine, and
 #' # carries a reported uncertainty for every gauging.
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   repl <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
-#'   add <- rc_2seg_power(Q, H, data = sauze, combine = "add", kstart = 1)
+#'   repl <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
+#'   add <- rc_2seg_powerlaw(Q, H, data = sauze, combine = "add", kstart = 1)
 #'   c(replace = repl$pars[["k"]], add = add$pars[["k"]])
 #'
 #'   # weights from the reported gauging uncertainties
-#'   rc_2seg_power(
+#'   rc_2seg_powerlaw(
 #'     Q,
 #'     H,
 #'     data = sauze,
@@ -107,7 +107,7 @@
 #'   )
 #' }
 #' @export
-rc_2seg_power <- function(
+rc_2seg_powerlaw <- function(
   discharge,
   stage,
   ...,
@@ -139,7 +139,7 @@ rc_2seg_power <- function(
   weighting <- resolve_wts(
     wts,
     keep = stats::complete.cases(discharge, stage),
-    fitter = "rc_2seg_power"
+    fitter = "rc_2seg_powerlaw"
   )
   wts_code <- weighting$type
   wts <- weighting$values
@@ -451,5 +451,5 @@ rc_2seg_power <- function(
     rse = mod_sum$sigma,
     model = mod_nls
   )
-  structure(outlist, class = c("rc_2seg_power", "rating_curve"))
+  structure(outlist, class = c("rc_2seg_powerlaw", "rating_curve"))
 }

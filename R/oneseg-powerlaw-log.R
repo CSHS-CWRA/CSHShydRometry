@@ -8,9 +8,10 @@
 #' back-transformed curve estimates the geometric mean discharge at each stage
 #' (also the median, when the scatter on the log scale is symmetric).
 #'
-#' @section The stage of zero flow:
-#' When \eqn{c} is estimated, the fit is nonlinear in \eqn{c} and is made
-#' with [stats::nls()]. When it is given, through `zero_flow_stage`, the
+#' @section The offset:
+#' \eqn{c} is the offset: for a single power law, the stage at which the flow
+#' would stop. When it is estimated, the fit is nonlinear in \eqn{c} and is
+#' made with [stats::nls()]. When it is given, through `offset`, the
 #' model is linear in its remaining parameters on the log-log scale and is
 #' fitted with [stats::lm()], and the limits from [predict()] carry no
 #' uncertainty in \eqn{c}. Fixing \eqn{c} at the value estimated by a first
@@ -34,48 +35,48 @@
 #'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
-#' @param zero_flow_stage The stage of zero flow, \eqn{c} in the formula:
-#'   `NULL` (the default) to estimate it, or a known value, below every gauged
-#'   stage, to hold it fixed.
+#' @param offset The offset, \eqn{c} in the formula: `NULL` (the default) to
+#'   estimate it, or a known value, below every gauged stage, to hold it
+#'   fixed.
 #' @param control Settings for [stats::nls()], as from [stats::nls.control()].
-#'   Used only when the stage of zero flow is estimated.
-#' @return An `rc_power_log` object; see [rating_curve] for its contents. The
+#'   Used only when the offset is estimated.
+#' @return An `rc_powerlaw_log` object; see [rating_curve] for its contents. The
 #'   back-transformed coefficient `a` estimates the geometric mean discharge;
 #'   `a_corrected` holds two bias-corrected versions for the arithmetic mean:
 #'   `nbc`, assuming lognormal errors, and `dbc`, Duan's smearing estimate.
 #' @examples
-#' fit <- rc_power_log(discharge, stage, data = thompson)
+#' fit <- rc_powerlaw_log(discharge, stage, data = thompson)
 #' coef(fit)
-#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+#' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #'
-#' # the stage of zero flow known, say from a survey of the control
-#' rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3)
+#' # the offset known, say from a survey of the control
+#' rc_powerlaw_log(discharge, stage, data = thompson, offset = -1.3)
 #'
 #' # c estimated, then treated as known: the same curve, with narrower limits
 #' # that leave out the uncertainty in c
-#' fixed <- rc_power_log(
+#' fixed <- rc_powerlaw_log(
 #'   discharge,
 #'   stage,
 #'   data = thompson,
-#'   zero_flow_stage = fit$pars$c
+#'   offset = fit$pars$c
 #' )
-#' predict(fixed, stage = c(1, 3, 6), conflev = 0.95)
+#' predict(fixed, new_stage = c(1, 3, 6), conflev = 0.95)
 #' @export
-rc_power_log <- function(
+rc_powerlaw_log <- function(
   discharge,
   stage,
   ...,
   data = NULL,
-  zero_flow_stage = NULL,
+  offset = NULL,
   control = stats::nls.control(maxiter = 1000, tol = 1e-6)
 ) {
   # discharge and stage may name columns of `data`, or be vectors
   if ("wts" %in% names(match.call(expand.dots = FALSE)$...)) {
     stop(
-      "`rc_power_log()` has no `wts` argument: weighting is not implemented ",
+      "`rc_powerlaw_log()` has no `wts` argument: weighting is not implemented ",
       "for the log-scale fit. Equal scatter on the log scale already means ",
       "scatter proportional to the flow, which is usually the reason to ",
-      "weight. To weight on the original scale, use `rc_power()`.",
+      "weight. To weight on the original scale, use `rc_powerlaw()`.",
       call. = FALSE
     )
   }
@@ -85,12 +86,12 @@ rc_power_log <- function(
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
-  checkmate::assert_number(zero_flow_stage, null.ok = TRUE, finite = TRUE)
+  checkmate::assert_number(offset, null.ok = TRUE, finite = TRUE)
   checkmate::assert_list(control, names = "named")
   qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
-  c <- zero_flow_stage
+  c <- offset
   if (is.null(c)) {
     # starting estimates from a straight line on the log-log scale
     cstart <- min(stage) - 0.1 * (max(stage) - min(stage))
@@ -111,7 +112,7 @@ rc_power_log <- function(
     c <- coefs[["c"]]
   } else {
     if (c >= min(stage)) {
-      stop("`zero_flow_stage` must be below every gauged stage.", call. = FALSE)
+      stop("`offset` must be below every gauged stage.", call. = FALSE)
     }
     # with c known the model is linear on the log-log scale
     mod <- stats::lm(
@@ -131,31 +132,30 @@ rc_power_log <- function(
     gaugings = tibble::as_tibble(qh),
     pars = list(a = a, b = b, c = c),
     a_corrected = c(nbc = a_nbc, dbc = a_dbc),
-    settings = list(zero_flow_stage = zero_flow_stage, control = control),
+    settings = list(offset = offset, control = control),
     rse = rse,
     model = mod
   )
-  structure(outlist, class = c("rc_power_log", "rating_curve"))
+  structure(outlist, class = c("rc_powerlaw_log", "rating_curve"))
 }
 
 
-#' Predict method for rc_power_log objects
+#' Predict method for rc_powerlaw_log objects
 #'
-#' @inheritParams predict.rc_power
-#' @param object An `rc_power_log` object.
+#' @inheritParams predict.rc_powerlaw
+#' @param object An `rc_powerlaw_log` object.
 #' @export
-predict.rc_power_log <- function(
+predict.rc_powerlaw_log <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
+  rlang::check_dots_empty()
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
-  if (is.null(stage)) {
-    stage <- stage_grid(object)
-  }
+  stage <- if (is.null(new_stage)) stage_grid(object) else new_stage
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
@@ -167,23 +167,21 @@ predict.rc_power_log <- function(
         mod,
         newdata = stage_df,
         interval = interval,
-        level = level,
-        ...
+        level = level
       )
     } else {
       stats::predict(
         mod,
         newdata = stage_df,
         interval = interval,
-        level = level,
-        ...
+        level = level
       )
     }
     exp(lims[, c("lwr", "upr"), drop = FALSE])
   }
   out_df <- data.frame(
     stage = stage,
-    fit = unname(exp(stats::predict(mod, newdata = stage_df, ...)))
+    fit = unname(exp(stats::predict(mod, newdata = stage_df)))
   )
   if (!is.null(conflev)) {
     ci_mat <- log_limits("confidence", conflev)

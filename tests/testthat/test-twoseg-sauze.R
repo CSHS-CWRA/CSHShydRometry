@@ -11,7 +11,7 @@ sauze_fit <- function(combine = "replace", wts = "none") {
   if (identical(wts, "spec")) {
     wts <- wts_spec(1 / d$uQ^2)
   }
-  rc_2seg_power(Q, H, data = d, combine = combine, wts = wts, kstart = 1)
+  rc_2seg_powerlaw(Q, H, data = d, combine = combine, wts = wts, kstart = 1)
 }
 
 test_that("both ways of combining the segments fit under every weighting", {
@@ -19,7 +19,7 @@ test_that("both ways of combining the segments fit under every weighting", {
   for (cfg in c("replace", "add")) {
     for (wc in c("none", "prop", "spec")) {
       fit <- sauze_fit(cfg, wc)
-      expect_s3_class(fit, "rc_2seg_power")
+      expect_s3_class(fit, "rc_2seg_powerlaw")
       expect_s3_class(fit, "rating_curve")
       k <- fit$pars[["k"]]
       expect_true(
@@ -46,7 +46,7 @@ test_that("specified weights give confidence but not prediction limits", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("replace", "spec")
   p <- suppressMessages(
-    predict(fit, stage = c(1, 3), conflev = 0.95, predlev = 0.95)
+    predict(fit, new_stage = c(1, 3), conflev = 0.95, predlev = 0.95)
   )
   expect_true(all(is.finite(p$ci_lwr)))
   expect_true(all(is.na(p$pi_lwr)))
@@ -59,11 +59,11 @@ test_that("the delta band jumps at the breakpoint and the bootstrap does not", {
   k <- fit$pars[["k"]]
   hh <- c(k - 0.05, k + 0.05)
 
-  d <- suppressMessages(predict(fit, stage = hh, conflev = 0.95))
+  d <- suppressMessages(predict(fit, new_stage = hh, conflev = 0.95))
   d_ratio <- (d$ci_upr[2] - d$ci_lwr[2]) / (d$ci_upr[1] - d$ci_lwr[1])
 
   b <- suppressWarnings(suppressMessages(
-    predict(fit, stage = hh, conflev = 0.95, method = "boot",
+    predict(fit, new_stage = hh, conflev = 0.95, method = "boot",
             B = 150, seed = 1)
   ))
   b_ratio <- (b$ci_upr[2] - b$ci_lwr[2]) / (b$ci_upr[1] - b$ci_lwr[1])
@@ -78,9 +78,9 @@ test_that("both methods agree on the fitted curve", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("replace", "spec")
   hp <- c(0.5, 1, 2, 4)
-  d <- delta_limits_2seg(fit, stage = hp)
+  d <- delta_limits_2seg(fit, new_stage = hp)
   b <- suppressWarnings(
-    boot_limits_2seg(fit, stage = hp, B = 25, seed = 1)
+    boot_limits_2seg(fit, new_stage = hp, B = 25, seed = 1)
   )
   expect_equal(d$fit, b$fit)
 })
@@ -89,6 +89,6 @@ test_that("adding the segments is continuous at the breakpoint", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("add", "spec")
   k <- fit$pars[["k"]]
-  p <- predict(fit, stage = c(k - 1e-6, k + 1e-6))
+  p <- predict(fit, new_stage = c(k - 1e-6, k + 1e-6))
   expect_equal(p$fit[1], p$fit[2], tolerance = 1e-5)
 })

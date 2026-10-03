@@ -28,9 +28,10 @@
 #' is, the draws too often land on impossible curves: negative or
 #' astronomically large discharges, giving limits that are meaningless.
 #'
-#' @param object An `rc_2seg_power` fit (from [rc_2seg_power()]).
-#' @param ... Passed on to the chosen limits function.
-#' @param stage Stages at which to return limits. Defaults to
+#' @param object An `rc_2seg_powerlaw` fit (from [rc_2seg_powerlaw()]).
+#' @param ... Passed on to the chosen limits function, such as `B` and `seed`
+#'   for `"boot"`. An argument that function does not take is an error.
+#' @param new_stage Stages at which to return limits. Defaults to
 #'   1000 points spanning the observed stage range.
 #' @param conflev Confidence level for the mean-curve (confidence) interval, or
 #'   `NULL` to omit it.
@@ -53,38 +54,38 @@
 #'   weighting. Where a quantity cannot be computed (prediction limits under
 #'   `"spec"` weights) the column is returned as `NA`.
 #'
-#'   Named for the object's class, `rc_2seg_power`, so `predict(object)`
-#'   dispatches here. The one-segment models define their own `predict.rc_power`
-#'   for the `rc_power` class; the two do not collide.
+#'   Named for the object's class, `rc_2seg_powerlaw`, so `predict(object)`
+#'   dispatches here. The one-segment models define their own `predict.rc_powerlaw`
+#'   for the `rc_powerlaw` class; the two do not collide.
 #' @seealso [delta_limits_2seg()], [boot_limits_2seg()].
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
+#'   fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
 #'   hp <- c(1, 1.5, 2, 4)
 #'
 #'   # the default, and fast
-#'   predict(fit, stage = hp, conflev = 0.95)
+#'   predict(fit, new_stage = hp, conflev = 0.95)
 #'
 #'   # slower, but does not assume the breakpoint is known. Compare the two
 #'   # either side of the breakpoint, at about 1.85 m: the delta band jumps
 #'   # there, the bootstrap band does not.
-#'   predict(fit, stage = hp, conflev = 0.95, method = "boot", B = 50)
+#'   predict(fit, new_stage = hp, conflev = 0.95, method = "boot", B = 50)
 #' }
 #'
 #' # the columns returned never depend on the model or the method, so results
 #' # from different approaches stack directly
-#' one <- rc_power(discharge, stage, data = thompson)
-#' two <- rc_2seg_power(discharge, stage, data = thompson, wts = "prop", kstart = 2)
+#' one <- rc_powerlaw(discharge, stage, data = thompson)
+#' two <- rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop", kstart = 2)
 #' rbind(
-#'   predict(one, stage = 3, conflev = 0.95),
-#'   predict(two, stage = 3, conflev = 0.95)
+#'   predict(one, new_stage = 3, conflev = 0.95),
+#'   predict(two, new_stage = 3, conflev = 0.95)
 #' )
 #' @export
-predict.rc_2seg_power <- function(
+predict.rc_2seg_powerlaw <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL,
   method = c("delta", "boot")
@@ -92,7 +93,7 @@ predict.rc_2seg_power <- function(
   method <- rlang::arg_match(method)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
-  # stage is deliberately NOT resolved here: every *_limits_2seg() function
+  # new_stage is deliberately NOT resolved here: every *_limits_2seg() function
   # defaults it the same way, so it resolves once, in whichever one runs.
   limits_fun <- switch(
     method,
@@ -101,7 +102,7 @@ predict.rc_2seg_power <- function(
   )
   limits_fun(
     object,
-    stage = stage,
+    new_stage = new_stage,
     conflev = conflev,
     predlev = predlev,
     ...
@@ -127,32 +128,31 @@ predict.rc_2seg_power <- function(
 #' per-observation error variances are supplied, not estimated, so there is no
 #' single scatter to add to the mean curve. Those columns come back `NA`.
 #'
-#' @param object An `rc_2seg_power` fit (from [rc_2seg_power()]).
-#' @param stage Stages at which to return limits. Defaults to
+#' @param object An `rc_2seg_powerlaw` fit (from [rc_2seg_powerlaw()]).
+#' @param new_stage Stages at which to return limits. Defaults to
 #'   1000 points spanning the observed stage range.
-#' @param ... Passed on to [investr::predFit()] for the [wts_none()]/[wts_spec()]
-#'   cases.
+#' @param ... Must be empty. Present so that every argument after it has
+#'   to be named in full.
 #' @param conflev,predlev Levels for the confidence and prediction intervals,
 #'   or `NULL` to omit either.
 #' @return A tibble; see
-#'   [predict.rc_2seg_power()] for the columns.
+#'   [predict.rc_2seg_powerlaw()] for the columns.
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
-#'   delta_limits_2seg(fit, stage = c(1, 2, 4), conflev = 0.95)
+#'   fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
+#'   delta_limits_2seg(fit, new_stage = c(1, 2, 4), conflev = 0.95)
 #' }
 #' @export
 delta_limits_2seg <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
-  if (is.null(stage)) {
-    stage <- stage_grid(object)
-  }
+  rlang::check_dots_empty()
+  stage <- if (is.null(new_stage)) stage_grid(object) else new_stage
   checkmate::assert_numeric(stage, min.len = 1L, finite = TRUE)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
@@ -175,8 +175,7 @@ delta_limits_2seg <- function(
         mod,
         newdata = stage_df,
         interval = "confidence",
-        level = conflev,
-        ...
+        level = conflev
       )
     } else {
       ci_mat <- nlspw_limits(
@@ -204,8 +203,7 @@ delta_limits_2seg <- function(
           mod,
           newdata = stage_df,
           interval = "prediction",
-          level = predlev,
-          ...
+          level = predlev
         )
       } else {
         pi_mat <- nlspw_limits(

@@ -24,7 +24,7 @@
 #'   curve has no parameters, so `pars` is an empty list.
 #' @examples
 #' fit <- rc_loess(discharge, stage, data = thompson)
-#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+#' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #' @export
 rc_loess <- function(
   discharge,
@@ -116,16 +116,17 @@ rc_loess <- function(
 
 #' Predict method for rc_loess objects
 #'
-#' @inheritParams predict.rc_power
+#' @inheritParams predict.rc_powerlaw
 #' @param object An rc_loess object.
 #' @export
 predict.rc_loess <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
+  rlang::check_dots_empty()
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
@@ -133,13 +134,11 @@ predict.rc_loess <- function(
   if (predlim) {
     message("Note: prediction limits are not implemented for loess models")
   }
-  if (is.null(stage)) {
-    stage <- stage_grid(object)
-  }
+  stage <- if (is.null(new_stage)) stage_grid(object) else new_stage
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
+  yvec <- unname(stats::predict(mod, newdata = stage_df))
   out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     # se.fit is the standard error of the fitted curve, not of a new gauging
@@ -147,7 +146,7 @@ predict.rc_loess <- function(
     # is a linear smoother, and se.fit equals residual.scale times the root
     # sum of squares of the smoother weights, each divided by its gauging's
     # weight; it leaves out any smoothing bias.
-    lo_pred <- stats::predict(mod, se = TRUE, newdata = stage_df, ...)
+    lo_pred <- stats::predict(mod, se = TRUE, newdata = stage_df)
     tc <- stats::qt(0.5 + 0.5 * conflev, lo_pred[["df"]])
     ci_mat <- cbind(
       lwr = lo_pred[["fit"]] - tc * lo_pred[["se.fit"]],

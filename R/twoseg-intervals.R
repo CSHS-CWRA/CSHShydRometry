@@ -5,9 +5,9 @@
 #' Case-resampling ("pairs") bootstrap: repeatedly resample the gaugings with
 #' replacement, refit the two-segment model on each resample, and summarise the
 #' resulting spread of fitted rating curves. Returns the same column layout as
-#' [predict.rc_2seg_power()] so the two can be plotted side by side.
+#' [predict.rc_2seg_powerlaw()] so the two can be plotted side by side.
 #'
-#' Why bootstrap? The delta-method limits in [predict.rc_2seg_power()] (via
+#' Why bootstrap? The delta-method limits in [predict.rc_2seg_powerlaw()] (via
 #' [investr::predFit()]) linearise the mean function about the fitted
 #' parameters, but the two-segment mean is not differentiable in the breakpoint
 #' `k` (it is an `ifelse` at `stage = k`). That produces an artificial, near-
@@ -19,11 +19,11 @@
 #' the resamples reproduce the original call by construction rather than
 #' relying on the caller to restate it.
 #'
-#' @param object An `rc_2seg_power` fit (from [rc_2seg_power()]). The gaugings are
+#' @param object An `rc_2seg_powerlaw` fit (from [rc_2seg_powerlaw()]). The gaugings are
 #'   taken from `object$gaugings` and the fitting arguments from
 #'   `object$settings`. Under `wts_spec()` the supplied weights are
 #'   resampled along with the cases.
-#' @param stage Stages at which to return limits. Defaults to
+#' @param new_stage Stages at which to return limits. Defaults to
 #'   1000 points spanning the observed stage range.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
@@ -59,10 +59,10 @@
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
+#'   fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
 #'   boot_limits_2seg(
 #'     fit,
-#'     stage = c(1, 2, 4),
+#'     new_stage = c(1, 2, 4),
 #'     conflev = 0.95,
 #'     B = 50,
 #'     seed = 1
@@ -72,17 +72,15 @@
 boot_limits_2seg <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL,
   B = 1000,
   seed = NULL,
   max_tries_factor = 3
 ) {
-  checkmate::assert_class(object, "rc_2seg_power")
-  if (is.null(stage)) {
-    stage <- stage_grid(object)
-  }
+  checkmate::assert_class(object, "rc_2seg_powerlaw")
+  stage <- if (is.null(new_stage)) stage_grid(object) else new_stage
   checkmate::assert_numeric(stage, min.len = 1L, finite = TRUE)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
@@ -138,7 +136,7 @@ boot_limits_2seg <- function(
     # like one whose fit errors, rather than warning once per resample
     fb <- tryCatch(
       suppressWarnings(
-        do.call(rc_2seg_power, c(list(discharge = qc[s], stage = hc[s]), args_b))
+        do.call(rc_2seg_powerlaw, c(list(discharge = qc[s], stage = hc[s]), args_b))
       ),
       error = function(e) NULL
     )

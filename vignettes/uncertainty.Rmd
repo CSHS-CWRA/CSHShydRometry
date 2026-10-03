@@ -41,8 +41,8 @@ library(CSHShydRometry)
   gaugings there are.
 
 ```{r}
-fit <- rc_power(discharge, stage, data = thompson, wts = "prop")
-predict(fit, stage = c(1, 4, 8), conflev = 0.95, predlev = 0.95)
+fit <- rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
+predict(fit, new_stage = c(1, 4, 8), conflev = 0.95, predlev = 0.95)
 ```
 
 Which to use depends on the question. Discharge averaged over a period, where
@@ -72,12 +72,12 @@ same at every flow; with `wts_prop()` it grows in proportion to the flow.
 ```{r}
 at <- c(1, 8)
 widths <- function(fit) {
-  p <- predict(fit, stage = at, predlev = 0.95)
+  p <- predict(fit, new_stage = at, predlev = 0.95)
   p$pi_upr - p$pi_lwr
 }
 data.frame(
   stage = at,
-  none = widths(rc_power(discharge, stage, data = thompson)),
+  none = widths(rc_powerlaw(discharge, stage, data = thompson)),
   prop = widths(fit)
 )
 ```
@@ -93,13 +93,13 @@ limits come back as `NA`, while its confidence limits are computed as usual.
 
 ## Fits on the log scale
 
-`rc_power_log()` works on the log scale, where the limits are symmetric.
+`rc_powerlaw_log()` works on the log scale, where the limits are symmetric.
 Transformed back to discharge they are lopsided, stretching further above
 the curve than below it:
 
 ```{r}
-fit_log <- rc_power_log(discharge, stage, data = thompson)
-p <- predict(fit_log, stage = 8, predlev = 0.95)
+fit_log <- rc_powerlaw_log(discharge, stage, data = thompson)
+p <- predict(fit_log, new_stage = 8, predlev = 0.95)
 c(below = p$fit - p$pi_lwr, above = p$pi_upr - p$fit)
 ```
 
@@ -111,19 +111,19 @@ about `r round(100 * fit_log$rse)`% here, the difference is small:
 fit_log$a_corrected / fit_log$pars$a
 ```
 
-### The stage of zero flow
+### The offset
 
-When the stage of zero flow, $c$, is estimated, its uncertainty is part of
+When the offset, $c$, is estimated, its uncertainty is part of
 the limits. Holding it fixed removes that part. That is right when $c$ is
 known independently, say from a survey of the control. Fixing it at the value
 estimated from the same gaugings, though, gives the same curve with limits
 that are too narrow:
 
 ```{r}
-fixed <- rc_power_log(discharge, stage, data = thompson,
-                      zero_flow_stage = fit_log$pars$c)
+fixed <- rc_powerlaw_log(discharge, stage, data = thompson,
+                      offset = fit_log$pars$c)
 width_at <- function(fit, at) {
-  p <- predict(fit, stage = at, conflev = 0.95)
+  p <- predict(fit, new_stage = at, conflev = 0.95)
   p$ci_upr - p$ci_lwr
 }
 c(c_estimated = width_at(fit_log, 3), c_fixed = width_at(fixed, 3))
@@ -144,7 +144,7 @@ fits <- list(
   "Cubic polynomial" = rc_poly(discharge, stage, data = thompson, degree = 3),
   "Loess" = rc_loess(discharge, stage, data = thompson)
 )
-curves <- lapply(fits, predict, stage = beyond)
+curves <- lapply(fits, predict, new_stage = beyond)
 
 plot(NULL, xlim = range(sapply(curves, function(p) range(p$fit))),
      ylim = range(beyond), xlab = "Discharge (m³/s)", ylab = "Stage (m)")
@@ -173,12 +173,12 @@ sauze <- data.frame(
   discharge = RBaM::SauzeGaugings$Q,
   uncertainty_sd = RBaM::SauzeGaugings$uQ
 )
-fit2 <- rc_2seg_power(discharge, stage, data = sauze,
+fit2 <- rc_2seg_powerlaw(discharge, stage, data = sauze,
                       wts = wts_spec(1 / sauze$uncertainty_sd^2))
 near_k <- fit2$pars$k + c(-0.05, 0.05)
 
-delta <- predict(fit2, stage = near_k, conflev = 0.95)
-boot <- predict(fit2, stage = near_k, conflev = 0.95,
+delta <- predict(fit2, new_stage = near_k, conflev = 0.95)
+boot <- predict(fit2, new_stage = near_k, conflev = 0.95,
                 method = "boot", B = 200, seed = 1)
 data.frame(
   stage = near_k,

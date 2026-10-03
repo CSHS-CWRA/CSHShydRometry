@@ -12,16 +12,20 @@
 #'
 #' Single segment:
 #' \itemize{
-#'   \item [rc_power()] — power law fitted by least squares on the original
+#'   \item [rc_powerlaw()] — power law fitted by least squares on the original
 #'     scale.
-#'   \item [rc_power_log()] — power law fitted by least squares on the
-#'     log-log scale, with the stage of zero flow estimated or given.
+#'   \item [rc_powerlaw_log()] — power law fitted by least squares on the
+#'     log-log scale.
+#' }
+#' In both, the offset \eqn{c} is estimated, or held at a value given as
+#' `offset`.
+#' \itemize{
 #'   \item [rc_poly()], [rc_loess()] — polynomial and loess alternatives.
 #' }
 #'
 #' Two segments, joined at an estimated breakpoint:
 #' \itemize{
-#'   \item [rc_2seg_power()] — with `combine = "replace"`: the upper power
+#'   \item [rc_2seg_powerlaw()] — with `combine = "replace"`: the upper power
 #'     law takes over from the lower at the breakpoint; with 
 #'     `combine = "add"`: it adds to the discharge carried at the breakpoint.
 #' }
@@ -33,7 +37,7 @@
 #'   \item [wts_none()] — the same scatter at every flow (constant variance).
 #'   \item [wts_prop()] — scatter proportional to the flow.
 #'   \item [wts_power()] — scatter proportional to a power of the flow, with
-#'     the power estimated; [rc_power()] only at this time.
+#'     the power estimated; [rc_powerlaw()] only at this time.
 #'   \item [wts_spec()] — variances supplied by the user, typically from
 #'     reported gauging uncertainties. A new observation's scatter is then
 #'     not identified by the fit, so prediction limits are returned as `NA`.
@@ -47,10 +51,10 @@
 #' come back as `NA` rather than as missing columns, so results from different
 #' approaches stack directly.
 #'
-#' For two-segment curves, [predict.rc_2seg_power()] takes a `method`. The
+#' For two-segment curves, [predict.rc_2seg_powerlaw()] takes a `method`. The
 #' default, `"delta"`, is fast but unreliable near the breakpoint, where the
 #' mean function is not differentiable; `"boot"` costs a refit per resample
-#' and behaves much better there. See [predict.rc_2seg_power()] for the detail.
+#' and behaves much better there. See [predict.rc_2seg_powerlaw()] for the detail.
 #'
 #' @section Data:
 #' [thompson] ships with the package and suits the single-segment models. The

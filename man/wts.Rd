@@ -42,8 +42,8 @@ An object of class \code{"rc_wts"}.
 }
 \description{
 How the scatter of the gaugings about the curve is modelled. Pass one of
-these as the \code{wts} argument of \code{\link[=rc_power]{rc_power()}}, \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} or
-\code{\link[=rc_2seg_power]{rc_2seg_power()}}.
+these as the \code{wts} argument of \code{\link[=rc_powerlaw]{rc_powerlaw()}}, \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} or
+\code{\link[=rc_2seg_powerlaw]{rc_2seg_powerlaw()}}.
 }
 \details{
 \itemize{
@@ -59,7 +59,7 @@ after \code{maxiter} rounds, with a warning.
 \item \code{wts_power()}: the scatter is proportional to a power of the flow, with
 the power estimated along with the curve. This adds a parameter, so the
 fit is made by generalised least squares with \code{\link[nlme:gnls]{nlme::gnls()}}, starting
-from the fit under \code{wts_prop()}. It is available in \code{\link[=rc_power]{rc_power()}} only:
+from the fit under \code{wts_prop()}. It is available in \code{\link[=rc_powerlaw]{rc_powerlaw()}} only:
 that is a matter of implementation, as the other fitting functions are not
 made with \code{\link[nlme:gnls]{nlme::gnls()}}. The estimate can be unstable with few gaugings;
 compare it with the fit under \code{wts_prop()}. The estimated power is kept on
@@ -75,17 +75,17 @@ The strings \code{"none"}, \code{"prop"} and \code{"power"} are shorthand for
 \code{wts_none()}, \code{wts_prop()} and \code{wts_power()} with their defaults.
 }
 \examples{
-rc_power(discharge, stage, data = thompson, wts = wts_prop())
+rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop())
 
 # the same, with the defaults
-rc_power(discharge, stage, data = thompson, wts = "prop")
+rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
 
 # the power of the flow estimated too
-fit <- rc_power(discharge, stage, data = thompson, wts = wts_power())
+fit <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_power())
 fit$wts$exponent
 
 # weights from each gauging's reported uncertainty
 d <- thompson[!is.na(thompson$uncertainty_pct), ]
 d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
-rc_power(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
+rc_powerlaw(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
 }

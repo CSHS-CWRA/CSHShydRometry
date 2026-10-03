@@ -4,14 +4,16 @@
 \alias{predict.rc_poly}
 \title{Predict method for rc_poly objects}
 \usage{
-\method{predict}{rc_poly}(object, ..., stage = NULL, conflev = NULL, predlev = NULL)
+\method{predict}{rc_poly}(object, ..., new_stage = NULL, conflev = NULL, predlev = NULL)
 }
 \arguments{
 \item{object}{An rc_poly object.}
 
-\item{...}{Additional arguments passed to the inner \code{stats::predict()} function.}
+\item{...}{Must be empty. Present so that every argument after it has to
+be named in full; a misspelt or unsupported argument is an error, not
+silently ignored.}
 
-\item{stage}{Stages at which to predict discharge. If \code{NULL}, a grid of
+\item{new_stage}{Stages at which to predict discharge. If \code{NULL}, a grid of
 1000 equally spaced stages spanning the observed range is used.}
 
 \item{conflev}{The confidence level for the confidence limits; if NULL, no

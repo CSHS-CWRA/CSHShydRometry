@@ -7,7 +7,7 @@
 boot_limits_2seg(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL,
   B = 1000,
@@ -16,7 +16,7 @@ boot_limits_2seg(
 )
 }
 \arguments{
-\item{object}{An \code{rc_2seg_power} fit (from \code{\link[=rc_2seg_power]{rc_2seg_power()}}). The gaugings are
+\item{object}{An \code{rc_2seg_powerlaw} fit (from \code{\link[=rc_2seg_powerlaw]{rc_2seg_powerlaw()}}). The gaugings are
 taken from \code{object$gaugings} and the fitting arguments from
 \code{object$settings}. Under \code{wts_spec()} the supplied weights are
 resampled along with the cases.}
@@ -24,7 +24,7 @@ resampled along with the cases.}
 \item{...}{Must be empty. Present so that every argument after it has
 to be named in full.}
 
-\item{stage}{Stages at which to return limits. Defaults to
+\item{new_stage}{Stages at which to return limits. Defaults to
 1000 points spanning the observed stage range.}
 
 \item{conflev}{Coverage for the confidence (mean-curve) interval, or \code{NULL}.}
@@ -50,10 +50,10 @@ curve \code{fit}, and the requested \code{ci_lwr}/\code{ci_upr} and \code{pi_lwr
 Case-resampling ("pairs") bootstrap: repeatedly resample the gaugings with
 replacement, refit the two-segment model on each resample, and summarise the
 resulting spread of fitted rating curves. Returns the same column layout as
-\code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} so the two can be plotted side by side.
+\code{\link[=predict.rc_2seg_powerlaw]{predict.rc_2seg_powerlaw()}} so the two can be plotted side by side.
 }
 \details{
-Why bootstrap? The delta-method limits in \code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} (via
+Why bootstrap? The delta-method limits in \code{\link[=predict.rc_2seg_powerlaw]{predict.rc_2seg_powerlaw()}} (via
 \code{\link[investr:predFit]{investr::predFit()}}) linearise the mean function about the fitted
 parameters, but the two-segment mean is not differentiable in the breakpoint
 \code{k} (it is an \code{ifelse} at \code{stage = k}). That produces an artificial, near-
@@ -83,10 +83,10 @@ method.
 \examples{
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
-  fit <- rc_2seg_power(Q, H, data = sauze, kstart = 1)
+  fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
   boot_limits_2seg(
     fit,
-    stage = c(1, 2, 4),
+    new_stage = c(1, 2, 4),
     conflev = 0.95,
     B = 50,
     seed = 1

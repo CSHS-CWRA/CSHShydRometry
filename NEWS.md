@@ -4,20 +4,20 @@
 
 * Fitting functions are named for the model they fit, not the algorithm
   that fits it, with the number of segments first for multi-segment curves:
-  * `rc_nls()` is now `rc_power()`: a power law, by least squares on the
+  * `rc_nls()` is now `rc_powerlaw()`: a power law, by least squares on the
     original scale;
-  * `rc_log_nls()` is now `rc_power_log()`: a power law, by least squares on
+  * `rc_log_nls()` is now `rc_powerlaw_log()`: a power law, by least squares on
     the log-log scale;
-  * `rc_nls_2seg()` is now `rc_2seg_power()`.
+  * `rc_nls_2seg()` is now `rc_2seg_powerlaw()`.
 
   Their classes are renamed to match. This leaves room for more two-segment
   methods (`rc_2seg_*()`) and for curves with more segments.
 
 * `rc_gnls()` is removed. The scatter it modelled, proportional to the flow
   raised to an estimated power, is now a weighting scheme of its own,
-  `wts_power()`: `rc_power(wts = wts_power())`, or `wts = "power"`. It adds
+  `wts_power()`: `rc_powerlaw(wts = wts_power())`, or `wts = "power"`. It adds
   a parameter, the power, so it is fitted by generalised least squares with
-  `nlme::gnls()` as before, and is available in `rc_power()` only. The fit
+  `nlme::gnls()` as before, and is available in `rc_powerlaw()` only. The fit
   now starts from the fit under `wts_prop()`, rather than from a straight
   line on the log-log scale, and records the estimated power in
   `fit$wts$exponent`. `rc_gnls()` also took any nlme variance function
@@ -36,13 +36,26 @@
 
 * `rc_log_ols()` is removed. It gave the same estimates as `rc_log_nls()`,
   but treated the estimated `c` as known when computing limits, which left
-  its uncertainty out. `rc_power_log()` instead gains a `zero_flow_stage`
+  its uncertainty out. `rc_powerlaw_log()` instead gains an `offset`
   argument for `c`: `NULL` (the default) estimates it, and a value holds it
-  fixed, for a stage of zero flow known from a survey. Fixing it at the
-  estimate of `c` reproduces the old behaviour.
+  fixed, for an offset known from a survey. Fixing it at the
+  estimate of `c` reproduces the old behaviour. `rc_powerlaw()` takes
+  `offset` too.
 
-* Weighting is chosen by a single argument, `wts`, in `rc_power()`, `rc_poly()`,
-  `rc_loess()` and `rc_2seg_power()`. It replaces `wts_code`, `wts`, `wts_tol`
+* `c` is called the offset, not the stage of zero flow. The two coincide for
+  a single power law, but not for a segment of a multi-segment curve.
+
+* In every `predict()` method, and in `delta_limits_2seg()` and
+  `boot_limits_2seg()`, the stages to predict at are now given as
+  `new_stage`, not `stage`.
+
+* `predict()` methods no longer pass `...` on to the functions they call.
+  An argument a method does not take, such as `method` for a
+  single-segment fit or a misspelt `conflev`, is now an error rather than
+  silently ignored.
+
+* Weighting is chosen by a single argument, `wts`, in `rc_powerlaw()`, `rc_poly()`,
+  `rc_loess()` and `rc_2seg_powerlaw()`. It replaces `wts_code`, `wts`, `wts_tol`
   and `wts_maxiter`, whose meanings depended on one another. `wts` takes
   `wts_none()` (the default), `wts_prop(tol, maxiter)`, `wts_power()` or
   `wts_spec(values)`, or the shorthand `"none"`, `"prop"` or `"power"`; see
@@ -51,10 +64,10 @@
 
 * The settings passed to `nls()` are given as a single `control` argument,
   as from `stats::nls.control()`, like `nls()` itself. It replaces `nls_tol`
-  and `nls_maxiter` in `rc_power()` and `rc_2seg_power()`, and `tol` in
-  `rc_power_log()`.
+  and `nls_maxiter` in `rc_powerlaw()` and `rc_2seg_powerlaw()`, and `tol` in
+  `rc_powerlaw_log()`.
 
-* `rc_2seg_power()`'s `config` argument is renamed `combine`, since it says
+* `rc_2seg_powerlaw()`'s `config` argument is renamed `combine`, since it says
   how the two segments combine above the breakpoint, and its values
   `"piecewise"` and `"compound"` are renamed `"replace"` (the upper power law
   takes over from the lower) and `"add"` (it adds to the lower). Both kinds
@@ -63,11 +76,11 @@
 * Every argument after the mandatory ones (`discharge` and `stage`, or `object`) must now
   be named in full: `...` sits between them, and the constructors reject
   anything passed through it. In particular `data` must be named, as in
-  `rc_power(discharge, stage, data = thompson)`.
+  `rc_powerlaw(discharge, stage, data = thompson)`.
 
 * Stage and discharge are named in full throughout, rather than `h` and `q`:
   * the constructors take `discharge` and `stage` (formerly `q` and `h`), as
-    in `rc_power(discharge, stage, data = thompson)`;
+    in `rc_powerlaw(discharge, stage, data = thompson)`;
   * `predict()` and the `*_limits_2seg()` functions take `stage` (formerly
     `hpred`), and return it as the column `stage` (formerly `h`);
   * the gaugings stored on a fit are `gaugings`, with columns `discharge` and
@@ -88,7 +101,7 @@
   astronomically large discharges) where a segment is poorly identified,
   making the limits meaningless. Use `method = "boot"` instead.
 
-* By default, `rc_2seg_power()` now tries 10 starting breakpoints spread across
+* By default, `rc_2seg_powerlaw()` now tries 10 starting breakpoints spread across
   the search range and keeps the most likely fit, rather than starting once
   from the middle of the range. `kstart` may also be a vector of starting
   values to try. The fit is sensitive to where it starts: from some starts
@@ -102,11 +115,11 @@
   resample's best fit too often, which would understate the uncertainty in
   the breakpoint.
 
-* `rc_2seg_power()` no longer takes `contcons`, which chose the parameter
+* `rc_2seg_powerlaw()` no longer takes `contcons`, which chose the parameter
   carrying the continuity constraint. Only `"a"` was implemented, and that
   is what `combine = "replace"` does.
 
-* `rc_2seg_power()` no longer takes `conflev` or `predlev`. They were stored on
+* `rc_2seg_powerlaw()` no longer takes `conflev` or `predlev`. They were stored on
   the fit but never used; give the levels to `predict()`.
 
 * Fit objects are restructured, the same way for every model (see
@@ -169,8 +182,8 @@
 ## Bug fixes
 
 * `rc_poly(degree = 1)` fitted spurious quadratic and cubic terms.
-* `rc_2seg_power()` ignored `nls_maxiter`.
-* `nls_tol` had no effect in `rc_2seg_power()`: its `"port"` algorithm ignores
+* `rc_2seg_powerlaw()` ignored `nls_maxiter`.
+* `nls_tol` had no effect in `rc_2seg_powerlaw()`: its `"port"` algorithm ignores
   `tol`. `control` now says so, and passes on the port algorithm's own
   settings, such as `rel.tol`.
 * User-supplied weights (now `wts_spec()`) fell out of step with the

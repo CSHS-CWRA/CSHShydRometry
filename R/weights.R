@@ -3,8 +3,8 @@
 #' Weighting schemes for rating-curve fits
 #'
 #' How the scatter of the gaugings about the curve is modelled. Pass one of
-#' these as the `wts` argument of [rc_power()], [rc_poly()], [rc_loess()] or
-#' [rc_2seg_power()].
+#' these as the `wts` argument of [rc_powerlaw()], [rc_poly()], [rc_loess()] or
+#' [rc_2seg_powerlaw()].
 #'
 #' * `wts_none()`: the scatter is the same at every flow (ordinary least
 #'   squares).
@@ -18,7 +18,7 @@
 #' * `wts_power()`: the scatter is proportional to a power of the flow, with
 #'   the power estimated along with the curve. This adds a parameter, so the
 #'   fit is made by generalised least squares with [nlme::gnls()], starting
-#'   from the fit under `wts_prop()`. It is available in [rc_power()] only:
+#'   from the fit under `wts_prop()`. It is available in [rc_powerlaw()] only:
 #'   that is a matter of implementation, as the other fitting functions are not
 #'   made with [nlme::gnls()]. The estimate can be unstable with few gaugings;
 #'   compare it with the fit under `wts_prop()`. The estimated power is kept on
@@ -44,19 +44,19 @@
 #' @param maxiter Maximum number of reweighting rounds.
 #' @return An object of class `"rc_wts"`.
 #' @examples
-#' rc_power(discharge, stage, data = thompson, wts = wts_prop())
+#' rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop())
 #'
 #' # the same, with the defaults
-#' rc_power(discharge, stage, data = thompson, wts = "prop")
+#' rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
 #'
 #' # the power of the flow estimated too
-#' fit <- rc_power(discharge, stage, data = thompson, wts = wts_power())
+#' fit <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_power())
 #' fit$wts$exponent
 #'
 #' # weights from each gauging's reported uncertainty
 #' d <- thompson[!is.na(thompson$uncertainty_pct), ]
 #' d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
-#' rc_power(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
+#' rc_powerlaw(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
 #' @name wts
 NULL
 
@@ -197,7 +197,7 @@ resolve_wts <- function(wts, keep, fitter, power_ok = FALSE) {
   }
   if (wts$type == "power" && !power_ok) {
     stop(
-      "`wts_power()` is available in `rc_power()` only, not in `", fitter,
+      "`wts_power()` is available in `rc_powerlaw()` only, not in `", fitter,
       "()`: its power is estimated with `nlme::gnls()`, which `", fitter,
       "()` is not fitted with. Use `wts_prop()` for scatter proportional ",
       "to the flow.",

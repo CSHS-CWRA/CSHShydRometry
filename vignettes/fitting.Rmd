@@ -54,11 +54,11 @@ change, through erosion, deposition or work on the control, so a curve is
 usually fitted to gaugings from one period of stable conditions.
 
 One way to check is to fit a single curve to every gauging and see whether
-the gaugings drift away from it over time. The fit here, `rc_power_log()`, is
+the gaugings drift away from it over time. The fit here, `rc_powerlaw_log()`, is
 explained below; its residuals are on the log scale, so 0.05 means about 5%.
 
 ```{r}
-fit_all <- rc_power_log(discharge, stage, data = thompson)
+fit_all <- rc_powerlaw_log(discharge, stage, data = thompson)
 departure <- residuals(fit_all$model)
 
 plot(thompson$date, 100 * departure,
@@ -112,11 +112,12 @@ ways to allow for it, both below: weight the fit, or fit on the log scale.
 ## A power law on the original scale
 
 The usual rating curve is a power law, $Q = a (h - c)^b$, where $Q$ is
-discharge, $h$ is stage, and $c$ is the stage at which the flow would stop.
-`rc_power()` fits it by least squares on the original scale:
+discharge, $h$ is stage, and $c$, the offset, is the stage at which the flow
+would stop.
+`rc_powerlaw()` fits it by least squares on the original scale:
 
 ```{r}
-fit <- rc_power(discharge, stage, data = thompson)
+fit <- rc_powerlaw(discharge, stage, data = thompson)
 coef(fit)
 ```
 
@@ -126,7 +127,7 @@ residuals suggested. The weights then depend on the fitted curve, so the fit
 is repeated, reweighting each time, until it settles:
 
 ```{r}
-fit_prop <- rc_power(discharge, stage, data = thompson, wts = wts_prop())
+fit_prop <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop())
 coef(fit_prop)
 fit_prop$irls$iterations
 ```
@@ -135,7 +136,7 @@ fit_prop$irls$iterations
 which the scatter is proportional:
 
 ```{r}
-fit_power <- rc_power(discharge, stage, data = thompson, wts = wts_power())
+fit_power <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_power())
 fit_power$wts$exponent
 ```
 
@@ -155,11 +156,11 @@ $$
 $$
 
 Equal scatter on the log scale is scatter proportional to the flow, so
-`rc_power_log()` allows for the fanning out by its choice of scale, without
+`rc_powerlaw_log()` allows for the fanning out by its choice of scale, without
 weights:
 
 ```{r}
-fit_log <- rc_power_log(discharge, stage, data = thompson)
+fit_log <- rc_powerlaw_log(discharge, stage, data = thompson)
 coef(fit_log)
 ```
 
@@ -167,18 +168,21 @@ Back on the original scale, this curve estimates the geometric mean
 discharge at each stage, which is a little below the arithmetic mean.
 `fit_log$a_corrected` holds two versions of $a$ corrected for that.
 
-If the stage of zero flow is known, say from a survey of the control, give it
-as `zero_flow_stage` and only $a$ and $b$ are estimated:
+$c$ is the *offset*. For a single power law it is the stage at which the flow
+would stop, but with several segments it no longer is, so the package calls
+it the offset throughout. If it is known, say from a survey of the control,
+give it as `offset` and only $a$ and $b$ are estimated. `rc_powerlaw()` takes
+`offset` too.
 
 ```{r}
-coef(rc_power_log(discharge, stage, data = thompson, zero_flow_stage = -1.3))
+coef(rc_powerlaw_log(discharge, stage, data = thompson, offset = -1.3))
 ```
 
 ## Other curve shapes
 
 Not every rating follows a power law. `rc_poly()` fits a polynomial in stage,
 and `rc_loess()` a smooth curve with no set shape. Both accept the same
-weighting schemes as `rc_power()`.
+weighting schemes as `rc_powerlaw()`.
 
 ```{r}
 fit_cubic <- rc_poly(discharge, stage, data = thompson, degree = 3)
@@ -194,11 +198,11 @@ curves can be compared side by side at chosen stages:
 at <- c(1, 4, 8)
 data.frame(
   stage = at,
-  power = predict(fit, stage = at)$fit,
-  power_prop = predict(fit_prop, stage = at)$fit,
-  power_log = predict(fit_log, stage = at)$fit,
-  cubic = predict(fit_cubic, stage = at)$fit,
-  loess = predict(fit_smooth, stage = at)$fit
+  power = predict(fit, new_stage = at)$fit,
+  power_prop = predict(fit_prop, new_stage = at)$fit,
+  power_log = predict(fit_log, new_stage = at)$fit,
+  cubic = predict(fit_cubic, new_stage = at)$fit,
+  loess = predict(fit_smooth, new_stage = at)$fit
 )
 ```
 
@@ -221,7 +225,7 @@ beyond it; `vignette("uncertainty")` takes that up.
 ## A curve in two segments
 
 Where the control changes, for example when the water rises out of the
-channel onto a floodplain, one power law is not enough. `rc_2seg_power()`
+channel onto a floodplain, one power law is not enough. `rc_2seg_powerlaw()`
 fits two power laws that meet at a breakpoint stage, $k$.
 
 The Ardèche at Sauze, from the RBaM package, has such a change. RBaM calls
@@ -244,9 +248,9 @@ How the two segments combine above the breakpoint is set by `combine`:
 one, and `"add"` adds it to the discharge the lower one carries.
 
 ```{r, eval = has_rbam}
-fit_repl <- rc_2seg_power(discharge, stage, data = sauze,
+fit_repl <- rc_2seg_powerlaw(discharge, stage, data = sauze,
                           wts = wts_spec(1 / sauze$uncertainty_sd^2))
-fit_add <- rc_2seg_power(discharge, stage, data = sauze,
+fit_add <- rc_2seg_powerlaw(discharge, stage, data = sauze,
                          combine = "add",
                          wts = wts_spec(1 / sauze$uncertainty_sd^2))
 c(replace = fit_repl$pars$k, add = fit_add$pars$k)

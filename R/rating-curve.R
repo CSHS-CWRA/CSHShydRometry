@@ -63,7 +63,7 @@ print.rating_curve <- function(x, ...) {
 #' @param ... Ignored.
 #' @return A named numeric vector; empty for [rc_loess()].
 #' @examples
-#' coef(rc_power(discharge, stage, data = thompson))
+#' coef(rc_powerlaw(discharge, stage, data = thompson))
 #' @export
 coef.rating_curve <- function(object, ...) {
   pars <- object$pars
@@ -76,6 +76,6 @@ coef.rating_curve <- function(object, ...) {
 
 #' @rdname coef.rating_curve
 #' @export
-coef.rc_2seg_power <- function(object, ...) {
+coef.rc_2seg_powerlaw <- function(object, ...) {
   stats::coef(object$model)
 }

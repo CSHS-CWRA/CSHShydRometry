@@ -51,5 +51,5 @@ Fit rating curve using loess smoother
 }
 \examples{
 fit <- rc_loess(discharge, stage, data = thompson)
-predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 }

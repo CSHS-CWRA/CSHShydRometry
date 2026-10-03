@@ -2,12 +2,12 @@
 % Please edit documentation in R/rating-curve.R
 \name{coef.rating_curve}
 \alias{coef.rating_curve}
-\alias{coef.rc_2seg_power}
+\alias{coef.rc_2seg_powerlaw}
 \title{Estimated parameters of a rating curve}
 \usage{
 \method{coef}{rating_curve}(object, ...)
 
-\method{coef}{rc_2seg_power}(object, ...)
+\method{coef}{rc_2seg_powerlaw}(object, ...)
 }
 \arguments{
 \item{object}{A rating curve fit.}
@@ -24,5 +24,5 @@ curve they carry the segment number, as in the model formula (\code{a1}, \code{b
 \code{k}, ...).
 }
 \examples{
-coef(rc_power(discharge, stage, data = thompson))
+coef(rc_powerlaw(discharge, stage, data = thompson))
 }

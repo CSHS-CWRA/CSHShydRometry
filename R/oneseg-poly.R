@@ -18,7 +18,7 @@
 #'   coefficients are named `b0`, `b1`, ... by power of `stage`.
 #' @examples
 #' fit <- rc_poly(discharge, stage, data = thompson, degree = 2)
-#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+#' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #' @export
 rc_poly <- function(
   discharge,
@@ -134,16 +134,17 @@ rc_poly <- function(
 
 #' Predict method for rc_poly objects
 #'
-#' @inheritParams predict.rc_power
+#' @inheritParams predict.rc_powerlaw
 #' @param object An rc_poly object.
 #' @export
 predict.rc_poly <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
+  rlang::check_dots_empty()
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
@@ -152,13 +153,11 @@ predict.rc_poly <- function(
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
-  if (is.null(stage)) {
-    stage <- stage_grid(object)
-  }
+  stage <- if (is.null(new_stage)) stage_grid(object) else new_stage
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
+  yvec <- unname(stats::predict(mod, newdata = stage_df))
   out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     if (wts_code != "prop") {
@@ -166,11 +165,10 @@ predict.rc_poly <- function(
         mod,
         newdata = stage_df,
         interval = "confidence",
-        level = conflev,
-        ...
+        level = conflev
       )
     } else {
-      # proportional weights: the same limits as for rc_power()
+      # proportional weights: the same limits as for rc_powerlaw()
       ci_mat <- nlspw_limits(
         mod,
         type = "confidence",
@@ -196,11 +194,10 @@ predict.rc_poly <- function(
         mod,
         newdata = stage_df,
         interval = "prediction",
-        level = predlev,
-        ...
+        level = predlev
       )
     } else if (wts_code == "prop") {
-      # proportional weights: the same limits as for rc_power()
+      # proportional weights: the same limits as for rc_powerlaw()
       pi_mat <- nlspw_limits(
         mod,
         type = "prediction",

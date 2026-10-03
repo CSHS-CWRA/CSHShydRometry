@@ -70,11 +70,11 @@ Here $c$ is the stage at which the flow would stop, $b$ says how quickly
 the flow grows as the water rises above that, and $a$ sets the scale: it
 is the discharge when the water is (a hypothetical) one meter above $c$.
 
-`rc_power()` is one method, which fits this relationship by (nonlinear)
-least squares:
+`rc_powerlaw()` is one method, which fits this relationship by
+(nonlinear) least squares:
 
 ``` r
-fit <- rc_power(discharge, stage, data = thompson)
+fit <- rc_powerlaw(discharge, stage, data = thompson)
 ```
 
 Like the result of statistical models commonly used in R, such as `lm()`
@@ -85,7 +85,7 @@ of model it is, and it works with the usual tools, such as `coef()` and
 ``` r
 fit
 #> Rating curve model.
-#> - Method: rc_power
+#> - Method: rc_powerlaw
 ```
 
 Here are the estimates of the parameters $a$, $b$, and $c$:
@@ -101,7 +101,7 @@ coef(fit)
 `predict()` evaluates the curve at the stages you give it:
 
 ``` r
-predict(fit, stage = c(1, 3, 6))
+predict(fit, new_stage = c(1, 3, 6))
 #> # A tibble: 3 × 2
 #>   stage   fit
 #>   <dbl> <dbl>
@@ -114,7 +114,7 @@ Ask for a confidence level to get limits for the curve itself, and a
 prediction level to get limits for a new gauging:
 
 ``` r
-predict(fit, stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
+predict(fit, new_stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
 #> # A tibble: 3 × 6
 #>   stage   fit ci_lwr ci_upr pi_lwr pi_upr
 #>   <dbl> <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
@@ -145,16 +145,17 @@ almost on the curve.
 
 Every model has an `rc_*()` function and a `predict()` method:
 
-- `rc_power()`: power law, fitted on the original scale.
-- `rc_power_log()`: power law, fitted on the log–log scale.
+- `rc_powerlaw()`: power law, fitted on the original scale.
+- `rc_powerlaw_log()`: power law, fitted on the log–log scale.
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
-- `rc_2seg_power()`: two power laws joined at a breakpoint (more below).
+- `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (more
+  below).
 
 Swapping one model for another changes one line:
 
 ``` r
 fit_poly <- rc_poly(discharge, stage, data = thompson)
-predict(fit_poly, stage = c(1, 3, 6))
+predict(fit_poly, new_stage = c(1, 3, 6))
 #> # A tibble: 3 × 2
 #>   stage   fit
 #>   <dbl> <dbl>
@@ -168,8 +169,8 @@ different models can be stacked with `rbind()`:
 
 ``` r
 rbind(
-  predict(fit, stage = 3, conflev = 0.95),
-  predict(fit_poly, stage = 3, conflev = 0.95)
+  predict(fit, new_stage = 3, conflev = 0.95),
+  predict(fit_poly, new_stage = 3, conflev = 0.95)
 )
 #> # A tibble: 2 × 4
 #>   stage   fit ci_lwr ci_upr
@@ -213,11 +214,11 @@ plot(stage ~ discharge, data = sauze)
 
 <img src="man/figures/README-plot-sauze-1.png" alt="" width="100%" />
 
-`rc_2seg_power()` fits two power laws that meet at a breakpoint, $k$.
+`rc_2seg_powerlaw()` fits two power laws that meet at a breakpoint, $k$.
 Here we weight each gauging by its reported uncertainty:
 
 ``` r
-fit2 <- rc_2seg_power(
+fit2 <- rc_2seg_powerlaw(
   discharge, stage,
   data = sauze,
   wts = wts_spec(1 / sauze$uncertainty_sd^2)
@@ -244,12 +245,12 @@ bootstrap band does not:
 near_k <- fit2$pars$k + c(-0.05, 0.05)
 delta <- predict(
   fit2,
-  stage = near_k,
+  new_stage = near_k,
   conflev = 0.95
 )
 boot <- predict(
   fit2,
-  stage = near_k,
+  new_stage = near_k,
   conflev = 0.95,
   method = "boot",
   B = 200,

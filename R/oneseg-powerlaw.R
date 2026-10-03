@@ -6,6 +6,14 @@
 #' original scale of discharge, with the scatter of the gaugings modelled as
 #' set by `wts`. The curve estimates the mean discharge at each stage.
 #'
+#' @section The offset:
+#' \eqn{c} is the offset: for a single power law, the stage at which the flow
+#' would stop. It is estimated unless it is given, through `offset`, say from
+#' a survey of the control. A given offset is held fixed, so the limits from
+#' [predict()] carry no uncertainty in it. Fixing it at the value estimated by
+#' a first fit treats an estimate as known: the curve is the same, but the
+#' limits are narrower than they should be.
+#'
 #' @param discharge <[`data-masking`][rlang::args_data_masking]> Discharge: a
 #'   vector, or an expression evaluated in `data`, such as a column name.
 #' @param stage <[`data-masking`][rlang::args_data_masking]> Stage: a vector,
@@ -17,22 +25,29 @@
 #' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
 #'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
 #'   with the weights. See [wts].
+#' @param offset The offset, \eqn{c} in the formula: `NULL` (the default) to
+#'   estimate it, or a known value, below every gauged stage, to hold it
+#'   fixed.
 #' @param control Settings for [stats::nls()], as from [stats::nls.control()].
-#' @return An `rc_power` object; see [rating_curve] for its contents.
+#' @return An `rc_powerlaw` object; see [rating_curve] for its contents.
 #' @examples
-#' fit <- rc_power(discharge, stage, data = thompson)
-#' predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+#' fit <- rc_powerlaw(discharge, stage, data = thompson)
+#' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # constant coefficient of variation instead of constant variance
-#' fit_prop <- rc_power(discharge, stage, data = thompson, wts = "prop")
-#' predict(fit_prop, stage = c(1, 3, 6), conflev = 0.95)
+#' fit_prop <- rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
+#' predict(fit_prop, new_stage = c(1, 3, 6), conflev = 0.95)
+#'
+#' # the offset known, say from a survey of the control
+#' rc_powerlaw(discharge, stage, data = thompson, wts = "prop", offset = -1.3)
 #' @export
-rc_power <- function(
+rc_powerlaw <- function(
   discharge,
   stage,
   ...,
   data = NULL,
   wts = wts_none(),
+  offset = NULL,
   control = stats::nls.control(maxiter = 1000, tol = 1e-6)
 ) {
   ## error checks and warnings
@@ -43,13 +58,14 @@ rc_power <- function(
   stage <- rlang::eval_tidy(rlang::enquo(stage), data)
   checkmate::assert_numeric(discharge, min.len = 1L)
   checkmate::assert_numeric(stage, len = length(discharge))
+  checkmate::assert_number(offset, null.ok = TRUE, finite = TRUE)
   checkmate::assert_list(control, names = "named")
   # the weighting scheme; specified weights are kept aligned with the
   # gaugings that remain
   weighting <- resolve_wts(
     wts,
     keep = stats::complete.cases(discharge, stage),
-    fitter = "rc_power",
+    fitter = "rc_powerlaw",
     power_ok = TRUE
   )
   # as given, for refitting; `weighting` may gain an estimate below
@@ -61,12 +77,30 @@ rc_power <- function(
   qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
   stage <- qh$stage
+  if (!is.null(offset) && offset >= min(stage)) {
+    stop("`offset` must be below every gauged stage.", call. = FALSE)
+  }
+
+  ## the curve; a given offset enters it as a number, not a parameter
+  formula <- if (is.null(offset)) {
+    discharge ~ a * (stage - c)^b
+  } else {
+    eval(bquote(discharge ~ a * (stage - .(offset))^b))
+  }
 
   ## generate starting values using lm on log-transformed data
-  cstart <- min(stage) - 0.1 * (max(stage) - min(stage))
+  cstart <- if (is.null(offset)) {
+    min(stage) - 0.1 * (max(stage) - min(stage))
+  } else {
+    offset
+  }
   start_lm <- stats::lm(log(discharge) ~ log(stage - cstart))
   astart <- unname(exp(start_lm$coefficients[1]))
   bstart <- unname(start_lm$coefficients[2])
+  start <- list(a = astart, b = bstart)
+  if (is.null(offset)) {
+    start$c <- cstart
+  }
   irls <- NULL
 
   # use nls to determine optimal parameters - no weights or specified weights
@@ -76,10 +110,10 @@ rc_power <- function(
     }
     checkmate::assert_numeric(wts, len = length(discharge), .var.name = "wts")
     mod_nls <- stats::nls(
-      discharge ~ a * (stage - c)^b,
+      formula,
       data = data.frame(discharge = discharge, stage = stage),
       weights = wts,
-      start = list(a = astart, b = bstart, c = cstart),
+      start = start,
       control = control
     )
   } else {
@@ -88,7 +122,7 @@ rc_power <- function(
     rounds <- if (wts_code == "prop") weighting else wts_prop()
     fit_fun <- function(wts, start) {
       stats::nls(
-        discharge ~ a * (stage - c)^b,
+        formula,
         data = data.frame(discharge = discharge, stage = stage, wts = wts),
         weights = wts,
         start = start,
@@ -98,7 +132,7 @@ rc_power <- function(
     res <- reweight_in_rounds(
       fit_fun,
       yp = astart * (stage - cstart)^bstart,
-      start = list(a = astart, b = bstart, c = cstart),
+      start = start,
       tol = rounds$tol,
       maxiter = rounds$maxiter
     )
@@ -108,7 +142,7 @@ rc_power <- function(
     if (wts_code == "power") {
       # estimate the power with the curve, by generalised least squares
       mod_nls <- nlme::gnls(
-        discharge ~ a * (stage - c)^b,
+        formula,
         data = data.frame(discharge = discharge, stage = stage),
         start = as.list(stats::coef(mod_nls)),
         weights = weighting$variance,
@@ -124,28 +158,31 @@ rc_power <- function(
   }
   mod_sum <- summary(mod_nls)
   coefs <- stats::coef(mod_nls)
+  c <- if (is.null(offset)) coefs[["c"]] else offset
 
   qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
-    pars = list(a = coefs[["a"]], b = coefs[["b"]], c = coefs[["c"]]),
-    settings = list(wts = wts_given, control = control),
+    pars = list(a = coefs[["a"]], b = coefs[["b"]], c = c),
+    settings = list(wts = wts_given, offset = offset, control = control),
     weights_used = wts,
     irls = irls,
     wts = weighting,
     rse = mod_sum$sigma,
     model = mod_nls
   )
-  structure(outlist, class = c("rc_power", "rating_curve"))
+  structure(outlist, class = c("rc_powerlaw", "rating_curve"))
 }
 
 
-#' Predict method for rc_power objects
+#' Predict method for rc_powerlaw objects
 #'
-#' @param object An `rc_power` object.
-#' @param stage Stages at which to predict discharge. If `NULL`, a grid of
+#' @param object An `rc_powerlaw` object.
+#' @param new_stage Stages at which to predict discharge. If `NULL`, a grid of
 #'   1000 equally spaced stages spanning the observed range is used.
-#' @param ... Additional arguments passed to the inner `stats::predict()` function.
+#' @param ... Must be empty. Present so that every argument after it has to
+#'   be named in full; a misspelt or unsupported argument is an error, not
+#'   silently ignored.
 #' @param conflev The confidence level for the confidence limits; if NULL, no
 #'   confidence limits are returned.
 #' @param predlev The prediction level for the prediction limits; if NULL, no
@@ -154,13 +191,14 @@ rc_power <- function(
 #'   (`fit`) and, if requested, the lower and upper confidence limits
 #'   (`ci_lwr`, `ci_upr`) and prediction limits (`pi_lwr`, `pi_upr`).
 #' @export
-predict.rc_power <- function(
+predict.rc_powerlaw <- function(
   object,
   ...,
-  stage = NULL,
+  new_stage = NULL,
   conflev = NULL,
   predlev = NULL
 ) {
+  rlang::check_dots_empty()
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
@@ -169,17 +207,17 @@ predict.rc_power <- function(
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
-  if (is.null(stage)) {
-    stage <- stage_grid(object)
-  }
+  stage <- if (is.null(new_stage)) stage_grid(object) else new_stage
   checkmate::assert_numeric(stage, min.len = 1, finite = TRUE)
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
   if (inherits(mod, "gnls")) {
     # the power was estimated, by nlme::gnls()
-    return(gnls_limits(mod, stage_df, object$wts$exponent, conflev, predlev))
+    return(gnls_limits(
+      mod, stage_df, object$pars, object$wts$exponent, conflev, predlev
+    ))
   }
-  yvec <- unname(stats::predict(mod, newdata = stage_df, ...))
+  yvec <- unname(stats::predict(mod, newdata = stage_df))
   out_df <- data.frame(stage = stage, fit = yvec)
   if (conflim) {
     if (wts_code == "none" || wts_code == "spec") {
@@ -187,8 +225,7 @@ predict.rc_power <- function(
         mod,
         newdata = stage_df,
         interval = "confidence",
-        level = conflev,
-        ...
+        level = conflev
       )
     } else {
       ci_mat <- nlspw_limits(
@@ -216,8 +253,7 @@ predict.rc_power <- function(
         mod,
         newdata = stage_df,
         interval = "prediction",
-        level = predlev,
-        ...
+        level = predlev
       )
     } else {
       pi_mat <- nlspw_limits(
@@ -241,21 +277,21 @@ predict.rc_power <- function(
 #' Delta-method limits for a power law fitted by [nlme::gnls()] with the
 #' scatter proportional to a power of the fitted flow. The curve's standard
 #' error is `sqrt(g' V g)`, where `g` is the gradient of `a (h - c)^b` in its
-#' parameters and `V` their covariance matrix. A new gauging adds its scatter,
+#' estimated parameters (`c` may be fixed) and `V` their covariance matrix. A new gauging adds its scatter,
 #' `sigma^2 fit^(2 power)`. The estimated power is treated as known, and the
 #' limits use the t distribution on the fit's residual degrees of freedom.
 #'
 #' @param mod An [nlme::gnls()] fit of `a * (stage - c)^b`.
 #' @param stage_df Data frame of stages, with column `stage`.
+#' @param pars The curve's parameters, `a`, `b` and `c`.
 #' @param power The estimated power of the scatter.
 #' @param conflev,predlev Levels, or `NULL` to omit those limits.
 #' @return A tibble of predictions and limits.
 #' @noRd
-gnls_limits <- function(mod, stage_df, power, conflev, predlev) {
-  coefs <- stats::coef(mod)
-  a <- coefs[["a"]]
-  b <- coefs[["b"]]
-  c <- coefs[["c"]]
+gnls_limits <- function(mod, stage_df, pars, power, conflev, predlev) {
+  a <- pars[["a"]]
+  b <- pars[["b"]]
+  c <- pars[["c"]]
   depth <- stage_df$stage - c
   fit <- a * depth^b
   gradient <- cbind(
@@ -263,7 +299,9 @@ gnls_limits <- function(mod, stage_df, power, conflev, predlev) {
     b = fit * log(depth),
     c = -a * b * depth^(b - 1)
   )
-  vcov_mat <- stats::vcov(mod)[colnames(gradient), colnames(gradient)]
+  estimated <- names(stats::coef(mod))
+  gradient <- gradient[, estimated, drop = FALSE]
+  vcov_mat <- stats::vcov(mod)[estimated, estimated, drop = FALSE]
   se_fit <- sqrt(rowSums((gradient %*% vcov_mat) * gradient))
   df <- mod$dims$N - mod$dims$p
   out_df <- data.frame(stage = stage_df$stage, fit = fit)

@@ -1,7 +1,7 @@
 # The two-segment interval methods, and the dispatcher over them.
 
 two_seg_fit <- function(combine = "replace", kstart = 2) {
-  rc_2seg_power(
+  rc_2seg_powerlaw(
     thompson$discharge,
     thompson$stage,
     combine = combine,
@@ -14,17 +14,17 @@ test_that("predict() defaults to the delta method", {
   fit <- two_seg_fit()
   hp <- c(1, 3, 6)
   expect_equal(
-    predict(fit, stage = hp, conflev = 0.95),
-    delta_limits_2seg(fit, stage = hp, conflev = 0.95)
+    predict(fit, new_stage = hp, conflev = 0.95),
+    delta_limits_2seg(fit, new_stage = hp, conflev = 0.95)
   )
 })
 
 test_that("the k-averaged and simulation methods are not part of this package", {
   fit <- two_seg_fit()
   expect_error(
-    predict(fit, stage = 3, conflev = 0.95, method = "kavg")
+    predict(fit, new_stage = 3, conflev = 0.95, method = "kavg")
   )
-  expect_error(predict(fit, stage = 3, conflev = 0.95, method = "sim"))
+  expect_error(predict(fit, new_stage = 3, conflev = 0.95, method = "sim"))
   expect_false(exists("sim_limits_2seg", where = asNamespace("CSHShydRometry")))
   expect_false(exists("kavg_limits_2seg", where = asNamespace("CSHShydRometry")))
 })
@@ -33,10 +33,10 @@ test_that("every interval method returns the same columns", {
   fit <- two_seg_fit()
   hp <- c(1, 3)
   want <- c("stage", "fit", "ci_lwr", "ci_upr")
-  expect_named(delta_limits_2seg(fit, stage = hp, conflev = 0.95), want)
+  expect_named(delta_limits_2seg(fit, new_stage = hp, conflev = 0.95), want)
   expect_named(
     suppressWarnings(
-      boot_limits_2seg(fit, stage = hp, conflev = 0.95, predlev = NULL,
+      boot_limits_2seg(fit, new_stage = hp, conflev = 0.95, predlev = NULL,
                        B = 25, seed = 1)
     ),
     want
@@ -46,9 +46,9 @@ test_that("every interval method returns the same columns", {
 test_that("the fitted curve is the same whichever method is asked for", {
   fit <- two_seg_fit()
   hp <- c(1, 3, 6)
-  d <- delta_limits_2seg(fit, stage = hp, conflev = NULL)
+  d <- delta_limits_2seg(fit, new_stage = hp, conflev = NULL)
   b <- suppressWarnings(
-    boot_limits_2seg(fit, stage = hp, conflev = NULL, predlev = NULL,
+    boot_limits_2seg(fit, new_stage = hp, conflev = NULL, predlev = NULL,
                      B = 25, seed = 1)
   )
   expect_equal(d$fit, b$fit)
@@ -58,9 +58,9 @@ test_that("both ways of combining the segments fit and predict", {
   # the compound fit needs the default search over starting breakpoints
   for (cfg in c("replace", "add")) {
     fit <- two_seg_fit(cfg, kstart = NULL)
-    expect_s3_class(fit, "rc_2seg_power")
+    expect_s3_class(fit, "rc_2seg_powerlaw")
     expect_s3_class(fit, "rating_curve")
-    p <- predict(fit, stage = c(1, 3), conflev = 0.95)
+    p <- predict(fit, new_stage = c(1, 3), conflev = 0.95)
     expect_true(all(is.finite(p$fit)))
   }
 })
@@ -84,6 +84,6 @@ test_that("predict() and the limits functions agree at their defaults", {
   hp <- c(1, 3)
   # they all default to computing no intervals at all, so the bare call
   # returns the curve and nothing else
-  expect_named(predict(fit, stage = hp), c("stage", "fit"))
-  expect_named(delta_limits_2seg(fit, stage = hp), c("stage", "fit"))
+  expect_named(predict(fit, new_stage = hp), c("stage", "fit"))
+  expect_named(delta_limits_2seg(fit, new_stage = hp), c("stage", "fit"))
 })

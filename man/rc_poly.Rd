@@ -34,5 +34,5 @@ Fit polynomial rating curve
 }
 \examples{
 fit <- rc_poly(discharge, stage, data = thompson, degree = 2)
-predict(fit, stage = c(1, 3, 6), conflev = 0.95)
+predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 }

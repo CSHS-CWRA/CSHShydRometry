@@ -10,14 +10,14 @@ reference:
       Each function fits one model, and returns a fit that `predict()` and
       `coef()` work with.
     contents:
-      - rc_power
-      - rc_power_log
+      - rc_powerlaw
+      - rc_powerlaw_log
       - rc_poly
       - rc_loess
 
   - title: Fitting a two-segment curve
     contents:
-      - rc_2seg_power
+      - rc_2seg_powerlaw
 
   - title: Weighting
     desc: How the scatter of the gaugings about the curve is modelled.

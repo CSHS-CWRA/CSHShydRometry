@@ -52,11 +52,19 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
   starting breakpoints would need to cover several breakpoints, kept in
   order.
 * More two-segment fits: first, on the log-log scale
-  (`rc_2seg_power_log()`). *(to discuss)* Fits whose segments are not power
+  (`rc_2seg_powerlaw_log()`). *(to discuss)* Fits whose segments are not power
   laws; hydraulic controls are usually modelled as power laws, so this may
   not be needed.
-* A known stage of zero flow in `rc_power()` and `rc_2seg_power()`, as
-  `rc_power_log()` has.
+* A known offset for each segment in `rc_2seg_powerlaw()`, as
+  `rc_powerlaw()` and `rc_powerlaw_log()` have.
+* More ways for segments to combine than `combine = "replace"` and `"add"`,
+  which multi-segment curves will need. BaRatin describes them with a
+  configuration matrix: a row for each range of stage, a column for each
+  segment, and a 1 where that segment carries flow in that range, so
+  "replace" is `rbind(c(1, 0), c(0, 1))` and "add" is
+  `rbind(c(1, 0), c(1, 1))`. `combine` could accept such a matrix, keeping
+  "replace" and "add" as shorthands. *(to discuss)* How to make the matrix
+  easy to specify; see the design notes.
 * A breakpoint-averaged interval method for two-segment curves, which
   removes the jump in the delta-method band at the breakpoint.
 * *(to discuss)* Bayesian fitting.
@@ -66,18 +74,20 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
 * Estimating the power in `wts_power()` within the package, for example by
   maximising the profile likelihood over the power, refitting at each value
   by reweighting in rounds. That would make it available in every fitting
-  function, not only `rc_power()`, and remove the dependence on
+  function, not only `rc_powerlaw()`, and remove the dependence on
   `nlme::gnls()`.
 * Further estimated shapes for the scatter, such as an exponential
   (`wts_exp()`).
 * Known uncertainty plus extra scatter that grows with the flow, as one
   scheme (`wts_comb()`).
-* Weighting on the log-log scale, in `rc_power_log()`.
+* Weighting on the log-log scale, in `rc_powerlaw_log()`.
 
 **Predicting and uncertainty**
 
-* `method` for every `predict()` method, not only two-segment fits, with a
-  bootstrap for single-segment curves too.
+* A bootstrap for single-segment curves, and with it a `method` argument
+  for their `predict()` methods, as two-segment fits have. Until then they
+  have no `method` argument; passing one is an error, as is any argument a
+  method does not take.
 * Bootstrap settings (`B`, `seed`, ...) given as an object, like the
   weighting schemes, rather than passed through `...`.
 * *(to discuss)* The default interval method for multi-segment curves.

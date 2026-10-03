@@ -19,7 +19,7 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
   `reweight_in_rounds()`.
 - `wts_power()` is scatter proportional to a power of the fitted flow, with
   the power *estimated*. Estimating a variance parameter needs a likelihood,
-  which `nlme::gnls()` provides, so it is available in `rc_power()` only.
+  which `nlme::gnls()` provides, so it is available in `rc_powerlaw()` only.
 - Both are built on an internal `wts_nlme()`, which records the variance
   function in nlme's terms: `varPower(fixed = 1)` and `varPower()`. This is
   an internal convenience while `gnls()` does the estimating, not a
@@ -51,7 +51,7 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
   power could be estimated for any fitting function, for example by
   maximising the profile likelihood over the power, refitting at each value
   with the rounds (`profile_loglik()` already exists for the breakpoint
-  search). That would also extend `wts_power()` beyond `rc_power()`, and
+  search). That would also extend `wts_power()` beyond `rc_powerlaw()`, and
   could replace `gnls()` altogether.
 - Combining schemes, such as known gauging uncertainty plus scatter that
   grows with the flow (nlme's `varComb()`), would be a new function, such as
@@ -64,12 +64,26 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
 - `rc_*()` functions fit models, and only they use the prefix. Internal
   helpers do not.
 - Fitting functions are named for the model, not the fitting algorithm:
-  `rc_power()`, not `rc_nls()`. A `_log` suffix marks a fit on the log-log
+  `rc_powerlaw()`, not `rc_nls()`. A `_log` suffix marks a fit on the log-log
   scale.
-- Multi-segment curves put the number of segments first: `rc_2seg_power()`,
+- Multi-segment curves put the number of segments first: `rc_2seg_powerlaw()`,
   leaving room for `rc_2seg_*()` and `rc_pseg_*()`.
 - Arguments and columns are named in full (`discharge`, `stage`), not with
   extreme abbreviations (`q`, `h`).
+- In formulas, a power law is `Q = a (h - c)^b`, and the parameters are
+  named `a`, `b` and `c` in `pars` and `coef()`. As an argument, though, `c`
+  is named `offset`.
+
+**Why.**
+
+- `c` lines up with `a` and `b`. The alternative, `h_0`, reads as the stage
+  of zero flow, which `c` is only for a single power law: for a segment of a
+  multi-segment curve it is not.
+- An argument `c = ` reads as R's `c()`, so the argument has a name in
+  words. "Offset" is BaRatin's term for the parameter, and holds for any
+  segment. "Zero flow stage" does not hold for segments, and "activation
+  stage" is, in BaRatin, the breakpoint (our `k`), not `c`.
+  *(to confirm with R. Dan Moore and Paul Whitfield)*
 
 ## Arguments
 
@@ -80,6 +94,14 @@ single `wts` argument taking a weighting object: `wts_none()`, `wts_prop()`,
   anything passed through `...` with `rlang::check_dots_empty()`.
 - `discharge` and `stage` are evaluated in `data`, so they can refer to its
   columns.
+- In `predict()`, the stages to predict at are `new_stage`, distinct from the
+  `stage` the curve was fitted to.
+- `predict()` methods check that `...` is empty too, rather than passing it
+  on. A single-segment fit has no `method`, so `predict(fit, method =
+  "boot")` is an error rather than delta-method limits that look like
+  bootstrap ones. `method` arrives with a single-segment bootstrap. The
+  two-segment `predict()` passes `...` on to its limits function, for `B`
+  and `seed`, and that function checks it.
 - The weights given to `wts_spec()` are *not*: they are an ordinary vector,
   evaluated where `wts_spec()` is called. A weighting scheme is an object in
   its own right, which can be made in one place and used in another, so an
@@ -120,13 +142,13 @@ script can behave differently from one session to the next.
 
 ## Fits on the log-log scale
 
-**Decision.** `rc_power_log()` takes no `wts`, and holds the stage of zero
-flow fixed when `zero_flow_stage` is given.
+**Decision.** `rc_powerlaw_log()` takes no `wts`, and holds the offset fixed
+when `offset` is given.
 
 **Why.** Equal scatter on the log scale already means scatter proportional to
 the flow, which is usually the reason to weight. Taking logs does not always
 even out the scatter, though, so weighting on the log scale is a possible
-extension. A known `zero_flow_stage` makes the model linear in its other
+extension. A known `offset` makes the model linear in its other
 parameters, fitted exactly by `lm()`. Fixing it at an *estimate* gives the
 same curve with limits that leave out its uncertainty; that is how the former
 `rc_log_ols()` behaved, and it is reproduced by fitting twice rather than
@@ -136,11 +158,13 @@ built in.
 
 **Decision.**
 
-- `rc_2seg_power()` tries several starting breakpoints and keeps the most
+- `rc_2seg_powerlaw()` tries several starting breakpoints and keeps the most
   likely fit, because the fit is sensitive to where it starts.
 - `predict()` offers `method = "delta"` (the default, fast, unreliable near
   the breakpoint) and `method = "boot"`.
 - The bootstrap repeats the full breakpoint search for every resample.
+- How the segments combine above the breakpoint is `combine = "replace"` or
+  `"add"`.
 
 **Why.**
 
@@ -151,3 +175,15 @@ built in.
 - A method drawing parameters from their asymptotic normal distribution
   (`"sim"`) was tried and removed: where a segment is poorly identified, the
   draws too often give impossible curves.
+- `combine` was earlier `config`, after BaRatin's configuration matrix,
+  which says which segments carry flow in which range of stage: a row per
+  range, a column per segment. With two segments only two matrices make
+  sense, `rbind(c(1, 0), c(0, 1))` ("replace") and `rbind(c(1, 0), c(1, 1))`
+  ("add"), so they are named in words.
+
+**What it leaves open.**
+
+- With more segments, two words will not be enough. `combine` could also
+  accept a configuration matrix, with `"replace"` and `"add"` kept as
+  shorthands, so no existing code breaks. A matrix is hard to write and
+  read, though, so how users specify one needs more thought.

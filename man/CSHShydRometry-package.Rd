@@ -17,16 +17,20 @@ or as column names with a \code{data} argument — and return an object carrying
 
 Single segment:
 \itemize{
-\item \code{\link[=rc_power]{rc_power()}} — power law fitted by least squares on the original
+\item \code{\link[=rc_powerlaw]{rc_powerlaw()}} — power law fitted by least squares on the original
 scale.
-\item \code{\link[=rc_power_log]{rc_power_log()}} — power law fitted by least squares on the
-log-log scale, with the stage of zero flow estimated or given.
+\item \code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}} — power law fitted by least squares on the
+log-log scale.
+}
+In both, the offset \eqn{c} is estimated, or held at a value given as
+\code{offset}.
+\itemize{
 \item \code{\link[=rc_poly]{rc_poly()}}, \code{\link[=rc_loess]{rc_loess()}} — polynomial and loess alternatives.
 }
 
 Two segments, joined at an estimated breakpoint:
 \itemize{
-\item \code{\link[=rc_2seg_power]{rc_2seg_power()}} — with \code{combine = "replace"}: the upper power
+\item \code{\link[=rc_2seg_powerlaw]{rc_2seg_powerlaw()}} — with \code{combine = "replace"}: the upper power
 law takes over from the lower at the breakpoint; with
 \code{combine = "add"}: it adds to the discharge carried at the breakpoint.
 }
@@ -40,7 +44,7 @@ scatter about the curve:
 \item \code{\link[=wts_none]{wts_none()}} — the same scatter at every flow (constant variance).
 \item \code{\link[=wts_prop]{wts_prop()}} — scatter proportional to the flow.
 \item \code{\link[=wts_power]{wts_power()}} — scatter proportional to a power of the flow, with
-the power estimated; \code{\link[=rc_power]{rc_power()}} only at this time.
+the power estimated; \code{\link[=rc_powerlaw]{rc_powerlaw()}} only at this time.
 \item \code{\link[=wts_spec]{wts_spec()}} — variances supplied by the user, typically from
 reported gauging uncertainties. A new observation's scatter is then
 not identified by the fit, so prediction limits are returned as \code{NA}.
@@ -56,10 +60,10 @@ weighting: \code{stage}, \code{fit}, and — when \code{conflev} or \code{predle
 come back as \code{NA} rather than as missing columns, so results from different
 approaches stack directly.
 
-For two-segment curves, \code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} takes a \code{method}. The
+For two-segment curves, \code{\link[=predict.rc_2seg_powerlaw]{predict.rc_2seg_powerlaw()}} takes a \code{method}. The
 default, \code{"delta"}, is fast but unreliable near the breakpoint, where the
 mean function is not differentiable; \code{"boot"} costs a refit per resample
-and behaves much better there. See \code{\link[=predict.rc_2seg_power]{predict.rc_2seg_power()}} for the detail.
+and behaves much better there. See \code{\link[=predict.rc_2seg_powerlaw]{predict.rc_2seg_powerlaw()}} for the detail.
 }
 
 \section{Data}{
