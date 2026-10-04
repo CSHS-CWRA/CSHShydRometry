@@ -147,6 +147,17 @@ rbind(
 )
 ```
 
+To label each row with its model, use `dplyr::bind_rows()` with named
+arguments:
+
+```{r stack-labelled, eval = requireNamespace("dplyr", quietly = TRUE)}
+dplyr::bind_rows(
+  power = predict(fit, new_stage = 3, conflev = 0.95),
+  poly = predict(fit_poly, new_stage = 3, conflev = 0.95),
+  .id = "model"
+)
+```
+
 ## Two-segment curves
 
 Where the river's control changes (say, when the water rises out of the

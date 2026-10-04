@@ -194,10 +194,19 @@ rc_powerlaw <- function(
 #' Confidence limits depend on this only mildly, because estimates average
 #' over many gaugings. Prediction limits depend on it directly: if the
 #' scatter is skewed or has heavy tails, they can miss, especially at high
-#' levels such as 0.99. Check the residuals before relying on them. Even
-#' under normality, the limits are exact only for a polynomial, or
-#' [rc_powerlaw_log()] with the offset given, with weights that do not depend
-#' on the fit; otherwise they are approximate.
+#' levels such as 0.99. Check the residuals before relying on them.
+#'
+#' Even when the scatter is normal, most limits are approximations: a 95%
+#' interval covers the truth roughly, not exactly, 95% of the time. That is
+#' because the curve is nonlinear in its parameters and is approximated by
+#' a straight line about the estimates (the delta method), because the
+#' weights are themselves estimated from the fit (under [wts_prop()] and
+#' [wts_power()]), or, for [rc_loess()], because of the smoother's
+#' approximations. The approximation is good with plenty of gaugings, and
+#' poorer with few, or beyond the range of the gaugings. The limits are
+#' exact only for fits that are linear in their parameters with weights
+#' fixed in advance: [rc_poly()] with [wts_none()] or [wts_spec()], and
+#' [rc_powerlaw_log()] with `offset` given.
 #' @return A tibble with the stages (`stage`), the predicted discharges
 #'   (`fit`) and, if requested, the lower and upper confidence limits
 #'   (`ci_lwr`, `ci_upr`) and prediction limits (`pi_lwr`, `pi_upr`).

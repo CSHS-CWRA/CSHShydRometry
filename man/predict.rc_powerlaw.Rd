@@ -38,9 +38,18 @@ gaugings about the curve is normal (on the log scale, for
 Confidence limits depend on this only mildly, because estimates average
 over many gaugings. Prediction limits depend on it directly: if the
 scatter is skewed or has heavy tails, they can miss, especially at high
-levels such as 0.99. Check the residuals before relying on them. Even
-under normality, the limits are exact only for a polynomial, or
-\code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}} with the offset given, with weights that do not depend
-on the fit; otherwise they are approximate.
+levels such as 0.99. Check the residuals before relying on them.
+
+Even when the scatter is normal, most limits are approximations: a 95\%
+interval covers the truth roughly, not exactly, 95\% of the time. That is
+because the curve is nonlinear in its parameters and is approximated by
+a straight line about the estimates (the delta method), because the
+weights are themselves estimated from the fit (under \code{\link[=wts_prop]{wts_prop()}} and
+\code{\link[=wts_power]{wts_power()}}), or, for \code{\link[=rc_loess]{rc_loess()}}, because of the smoother's
+approximations. The approximation is good with plenty of gaugings, and
+poorer with few, or beyond the range of the gaugings. The limits are
+exact only for fits that are linear in their parameters with weights
+fixed in advance: \code{\link[=rc_poly]{rc_poly()}} with \code{\link[=wts_none]{wts_none()}} or \code{\link[=wts_spec]{wts_spec()}}, and
+\code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}} with \code{offset} given.
 }
 

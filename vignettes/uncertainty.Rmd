@@ -108,8 +108,10 @@ qqnorm(relative_residuals, main = "Relative residuals")
 qqline(relative_residuals)
 ```
 
-Even with normal scatter, most of the limits are approximate, because they
-linearise the curve about its estimates; see `?predict.rc_powerlaw`.
+Even with normal scatter, a 95% interval from most fits covers the truth
+only roughly 95% of the time, because the calculation approximates the
+curve by a straight line about its estimates. The approximation is good with
+plenty of gaugings, and poorer with few; see `?predict.rc_powerlaw`.
 
 ## Fits on the log scale
 
