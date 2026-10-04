@@ -67,10 +67,11 @@
   variances leaves room to combine sources of scatter, such as measurement
   error and the rest, by adding them. This interface is experimental.
 
-* New `fitted()` and `residuals()` methods for every fit. `residuals()` gives
-  observed minus fitted discharge, or, with `type = "pearson"`, residuals
-  scaled by their modelled standard deviation, for checking the variance
-  scheme and normality. Use these rather than the `model` element, which
+* New `fitted()` and `residuals()` methods for every fit. Residuals are
+  observed minus fitted, on the scale the model is fitted on (log for
+  `rc_powerlaw_log()`, discharge otherwise), and, with `divide_by_sd = TRUE`,
+  divided by the estimated standard deviation of a gauging at that stage,
+  for checking the variance scheme and normality. Use these rather than the `model` element, which
   depends on how a fit is computed and may change.
 
 * The settings passed to `nls()` are given as a single `control` argument,

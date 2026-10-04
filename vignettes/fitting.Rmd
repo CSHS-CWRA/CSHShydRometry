@@ -59,7 +59,7 @@ explained below; its residuals are on the log scale, so 0.05 means about 5%.
 
 ```{r}
 fit_all <- rc_powerlaw_log(discharge, stage, data = thompson)
-departure <- log(thompson$discharge / fitted(fit_all))
+departure <- residuals(fit_all)
 
 plot(thompson$date, 100 * departure,
      xlab = "Date of gauging", ylab = "Departure from the curve (%)")

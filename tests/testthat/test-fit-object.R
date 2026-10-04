@@ -188,26 +188,32 @@ test_that("fitted() and residuals() work for every fit", {
     fit <- fits[[nm]]
     n <- nrow(fit$gaugings)
     expect_length(fitted(fit), n)
-    expect_equal(residuals(fit), fit$gaugings$discharge - fitted(fit))
-    expect_true(all(is.finite(residuals(fit, type = "pearson"))))
+    expect_length(residuals(fit), n)
+    expect_true(all(is.finite(residuals(fit, divide_by_sd = TRUE))))
   }
-  expect_error(residuals(fits[[1]], type = "bogus"))
+  # on the scale the model is fitted on
+  one <- fits$rc_powerlaw
+  expect_equal(residuals(one), one$gaugings$discharge - fitted(one))
+  log_fit <- fits$rc_powerlaw_log
+  expect_equal(residuals(log_fit),
+               log(log_fit$gaugings$discharge) - log(fitted(log_fit)))
+  expect_error(residuals(one, divide_by_sd = "yes"))
   expect_error(fitted(fits[[1]], stage = 3), class = "rlib_error_dots_nonempty")
 })
 
-test_that("Pearson residuals match those of the underlying model", {
+test_that("residuals divided by the sd match the underlying model's", {
   for (variance in list("none", "prop", "power")) {
     fit <- rc_powerlaw(discharge, stage, data = thompson, variance = variance)
     expect_equal(unname(fitted(fit)), unname(as.numeric(fitted(fit$model))))
     expect_equal(
-      unname(residuals(fit, type = "pearson")),
+      unname(residuals(fit, divide_by_sd = TRUE)),
       unname(as.numeric(residuals(fit$model, type = "pearson"))),
       tolerance = 1e-6
     )
   }
   log_fit <- rc_powerlaw_log(discharge, stage, data = thompson)
   expect_equal(
-    unname(residuals(log_fit, type = "pearson")),
+    unname(residuals(log_fit, divide_by_sd = TRUE)),
     as.numeric(residuals(log_fit$model)) / log_fit$rse
   )
 })

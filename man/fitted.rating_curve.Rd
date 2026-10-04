@@ -7,15 +7,15 @@
 \usage{
 \method{fitted}{rating_curve}(object, ...)
 
-\method{residuals}{rating_curve}(object, ..., type = c("response", "pearson"))
+\method{residuals}{rating_curve}(object, ..., divide_by_sd = FALSE)
 }
 \arguments{
 \item{object}{A rating curve fit.}
 
 \item{...}{Must be empty.}
 
-\item{type}{The type of residual: \code{"response"} (the default) or
-\code{"pearson"}.}
+\item{divide_by_sd}{Whether to divide each residual by the estimated
+standard deviation of a gauging at its stage.}
 }
 \value{
 A numeric vector, one value per gauging in \code{object$gaugings}.
@@ -25,23 +25,25 @@ The fitted discharge at each gauging, and the residuals: the gaugings'
 departures from the curve.
 }
 \details{
-Residuals come in two types:
-\itemize{
-\item \code{"response"}: observed minus fitted discharge, in cubic meters per
-second, for every fit, including those on the log scale.
-\item \code{"pearson"}: each residual divided by its standard deviation under the
-fit's variance scheme, as estimated. If the scheme describes the scatter
-well, these have about the same spread at every stage, with a standard
-deviation near 1, so they are the ones to check for a trend in the
-scatter or for normality. For \code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}} they are the residuals
-on the log scale, divided by \code{rse}.
-}
+Residuals are always differences, observed minus fitted, on the scale the
+model is fitted on: the log scale for \code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}}, so
+\code{log(observed) - log(fitted)}, and discharge, in cubic meters per second,
+for every other fit. Nothing is transformed back.
+
+With \code{divide_by_sd = TRUE}, each residual is divided by the fit's estimated
+standard deviation of a gauging at that stage, on the same scale, as given
+by its variance scheme: for example \code{rse * fitted} under \code{\link[=var_prop]{var_prop()}}. If
+the variance scheme describes the scatter well, the results have about the
+same spread at every stage, with a standard deviation near 1, so they are
+the ones to check for a trend in the scatter or for normality. This is the
+standard deviation of a gauging's scatter, not of the residual itself: it
+makes no adjustment for the uncertainty in the fitted curve.
 }
 \examples{
 fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
 head(fitted(fit))
 head(residuals(fit))
 
-# the scatter, scaled by its modelled standard deviation
-qqnorm(residuals(fit, type = "pearson"))
+# the residuals in standard deviations, to check the variance scheme
+qqnorm(residuals(fit, divide_by_sd = TRUE))
 }
