@@ -91,6 +91,26 @@ Under `wts_spec()`, each gauging's scatter is supplied rather than estimated,
 so the fit says nothing about the scatter of a new gauging. Its prediction
 limits come back as `NA`, while its confidence limits are computed as usual.
 
+## What the limits assume
+
+The limits use the t distribution, which assumes the gaugings scatter
+normally about the curve. Confidence limits depend on this only mildly,
+because the estimates average over many gaugings. Prediction limits depend
+on it directly: they are only as good as the assumed shape of the scatter,
+and if it is skewed or has heavy tails they can miss, especially at high
+levels such as 0.99. So look at the residuals before relying on prediction
+limits. Here the relative residuals of the power law under `wts_prop()`
+look roughly normal:
+
+```{r, fig.height = 3.4}
+relative_residuals <- residuals(fit$model) / fitted(fit$model)
+qqnorm(relative_residuals, main = "Relative residuals")
+qqline(relative_residuals)
+```
+
+Even with normal scatter, most of the limits are approximate, because they
+linearise the curve about its estimates; see `?predict.rc_powerlaw`.
+
 ## Fits on the log scale
 
 `rc_powerlaw_log()` works on the log scale, where the limits are symmetric.

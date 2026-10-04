@@ -25,3 +25,17 @@ prediction limits are returned.}
 \description{
 Predict method for rc_poly objects
 }
+\section{What the limits assume}{
+
+The limits use the t distribution, so they assume the scatter of the
+gaugings about the curve is normal (on the log scale, for
+\code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}}), with the spread the weighting scheme describes.
+Confidence limits depend on this only mildly, because estimates average
+over many gaugings. Prediction limits depend on it directly: if the
+scatter is skewed or has heavy tails, they can miss, especially at high
+levels such as 0.99. Check the residuals before relying on them. Even
+under normality, the limits are exact only for a polynomial, or
+\code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}} with the offset given, with weights that do not depend
+on the fit; otherwise they are approximate.
+}
+

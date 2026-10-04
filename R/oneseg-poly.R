@@ -135,6 +135,7 @@ rc_poly <- function(
 #' Predict method for rc_poly objects
 #'
 #' @inheritParams predict.rc_powerlaw
+#' @inheritSection predict.rc_powerlaw What the limits assume
 #' @param object An rc_poly object.
 #' @export
 predict.rc_poly <- function(

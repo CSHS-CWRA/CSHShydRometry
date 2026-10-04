@@ -143,6 +143,7 @@ rc_powerlaw_log <- function(
 #' Predict method for rc_powerlaw_log objects
 #'
 #' @inheritParams predict.rc_powerlaw
+#' @inheritSection predict.rc_powerlaw What the limits assume
 #' @param object An `rc_powerlaw_log` object.
 #' @export
 predict.rc_powerlaw_log <- function(

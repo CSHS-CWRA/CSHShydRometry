@@ -80,6 +80,16 @@ is, the draws too often land on impossible curves: negative or
 astronomically large discharges, giving limits that are meaningless.
 }
 
+\section{What the limits assume}{
+
+Prediction limits, from either method, assume the scatter of the
+gaugings about the curve is normal, with the spread the weighting scheme
+describes: if it is skewed or has heavy tails, they can miss, especially
+at high levels such as 0.99. Delta-method confidence limits assume the
+estimates are close to normal, which is approximate, and poor near the
+breakpoint; bootstrap confidence limits do not.
+}
+
 \examples{
 if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings

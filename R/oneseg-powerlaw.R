@@ -187,6 +187,17 @@ rc_powerlaw <- function(
 #'   confidence limits are returned.
 #' @param predlev The prediction level for the prediction limits; if NULL, no
 #'   prediction limits are returned.
+#' @section What the limits assume:
+#' The limits use the t distribution, so they assume the scatter of the
+#' gaugings about the curve is normal (on the log scale, for
+#' [rc_powerlaw_log()]), with the spread the weighting scheme describes.
+#' Confidence limits depend on this only mildly, because estimates average
+#' over many gaugings. Prediction limits depend on it directly: if the
+#' scatter is skewed or has heavy tails, they can miss, especially at high
+#' levels such as 0.99. Check the residuals before relying on them. Even
+#' under normality, the limits are exact only for a polynomial, or
+#' [rc_powerlaw_log()] with the offset given, with weights that do not depend
+#' on the fit; otherwise they are approximate.
 #' @return A tibble with the stages (`stage`), the predicted discharges
 #'   (`fit`) and, if requested, the lower and upper confidence limits
 #'   (`ci_lwr`, `ci_upr`) and prediction limits (`pi_lwr`, `pi_upr`).

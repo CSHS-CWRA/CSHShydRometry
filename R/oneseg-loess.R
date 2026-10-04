@@ -117,6 +117,7 @@ rc_loess <- function(
 #' Predict method for rc_loess objects
 #'
 #' @inheritParams predict.rc_powerlaw
+#' @inheritSection predict.rc_powerlaw What the limits assume
 #' @param object An rc_loess object.
 #' @export
 predict.rc_loess <- function(
