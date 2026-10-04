@@ -3,9 +3,9 @@
 #' Confidence and prediction limits for an NLS fit with proportional weights
 #'
 #' `nlspw` is short for "NLS, proportional weights": these are the limits
-#' used under [wts_prop()].
+#' used under [var_prop()].
 #'
-#' Builds pointwise interval limits for the [wts_prop()] case, where the
+#' Builds pointwise interval limits for the [var_prop()] case, where the
 #' error standard deviation is taken to be proportional to the mean discharge
 #' (constant coefficient of variation). Standard errors of the fitted mean come
 #' from the delta method via [investr::predFit()]; the interval half-width uses
@@ -94,7 +94,7 @@ drop_incomplete <- function(discharge, stage) {
 
 #' Fit with proportional weights by iterative reweighting
 #'
-#' Under [wts_prop()] the error standard deviation is proportional to
+#' Under [var_prop()] the error standard deviation is proportional to
 #' the mean discharge, so the weights `1 / fitted^2` depend on the fit itself.
 #' The fit is therefore repeated in rounds: fit with the current weights,
 #' recompute the weights from the new fitted values, refit. Each round starts
@@ -135,7 +135,7 @@ reweight_in_rounds <- function(fit_fun, yp, start, tol, maxiter) {
         paste(
           "Proportional weights did not converge in %d rounds (the fitted",
           "discharges still changed by up to %.2g%% in the last); the fit",
-          "may not be reliable. Consider increasing `maxiter` in `wts_prop()`."
+          "may not be reliable. Consider increasing `maxiter` in `var_prop()`."
         ),
         maxiter,
         100 * change

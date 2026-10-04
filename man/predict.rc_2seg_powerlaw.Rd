@@ -108,7 +108,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
 # the columns returned never depend on the model or the method, so results
 # from different approaches stack directly
 one <- rc_powerlaw(discharge, stage, data = thompson)
-two <- rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop", kstart = 2)
+two <- rc_2seg_powerlaw(discharge, stage, data = thompson, variance = "prop", kstart = 2)
 rbind(
   predict(one, new_stage = 3, conflev = 0.95),
   predict(two, new_stage = 3, conflev = 0.95)

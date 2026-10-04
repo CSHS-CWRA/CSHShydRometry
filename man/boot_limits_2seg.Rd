@@ -18,7 +18,7 @@ boot_limits_2seg(
 \arguments{
 \item{object}{An \code{rc_2seg_powerlaw} fit (from \code{\link[=rc_2seg_powerlaw]{rc_2seg_powerlaw()}}). The gaugings are
 taken from \code{object$gaugings} and the fitting arguments from
-\code{object$settings}. Under \code{wts_spec()} the supplied weights are
+\code{object$settings}. Under \code{var_spec()} the supplied variances are
 resampled along with the cases.}
 
 \item{...}{Must be empty. Present so that every argument after it has
@@ -38,7 +38,7 @@ to be named in full.}
 
 \item{max_tries_factor}{Cap on total resample attempts (\code{B * factor}) so a
 run terminates even if some resamples fail to converge. A resample fails
-if its fit errors or, under \code{wts_prop()}, if its reweighting does
+if its fit errors or, under \code{var_prop()}, if its reweighting does
 not converge; failed resamples are redrawn.}
 }
 \value{
@@ -72,10 +72,10 @@ of the bootstrap curves at each stage) with the observation-noise sd in
 quadrature, using a t-quantile on the fit's residual degrees of freedom. The
 observation-noise sd follows the error model:
 \itemize{
-\item \code{\link[=wts_none]{wts_none()}}: homoscedastic, \code{sd(discharge - fitted)}.
-\item \code{\link[=wts_prop]{wts_prop()}}: constant coefficient of variation,
+\item \code{\link[=var_none]{var_none()}}: homoscedastic, \code{sd(discharge - fitted)}.
+\item \code{\link[=var_prop]{var_prop()}}: constant coefficient of variation,
 \code{fit * sd((discharge - fitted) / fitted)}.
-\item \code{\link[=wts_spec]{wts_spec()}}: a new observation's uncertainty is not identified by the
+\item \code{\link[=var_spec]{var_spec()}}: a new observation's uncertainty is not identified by the
 fit, so \code{pi_lwr}/\code{pi_upr} are returned as \code{NA}, as in every other
 method.
 }

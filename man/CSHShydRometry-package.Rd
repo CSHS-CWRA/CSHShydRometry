@@ -36,20 +36,21 @@ law takes over from the lower at the breakpoint; with
 }
 }
 
-\section{Weighting}{
+\section{Variance}{
 
-The constructors that take \code{wts} offer four models of how the gaugings
-scatter about the curve:
+The constructors that take \code{variance} offer four models of how the
+gaugings scatter about the curve (experimental: this interface may
+change):
 \itemize{
-\item \code{\link[=wts_none]{wts_none()}} — the same scatter at every flow (constant variance).
-\item \code{\link[=wts_prop]{wts_prop()}} — scatter proportional to the flow.
-\item \code{\link[=wts_power]{wts_power()}} — scatter proportional to a power of the flow, with
+\item \code{\link[=var_none]{var_none()}} — the same scatter at every flow (constant variance).
+\item \code{\link[=var_prop]{var_prop()}} — scatter proportional to the flow.
+\item \code{\link[=var_power]{var_power()}} — scatter proportional to a power of the flow, with
 the power estimated; \code{\link[=rc_powerlaw]{rc_powerlaw()}} only at this time.
-\item \code{\link[=wts_spec]{wts_spec()}} — variances supplied by the user, typically from
+\item \code{\link[=var_spec]{var_spec()}} — variances supplied by the user, typically from
 reported gauging uncertainties. A new observation's scatter is then
 not identified by the fit, so prediction limits are returned as \code{NA}.
 }
-See \link{wts}.
+See \link{variance}.
 }
 
 \section{Confidence and prediction limits}{

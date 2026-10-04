@@ -59,14 +59,14 @@ is the same, but the limits are narrower than they should be, because the
 uncertainty in \eqn{c} is left out.
 }
 
-\section{Weighting}{
+\section{Variance}{
 
-There is no \code{wts} argument. Equal scatter on the log scale already means
-scatter proportional to the flow, which is usually why one would weight a
-fit on the original scale, so weighting is not implemented here. Taking
-logs does not always even out the scatter completely, though, and a
-weighting scheme on the log scale could still be useful; check the
-residuals of the fit.
+There is no \code{variance} argument. Equal scatter on the log scale already
+means a standard deviation proportional to the flow, which is usually why
+one would model the variance of a fit on the original scale, so it is not
+implemented here. Taking logs does not always even out the scatter
+completely, though, and a variance scheme on the log scale could still be
+useful; check the residuals of the fit.
 }
 
 \examples{

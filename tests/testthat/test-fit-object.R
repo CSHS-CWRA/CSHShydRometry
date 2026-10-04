@@ -6,13 +6,13 @@ all_fits <- function() {
     rc_powerlaw_log_offset = rc_powerlaw_log(discharge, stage, data = thompson, offset = -1.3),
     rc_powerlaw_log = rc_powerlaw_log(discharge, stage, data = thompson),
     rc_powerlaw = rc_powerlaw(discharge, stage, data = thompson),
-    rc_power_prop = rc_powerlaw(discharge, stage, data = thompson, wts = "prop"),
-    rc_power_wts_power = rc_powerlaw(discharge, stage, data = thompson,
-                                  wts = wts_power()),
+    rc_power_prop = rc_powerlaw(discharge, stage, data = thompson, variance = "prop"),
+    rc_power_var_power = rc_powerlaw(discharge, stage, data = thompson,
+                                  variance = var_power()),
     rc_poly = rc_poly(discharge, stage, data = thompson),
-    rc_poly_prop = rc_poly(discharge, stage, data = thompson, wts = "prop"),
+    rc_poly_prop = rc_poly(discharge, stage, data = thompson, variance = "prop"),
     rc_loess = rc_loess(discharge, stage, data = thompson),
-    rc_2seg_powerlaw = rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop",
+    rc_2seg_powerlaw = rc_2seg_powerlaw(discharge, stage, data = thompson, variance = "prop",
                               kstart = 2)
   )
 }
@@ -60,7 +60,7 @@ test_that("two-segment pars hold one value per segment", {
 })
 
 test_that("settings are enough to refit", {
-  fit <- rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
+  fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
   refit <- do.call(rc_powerlaw, c(list(thompson$discharge, thompson$stage), fit$settings))
   expect_equal(coef(refit), coef(fit))
   fit2 <- rc_poly(discharge, stage, data = thompson, degree = 3)
@@ -70,7 +70,7 @@ test_that("settings are enough to refit", {
 
 test_that("the two-segment fit no longer takes conflev or predlev", {
   expect_error(
-    rc_2seg_powerlaw(discharge, stage, data = thompson, kstart = 2, wts = "prop",
+    rc_2seg_powerlaw(discharge, stage, data = thompson, kstart = 2, variance = "prop",
                 conflev = 0.9),
     class = "rlib_error_dots_nonempty"
   )
@@ -83,12 +83,12 @@ test_that("loess records its residual scale and equivalent parameters", {
 })
 
 test_that("the fit records its weighting scheme, with any estimate", {
-  fit <- rc_powerlaw(discharge, stage, data = thompson, wts = "power")
+  fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "power")
   expect_s3_class(fit$model, "gnls")
-  expect_true(is.numeric(fit$wts$exponent) && length(fit$wts$exponent) == 1L)
+  expect_true(is.numeric(fit$variance$exponent) && length(fit$variance$exponent) == 1L)
   # settings keep the scheme as given, for refitting
-  expect_null(fit$settings$wts$exponent)
-  expect_s3_class(rc_powerlaw(discharge, stage, data = thompson)$wts, "rc_wts_none")
+  expect_null(fit$settings$variance$exponent)
+  expect_s3_class(rc_powerlaw(discharge, stage, data = thompson)$variance, "rc_var_none")
   # the power describes the scatter, not the curve
   expect_named(coef(fit), c("a", "b", "c"))
   expect_named(fit$pars, c("a", "b", "c"))
@@ -98,9 +98,9 @@ test_that("the fit records its weighting scheme, with any estimate", {
 
 test_that("converged reweighting is recorded", {
   for (fit in list(
-    rc_powerlaw(discharge, stage, data = thompson, wts = "prop"),
-    rc_poly(discharge, stage, data = thompson, wts = "prop"),
-    rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop", kstart = 2)
+    rc_powerlaw(discharge, stage, data = thompson, variance = "prop"),
+    rc_poly(discharge, stage, data = thompson, variance = "prop"),
+    rc_2seg_powerlaw(discharge, stage, data = thompson, variance = "prop", kstart = 2)
   )) {
     expect_true(fit$irls$converged)
     expect_gt(fit$irls$iterations, 1L)
@@ -112,24 +112,24 @@ test_that("converged reweighting is recorded", {
 
 test_that("reweighting that runs out of rounds warns and says so", {
   expect_warning(
-    fit <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1)),
+    fit <- rc_powerlaw(discharge, stage, data = thompson, variance = var_prop(maxiter = 1)),
     "did not converge in 1 rounds"
   )
   expect_false(fit$irls$converged)
   expect_equal(fit$irls$iterations, 1L)
   expect_warning(
-    rc_poly(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1)),
+    rc_poly(discharge, stage, data = thompson, variance = var_prop(maxiter = 1)),
     "did not converge"
   )
   expect_warning(
-    rc_2seg_powerlaw(discharge, stage, data = thompson, wts = wts_prop(maxiter = 1), kstart = 2),
+    rc_2seg_powerlaw(discharge, stage, data = thompson, variance = var_prop(maxiter = 1), kstart = 2),
     "did not converge"
   )
 })
 
 test_that("reweighting stops on the change in fitted discharge", {
-  fit <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-3))
-  tight <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop(tol = 1e-10))
+  fit <- rc_powerlaw(discharge, stage, data = thompson, variance = var_prop(tol = 1e-3))
+  tight <- rc_powerlaw(discharge, stage, data = thompson, variance = var_prop(tol = 1e-10))
   expect_lte(fit$irls$iterations, tight$irls$iterations)
   expect_equal(stats::fitted(fit$model), stats::fitted(tight$model),
                tolerance = 1e-2)
@@ -168,7 +168,7 @@ test_that("no code relies on partial matching", {
       all_fits(),
       list(rc_powerlaw_log(discharge, stage, data = thompson,
                         offset = -1.3),
-           rc_loess(discharge, stage, data = thompson, wts = "prop"))
+           rc_loess(discharge, stage, data = thompson, variance = "prop"))
     )
     for (fit in fits) {
       suppressMessages(
@@ -181,3 +181,33 @@ test_that("no code relies on partial matching", {
   })
 })
 
+
+test_that("fitted() and residuals() work for every fit", {
+  fits <- all_fits()
+  for (nm in names(fits)) {
+    fit <- fits[[nm]]
+    n <- nrow(fit$gaugings)
+    expect_length(fitted(fit), n)
+    expect_equal(residuals(fit), fit$gaugings$discharge - fitted(fit))
+    expect_true(all(is.finite(residuals(fit, type = "pearson"))))
+  }
+  expect_error(residuals(fits[[1]], type = "bogus"))
+  expect_error(fitted(fits[[1]], stage = 3), class = "rlib_error_dots_nonempty")
+})
+
+test_that("Pearson residuals match those of the underlying model", {
+  for (variance in list("none", "prop", "power")) {
+    fit <- rc_powerlaw(discharge, stage, data = thompson, variance = variance)
+    expect_equal(unname(fitted(fit)), unname(as.numeric(fitted(fit$model))))
+    expect_equal(
+      unname(residuals(fit, type = "pearson")),
+      unname(as.numeric(residuals(fit$model, type = "pearson"))),
+      tolerance = 1e-6
+    )
+  }
+  log_fit <- rc_powerlaw_log(discharge, stage, data = thompson)
+  expect_equal(
+    unname(residuals(log_fit, type = "pearson")),
+    as.numeric(residuals(log_fit$model)) / log_fit$rse
+  )
+})

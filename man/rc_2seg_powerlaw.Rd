@@ -13,7 +13,7 @@ rc_2seg_powerlaw(
   kstart = NULL,
   kfixed = FALSE,
   kbounds = NULL,
-  wts = wts_none(),
+  variance = var_none(),
   control = stats::nls.control(maxiter = 1000)
 )
 }
@@ -47,9 +47,10 @@ numeric vector tries each of its values. See Details.}
 \item{kbounds}{Lower and upper bounds for \code{k}, or \code{NULL} to keep at least
 three gaugings in each segment.}
 
-\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
-\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
-with the weights. See \link{wts}.}
+\item{variance}{How the variance of the gaugings about the curve is
+modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}, and note
+that this interface is experimental.}
 
 \item{control}{Settings for \code{\link[stats:nls]{stats::nls()}}, as from \code{\link[stats:nls.control]{stats::nls.control()}}.
 The fit uses the \code{"port"} algorithm, which ignores \code{tol}; its own
@@ -83,7 +84,7 @@ segment on the log-log scale (\code{log(discharge) ~ log(stage - c)});
 \code{a = exp(intercept)}, \code{b = slope}.
 \item Fit all parameters jointly with \code{\link[stats:nls]{stats::nls()}} using the "port"
 algorithm (which supports the box constraints in \code{lower}/\code{upper}).
-Under \code{wts_prop()} this fit is repeated, updating the weights
+Under \code{var_prop()} this fit is repeated, updating the weights
 from the current fitted values and starting from the previous
 estimates, until the fitted discharges stabilise.
 }
@@ -109,7 +110,7 @@ then rest on that one start.
 \examples{
 # The Thompson is close to a single control, so its two-segment fit needs
 # proportional weights to converge.
-fit <- rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop")
+fit <- rc_2seg_powerlaw(discharge, stage, data = thompson, variance = "prop")
 fit
 coef(fit)
 
@@ -127,12 +128,12 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
   add <- rc_2seg_powerlaw(Q, H, data = sauze, combine = "add", kstart = 1)
   c(replace = repl$pars[["k"]], add = add$pars[["k"]])
 
-  # weights from the reported gauging uncertainties
+  # variances from the reported gauging uncertainties
   rc_2seg_powerlaw(
     Q,
     H,
     data = sauze,
-    wts = wts_spec(1 / sauze$uQ^2),
+    variance = var_spec(sauze$uQ^2),
     kstart = 1
   )
 }

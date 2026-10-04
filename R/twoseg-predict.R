@@ -84,7 +84,7 @@
 #' # the columns returned never depend on the model or the method, so results
 #' # from different approaches stack directly
 #' one <- rc_powerlaw(discharge, stage, data = thompson)
-#' two <- rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop", kstart = 2)
+#' two <- rc_2seg_powerlaw(discharge, stage, data = thompson, variance = "prop", kstart = 2)
 #' rbind(
 #'   predict(one, new_stage = 3, conflev = 0.95),
 #'   predict(two, new_stage = 3, conflev = 0.95)
@@ -123,8 +123,8 @@ predict.rc_2seg_powerlaw <- function(
 #' Linearises the fitted curve about `theta-hat` and propagates the parameter
 #' covariance through that linearisation. Routed by weighting:
 #' \itemize{
-#'   \item [wts_none()] / [wts_spec()]: [investr::predFit()].
-#'   \item [wts_prop()]: the delta method adapted to the proportional
+#'   \item [var_none()] / [var_spec()]: [investr::predFit()].
+#'   \item [var_prop()]: the delta method adapted to the proportional
 #'     error structure.
 #' }
 #' The linearisation holds the breakpoint fixed at `k-hat`, so the gradient
@@ -166,12 +166,12 @@ delta_limits_2seg <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  if (predlim && object$settings$wts$type == "spec") {
+  if (predlim && object$settings$variance$type == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
   stage_df <- data.frame(stage = stage)
   mod <- object[["model"]]
-  wts_code <- object$settings$wts$type
+  wts_code <- object$settings$variance$type
   # point predictions (fitted mean discharge) at the requested stages
   yvec <- unname(stats::predict(mod, newdata = stage_df))
   out_df <- data.frame(stage = stage, fit = yvec)

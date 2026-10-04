@@ -4,7 +4,7 @@
 \alias{rc_poly}
 \title{Fit polynomial rating curve}
 \usage{
-rc_poly(discharge, stage, ..., data = NULL, degree = 2, wts = wts_none())
+rc_poly(discharge, stage, ..., data = NULL, degree = 2, variance = var_none())
 }
 \arguments{
 \item{discharge}{<\code{\link[rlang:args_data_masking]{data-masking}}> Discharge: a
@@ -21,9 +21,10 @@ evaluated.}
 
 \item{degree}{Polynomial degree; positive whole number. Default 2.}
 
-\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
-\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
-with the weights. See \link{wts}.}
+\item{variance}{How the variance of the gaugings about the curve is
+modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}, and note
+that this interface is experimental.}
 }
 \value{
 An \code{rc_poly} object; see \link{rating_curve} for its contents. The

@@ -32,8 +32,8 @@ A tibble; see
 Linearises the fitted curve about \code{theta-hat} and propagates the parameter
 covariance through that linearisation. Routed by weighting:
 \itemize{
-\item \code{\link[=wts_none]{wts_none()}} / \code{\link[=wts_spec]{wts_spec()}}: \code{\link[investr:predFit]{investr::predFit()}}.
-\item \code{\link[=wts_prop]{wts_prop()}}: the delta method adapted to the proportional
+\item \code{\link[=var_none]{var_none()}} / \code{\link[=var_spec]{var_spec()}}: \code{\link[investr:predFit]{investr::predFit()}}.
+\item \code{\link[=var_prop]{var_prop()}}: the delta method adapted to the proportional
 error structure.
 }
 The linearisation holds the breakpoint fixed at \code{k-hat}, so the gradient

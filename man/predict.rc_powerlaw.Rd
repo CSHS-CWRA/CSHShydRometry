@@ -44,12 +44,12 @@ Even when the scatter is normal, most limits are approximations: a 95\%
 interval covers the truth roughly, not exactly, 95\% of the time. That is
 because the curve is nonlinear in its parameters and is approximated by
 a straight line about the estimates (the delta method), because the
-weights are themselves estimated from the fit (under \code{\link[=wts_prop]{wts_prop()}} and
-\code{\link[=wts_power]{wts_power()}}), or, for \code{\link[=rc_loess]{rc_loess()}}, because of the smoother's
+weights are themselves estimated from the fit (under \code{\link[=var_prop]{var_prop()}} and
+\code{\link[=var_power]{var_power()}}), or, for \code{\link[=rc_loess]{rc_loess()}}, because of the smoother's
 approximations. The approximation is good with plenty of gaugings, and
 poorer with few, or beyond the range of the gaugings. The limits are
 exact only for fits that are linear in their parameters with weights
-fixed in advance: \code{\link[=rc_poly]{rc_poly()}} with \code{\link[=wts_none]{wts_none()}} or \code{\link[=wts_spec]{wts_spec()}}, and
+fixed in advance: \code{\link[=rc_poly]{rc_poly()}} with \code{\link[=var_none]{var_none()}} or \code{\link[=var_spec]{var_spec()}}, and
 \code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}} with \code{offset} given.
 }
 

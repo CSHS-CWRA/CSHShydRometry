@@ -23,9 +23,10 @@
 #' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
 #' @param kbounds Lower and upper bounds for `k`, or `NULL` to keep at least
 #'   three gaugings in each segment.
-#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
-#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
-#'   with the weights. See [wts].
+#' @param variance How the variance of the gaugings about the curve is
+#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), or `var_spec()` with the variances. See [variance], and note
+#'   that this interface is experimental.
 #' @param control Settings for [stats::nls()], as from [stats::nls.control()].
 #'   The fit uses the `"port"` algorithm, which ignores `tol`; its own
 #'   settings, such as `rel.tol`, can be added to the list (see
@@ -44,7 +45,7 @@
 #'         `a = exp(intercept)`, `b = slope`.
 #'   \item Fit all parameters jointly with [stats::nls()] using the "port"
 #'         algorithm (which supports the box constraints in `lower`/`upper`).
-#'         Under `wts_prop()` this fit is repeated, updating the weights
+#'         Under `var_prop()` this fit is repeated, updating the weights
 #'         from the current fitted values and starting from the previous
 #'         estimates, until the fitted discharges stabilise.
 #' }
@@ -79,7 +80,7 @@
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs
 #' # proportional weights to converge.
-#' fit <- rc_2seg_powerlaw(discharge, stage, data = thompson, wts = "prop")
+#' fit <- rc_2seg_powerlaw(discharge, stage, data = thompson, variance = "prop")
 #' fit
 #' coef(fit)
 #'
@@ -97,12 +98,12 @@
 #'   add <- rc_2seg_powerlaw(Q, H, data = sauze, combine = "add", kstart = 1)
 #'   c(replace = repl$pars[["k"]], add = add$pars[["k"]])
 #'
-#'   # weights from the reported gauging uncertainties
+#'   # variances from the reported gauging uncertainties
 #'   rc_2seg_powerlaw(
 #'     Q,
 #'     H,
 #'     data = sauze,
-#'     wts = wts_spec(1 / sauze$uQ^2),
+#'     variance = var_spec(sauze$uQ^2),
 #'     kstart = 1
 #'   )
 #' }
@@ -116,7 +117,7 @@ rc_2seg_powerlaw <- function(
   kstart = NULL,
   kfixed = FALSE,
   kbounds = NULL,
-  wts = wts_none(),
+  variance = var_none(),
   control = stats::nls.control(maxiter = 1000)
 ) {
   # -- 1. Inputs: tidy evaluation, checks, missing values ----
@@ -136,13 +137,14 @@ rc_2seg_powerlaw <- function(
   checkmate::assert_list(control, names = "named")
   # the weighting scheme; specified weights are kept aligned with the
   # gaugings that remain
-  weighting <- resolve_wts(
-    wts,
+  weighting <- resolve_variance(
+    variance,
     keep = stats::complete.cases(discharge, stage),
     fitter = "rc_2seg_powerlaw"
   )
   wts_code <- weighting$type
-  wts <- weighting$values
+  # the engine fits with weights, the reciprocals of the variances
+  wts <- if (weighting$type == "spec") 1 / weighting$values
   # remove missing values, and check the number of observations
   qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
@@ -408,7 +410,7 @@ rc_2seg_powerlaw <- function(
     warning(
       "Proportional weights did not converge in ", weighting$maxiter, " rounds ",
       "from any starting breakpoint; the fit may not be reliable. ",
-      "Consider increasing `maxiter` in `wts_prop()`.",
+      "Consider increasing `maxiter` in `var_prop()`.",
       call. = FALSE
     )
   }
@@ -441,12 +443,12 @@ rc_2seg_powerlaw <- function(
       kstart = kstart_input,
       kfixed = kfixed,
       kbounds = kbounds,
-      wts = weighting,
+      variance = weighting,
       control = control
     ),
     weights_used = wts,
     irls = irls,
-    wts = weighting,
+    variance = weighting,
     kstart_search = kstart_search,
     rse = mod_sum$sigma,
     model = mod_nls

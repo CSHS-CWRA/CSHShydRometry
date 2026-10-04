@@ -9,7 +9,7 @@ rc_powerlaw(
   stage,
   ...,
   data = NULL,
-  wts = wts_none(),
+  variance = var_none(),
   offset = NULL,
   control = stats::nls.control(maxiter = 1000, tol = 1e-06)
 )
@@ -27,9 +27,11 @@ to be named in full.}
 \item{data}{Optional data frame in which \code{discharge} and \code{stage} are
 evaluated.}
 
-\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
-\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
-with the weights. See \link{wts}.}
+\item{variance}{How the variance of the gaugings about the curve is
+modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\code{"prop"}), \code{var_power()} (or \code{"power"}), or \code{var_spec()} with the
+variances. See \link{variance}, and note that this interface is
+experimental.}
 
 \item{offset}{The offset, \eqn{c} in the formula: \code{NULL} (the default) to
 estimate it, or a known value, below every gauged stage, to hold it
@@ -43,7 +45,7 @@ An \code{rc_powerlaw} object; see \link{rating_curve} for its contents.
 \description{
 Fits the power law \eqn{Q = a (h - c)^b} by nonlinear least squares on the
 original scale of discharge, with the scatter of the gaugings modelled as
-set by \code{wts}. The curve estimates the mean discharge at each stage.
+set by \code{variance}. The curve estimates the mean discharge at each stage.
 }
 \section{The offset}{
 
@@ -60,9 +62,9 @@ fit <- rc_powerlaw(discharge, stage, data = thompson)
 predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 
 # constant coefficient of variation instead of constant variance
-fit_prop <- rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
+fit_prop <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
 predict(fit_prop, new_stage = c(1, 3, 6), conflev = 0.95)
 
 # the offset known, say from a survey of the control
-rc_powerlaw(discharge, stage, data = thompson, wts = "prop", offset = -1.3)
+rc_powerlaw(discharge, stage, data = thompson, variance = "prop", offset = -1.3)
 }

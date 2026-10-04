@@ -184,13 +184,13 @@ plot(stage ~ discharge, data = sauze)
 ```
 
 `rc_2seg_powerlaw()` fits two power laws that meet at a breakpoint, $k$. Here we
-weight each gauging by its reported uncertainty:
+give each gauging the variance of its reported uncertainty:
 
 ```{r twoseg}
 fit2 <- rc_2seg_powerlaw(
   discharge, stage,
   data = sauze,
-  wts = wts_spec(1 / sauze$uncertainty_sd^2)
+  variance = var_spec(sauze$uncertainty_sd^2)
 )
 fit2$pars$k
 ```

@@ -5,7 +5,8 @@
 \title{Rating curve fits}
 \description{
 Every \verb{rc_*()} constructor returns a list with class
-\code{c("rc_<method>", "rating_curve")} and these elements:
+\code{c("rc_<method>", "rating_curve")}. These elements are part of the
+interface:
 }
 \details{
 \describe{
@@ -18,18 +19,23 @@ differ in length where a parameter is fixed by how the segments join. Empty
 for \code{\link[=rc_loess]{rc_loess()}}, which has no parameters. \code{\link[=coef]{coef()}} returns the same
 estimates as a flat named vector.}
 \item{\code{settings}}{The arguments the fit was made with, including any
-user-supplied weights, aligned with \code{gaugings}. Enough to refit.}
-\item{\code{rse}}{The residual standard error (on the log scale for the
-log-scale fits).}
-\item{\code{model}}{The underlying model object, e.g. from \code{\link[stats:nls]{stats::nls()}}.}
+user-supplied variances, aligned with \code{gaugings}. Enough to refit.}
+\item{\code{variance}}{For constructors with a \code{variance} argument: the
+variance scheme, with any estimated parameter filled in, such as the
+power estimated under \code{\link[=var_power]{var_power()}} (\code{fit$variance$exponent}).}
 }
 
-Constructors with a \code{wts} argument also return \code{weights_used}, the
-weights the final model was fitted with, and \code{irls} (for iteratively
-reweighted least squares): \code{NULL}, or under \code{\link[=wts_prop]{wts_prop()}}, which refits in
-rounds, a list giving the number of rounds (\code{iterations}) and whether they
-\code{converged}; and \code{wts}: the weighting scheme, with any estimated parameter
-filled in, such as the power estimated under \code{\link[=wts_power]{wts_power()}}
-(\code{fit$wts$exponent}). Some constructors carry
-further elements, documented on their own help pages.
+Use \code{\link[=fitted]{fitted()}}, \code{\link[=residuals]{residuals()}}, \code{\link[=coef]{coef()}} and \code{\link[=predict]{predict()}} rather than
+reaching into the fit for those quantities.
+
+Fits also carry elements that depend on how they are computed, and that
+may change as the methods for modelling the scatter develop: \code{model}, the
+underlying model object, such as from \code{\link[stats:nls]{stats::nls()}}; \code{rse}, the residual
+standard error (on the log scale for the log-scale fits); and, for
+constructors with a \code{variance} argument, \code{weights_used}, the weights the
+final model was fitted with, and \code{irls} (for iteratively reweighted least
+squares): \code{NULL}, or under \code{\link[=var_prop]{var_prop()}}, which refits in rounds, a list
+giving the number of rounds (\code{iterations}) and whether they \code{converged}.
+Some constructors carry further elements, documented on their own help
+pages.
 }

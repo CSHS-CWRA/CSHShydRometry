@@ -19,13 +19,13 @@
 #' is the same, but the limits are narrower than they should be, because the
 #' uncertainty in \eqn{c} is left out.
 #'
-#' @section Weighting:
-#' There is no `wts` argument. Equal scatter on the log scale already means
-#' scatter proportional to the flow, which is usually why one would weight a
-#' fit on the original scale, so weighting is not implemented here. Taking
-#' logs does not always even out the scatter completely, though, and a
-#' weighting scheme on the log scale could still be useful; check the
-#' residuals of the fit.
+#' @section Variance:
+#' There is no `variance` argument. Equal scatter on the log scale already
+#' means a standard deviation proportional to the flow, which is usually why
+#' one would model the variance of a fit on the original scale, so it is not
+#' implemented here. Taking logs does not always even out the scatter
+#' completely, though, and a variance scheme on the log scale could still be
+#' useful; check the residuals of the fit.
 #'
 #' @param discharge <[`data-masking`][rlang::args_data_masking]> Discharge: a
 #'   vector, or an expression evaluated in `data`, such as a column name.
@@ -71,12 +71,13 @@ rc_powerlaw_log <- function(
   control = stats::nls.control(maxiter = 1000, tol = 1e-6)
 ) {
   # discharge and stage may name columns of `data`, or be vectors
-  if ("wts" %in% names(match.call(expand.dots = FALSE)$...)) {
+  if ("variance" %in% names(match.call(expand.dots = FALSE)$...)) {
     stop(
-      "`rc_powerlaw_log()` has no `wts` argument: weighting is not implemented ",
+      "`rc_powerlaw_log()` has no `variance` argument: it is not implemented ",
       "for the log-scale fit. Equal scatter on the log scale already means ",
-      "scatter proportional to the flow, which is usually the reason to ",
-      "weight. To weight on the original scale, use `rc_powerlaw()`.",
+      "a standard deviation proportional to the flow, which is usually the ",
+      "reason to model the variance. To model it on the original scale, use ",
+      "`rc_powerlaw()`.",
       call. = FALSE
     )
   }

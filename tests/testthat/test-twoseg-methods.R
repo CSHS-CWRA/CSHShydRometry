@@ -5,7 +5,7 @@ two_seg_fit <- function(combine = "replace", kstart = 2) {
     thompson$discharge,
     thompson$stage,
     combine = combine,
-    wts = "prop",
+    variance = "prop",
     kstart = kstart
   )
 }
@@ -68,7 +68,7 @@ test_that("both ways of combining the segments fit and predict", {
 test_that("the bootstrap refits with the arguments the fit was made with", {
   fit <- two_seg_fit()
   expect_equal(fit$settings$combine, "replace")
-  expect_equal(fit$settings$wts$type, "prop")
+  expect_equal(fit$settings$variance$type, "prop")
   expect_equal(fit$settings$kstart, 2)
 })
 

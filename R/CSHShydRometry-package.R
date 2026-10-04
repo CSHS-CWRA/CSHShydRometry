@@ -30,19 +30,20 @@
 #'     `combine = "add"`: it adds to the discharge carried at the breakpoint.
 #' }
 #'
-#' @section Weighting:
-#' The constructors that take `wts` offer four models of how the gaugings
-#' scatter about the curve:
+#' @section Variance:
+#' The constructors that take `variance` offer four models of how the
+#' gaugings scatter about the curve (experimental: this interface may
+#' change):
 #' \itemize{
-#'   \item [wts_none()] — the same scatter at every flow (constant variance).
-#'   \item [wts_prop()] — scatter proportional to the flow.
-#'   \item [wts_power()] — scatter proportional to a power of the flow, with
+#'   \item [var_none()] — the same scatter at every flow (constant variance).
+#'   \item [var_prop()] — scatter proportional to the flow.
+#'   \item [var_power()] — scatter proportional to a power of the flow, with
 #'     the power estimated; [rc_powerlaw()] only at this time.
-#'   \item [wts_spec()] — variances supplied by the user, typically from
+#'   \item [var_spec()] — variances supplied by the user, typically from
 #'     reported gauging uncertainties. A new observation's scatter is then
 #'     not identified by the fit, so prediction limits are returned as `NA`.
 #' }
-#' See [wts].
+#' See [variance].
 #'
 #' @section Confidence and prediction limits:
 #' `predict()` returns the same columns whatever the model, the method or the

@@ -59,7 +59,7 @@ explained below; its residuals are on the log scale, so 0.05 means about 5%.
 
 ```{r}
 fit_all <- rc_powerlaw_log(discharge, stage, data = thompson)
-departure <- residuals(fit_all$model)
+departure <- log(thompson$discharge / fitted(fit_all))
 
 plot(thompson$date, 100 * departure,
      xlab = "Date of gauging", ylab = "Departure from the curve (%)")
@@ -90,8 +90,8 @@ residuals show the scatter fairly:
 
 ```{r, fig.height = 3.4}
 smooth <- rc_loess(discharge, stage, data = thompson)
-fitted_q <- fitted(smooth$model)
-residual_q <- thompson$discharge - fitted_q
+fitted_q <- fitted(smooth)
+residual_q <- residuals(smooth)
 
 op <- par(mfrow = c(1, 2))
 plot(fitted_q, residual_q, xlab = "Fitted discharge (m³/s)",
@@ -107,7 +107,8 @@ The residuals fan out as the flow grows, while the relative residuals stay
 roughly even. The scatter is roughly proportional to the flow: a constant
 percentage, not a constant amount. That matters for the fit, because
 ordinary least squares assumes the same scatter at every flow. There are two
-ways to allow for it, both below: weight the fit, or fit on the log scale.
+ways to allow for it, both below: model the variance, or fit on the log
+scale.
 
 ## A power law on the original scale
 
@@ -121,31 +122,33 @@ fit <- rc_powerlaw(discharge, stage, data = thompson)
 coef(fit)
 ```
 
-By default every gauging counts equally (`wts_none()`). With
-`wts_prop()` the scatter is taken to be proportional to the flow, as the
-residuals suggested. The weights then depend on the fitted curve, so the fit
-is repeated, reweighting each time, until it settles:
+The `variance` argument says how the scatter changes with the flow. By
+default it is the same at every flow (`var_none()`). With `var_prop()` its
+standard deviation is proportional to the flow, as the residuals suggested.
+The fit weights each gauging by the reciprocal of its variance, and those
+weights depend on the fitted curve, so the fit is repeated, reweighting each
+time, until it settles:
 
 ```{r}
-fit_prop <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_prop())
+fit_prop <- rc_powerlaw(discharge, stage, data = thompson, variance = var_prop())
 coef(fit_prop)
 fit_prop$irls$iterations
 ```
 
-`wts_power()` goes one step further and estimates the power of the flow to
+`var_power()` goes one step further and estimates the power of the flow to
 which the scatter is proportional:
 
 ```{r}
-fit_power <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_power())
-fit_power$wts$exponent
+fit_power <- rc_powerlaw(discharge, stage, data = thompson, variance = var_power())
+fit_power$variance$exponent
 ```
 
-An estimated power close to 1 supports `wts_prop()`. The estimate can be
-unstable with few gaugings, so compare it with the fit under `wts_prop()`.
+An estimated power close to 1 supports `var_prop()`. The estimate can be
+unstable with few gaugings, so compare it with the fit under `var_prop()`.
 
-When each gauging comes with its own reported uncertainty, `wts_spec()` uses
+When each gauging comes with its own reported uncertainty, `var_spec()` uses
 it directly; there is an example with the two-segment curve below. See
-`?wts` for all the weighting schemes.
+`?variance` for all the variance schemes.
 
 ## A power law on the log scale
 
@@ -156,8 +159,8 @@ $$
 $$
 
 Equal scatter on the log scale is scatter proportional to the flow, so
-`rc_powerlaw_log()` allows for the fanning out by its choice of scale, without
-weights:
+`rc_powerlaw_log()` allows for the fanning out by its choice of scale, with
+no variance scheme:
 
 ```{r}
 fit_log <- rc_powerlaw_log(discharge, stage, data = thompson)
@@ -182,7 +185,7 @@ coef(rc_powerlaw_log(discharge, stage, data = thompson, offset = -1.3))
 
 Not every rating follows a power law. `rc_poly()` fits a polynomial in stage,
 and `rc_loess()` a smooth curve with no set shape. Both accept the same
-weighting schemes as `rc_powerlaw()`.
+variance schemes as `rc_powerlaw()`, except `var_power()`.
 
 ```{r}
 fit_cubic <- rc_poly(discharge, stage, data = thompson, degree = 3)
@@ -215,7 +218,7 @@ plot(stage ~ discharge, data = thompson, col = "grey50",
 lines(stage ~ fit, data = predict(fit_prop), lwd = 2)
 lines(stage ~ fit, data = predict(fit_log), lwd = 2, lty = 2)
 lines(stage ~ fit, data = predict(fit_cubic), lwd = 2, lty = 3)
-legend("bottomright", c("Power law, proportional weights", "Power law, log scale",
+legend("bottomright", c("Power law, var_prop()", "Power law, log scale",
        "Cubic polynomial"), lty = 1:3, lwd = 2, bty = "n")
 ```
 
@@ -242,17 +245,17 @@ plot(stage ~ discharge, data = sauze,
      xlab = "Discharge (m³/s)", ylab = "Stage (m)")
 ```
 
-The reported uncertainties give the weights directly, through `wts_spec()`.
+The reported uncertainties give the variances directly, through `var_spec()`.
 How the two segments combine above the breakpoint is set by `combine`:
 `"replace"` (the default) lets the upper power law take over from the lower
 one, and `"add"` adds it to the discharge the lower one carries.
 
 ```{r, eval = has_rbam}
 fit_repl <- rc_2seg_powerlaw(discharge, stage, data = sauze,
-                          wts = wts_spec(1 / sauze$uncertainty_sd^2))
+                          variance = var_spec(sauze$uncertainty_sd^2))
 fit_add <- rc_2seg_powerlaw(discharge, stage, data = sauze,
                          combine = "add",
-                         wts = wts_spec(1 / sauze$uncertainty_sd^2))
+                         variance = var_spec(sauze$uncertainty_sd^2))
 c(replace = fit_repl$pars$k, add = fit_add$pars$k)
 ```
 

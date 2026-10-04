@@ -16,9 +16,10 @@
 #'   observed stage range? Default is `TRUE`. If `FALSE`, predictions outside
 #'   the range of the gaugings are `NA`. (This sets loess's `surface` to
 #'   `"direct"` or `"interpolate"`; see [stats::predict.loess()].)
-#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
-#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
-#'   with the weights. See [wts]. Under `wts_prop()`
+#' @param variance How the variance of the gaugings about the curve is
+#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), or `var_spec()` with the variances. See [variance], and note
+#'   that this interface is experimental. Under `var_prop()`
 #'   the loess curve is refitted in rounds, like the parametric fits.
 #' @return An `rc_loess` object; see [rating_curve] for its contents. A loess
 #'   curve has no parameters, so `pars` is an empty list.
@@ -34,7 +35,7 @@ rc_loess <- function(
   degree = 2,
   span = 0.75,
   extrapolate = TRUE,
-  wts = wts_none()
+  variance = var_none()
 ) {
   # error checks
   # discharge and stage may use columns of `data`, or be vectors
@@ -46,13 +47,14 @@ rc_loess <- function(
   checkmate::assert_numeric(stage, len = length(discharge))
   # the weighting scheme; specified weights are kept aligned with the
   # gaugings that remain
-  weighting <- resolve_wts(
-    wts,
+  weighting <- resolve_variance(
+    variance,
     keep = stats::complete.cases(discharge, stage),
     fitter = "rc_loess"
   )
   wts_code <- weighting$type
-  wts <- weighting$values
+  # the engine fits with weights, the reciprocals of the variances
+  wts <- if (weighting$type == "spec") 1 / weighting$values
   # remove missing observations
   qh <- drop_incomplete(discharge, stage)
   discharge <- qh$discharge
@@ -101,11 +103,11 @@ rc_loess <- function(
       degree = degree,
       span = span,
       extrapolate = extrapolate,
-      wts = weighting
+      variance = weighting
     ),
     weights_used = wts,
     irls = irls,
-    wts = weighting,
+    variance = weighting,
     enp = mod_lo$enp,
     rse = mod_lo$s,
     model = mod_lo

@@ -6,8 +6,8 @@
 # to the flow. The comparable fits are:
 #
 #   bdrc::plm0()  constant scatter on the log scale  ~ rc_powerlaw_log(),
-#                                                      rc_powerlaw(wts = "prop")
-#   bdrc::plm()   log-scale scatter varying with     ~ rc_powerlaw(wts = "power"),
+#                                                      rc_powerlaw(variance = "prop")
+#   bdrc::plm()   log-scale scatter varying with     ~ rc_powerlaw(variance = "power"),
 #                 stage                                roughly: ours varies with
 #                                                      the flow, not the stage
 #
@@ -27,8 +27,8 @@ set.seed(1)
 
 ours <- list(
   powerlaw_log = rc_powerlaw_log(discharge, stage, data = d),
-  powerlaw_prop = rc_powerlaw(discharge, stage, data = d, wts = "prop"),
-  powerlaw_power = rc_powerlaw(discharge, stage, data = d, wts = "power")
+  powerlaw_prop = rc_powerlaw(discharge, stage, data = d, variance = "prop"),
+  powerlaw_power = rc_powerlaw(discharge, stage, data = d, variance = "power")
 )
 theirs <- list(
   plm0 = plm0(discharge ~ stage, data = d, verbose = FALSE),

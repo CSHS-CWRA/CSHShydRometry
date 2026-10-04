@@ -1,14 +1,14 @@
 # The one-segment constructors: input handling, weighting schemes, and the
 # limits each weighting leads to.
 
-# The gaugings with a reported uncertainty, and weights from it: the
+# The gaugings with a reported uncertainty, and variances from it: the
 # uncertainty is a percentage of the discharge at two standard deviations.
 # The gauging reported as 0.0226% is left out: it is probably a fraction
 # entered as a percentage (see ?thompson), and its weight would be over 99.9%
 # of the total, forcing the curve through it.
 spec_data <- function() {
   d <- thompson[!is.na(thompson$uncertainty_pct) & thompson$uncertainty_pct > 1, ]
-  d$wts <- 1 / (d$uncertainty_pct / 100 * d$discharge / 2)^2
+  d$variance <- (d$uncertainty_pct / 100 * d$discharge / 2)^2
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   d
 }
@@ -45,35 +45,35 @@ test_that("gaugings with a missing stage or discharge are dropped", {
   expect_false(anyNA(fit$gaugings))
 })
 
-test_that("wts_spec() takes a vector, not a column of the fit's data", {
+test_that("var_spec() takes a vector, not a column of the fit's data", {
   d <- spec_data()
   d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
   # evaluated where it is called, so a bare column name is not found
-  expect_error(wts_spec(1 / uncertainty_sd^2), "uncertainty_sd")
-  expect_error(wts_spec("not numbers"))
+  expect_error(var_spec(uncertainty_sd^2), "uncertainty_sd")
+  expect_error(var_spec("not numbers"))
   fits <- list(
-    rc_powerlaw(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2)),
-    rc_poly(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2)),
-    rc_loess(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2),
+    rc_powerlaw(discharge, stage, data = d, variance = var_spec(d$uncertainty_sd^2)),
+    rc_poly(discharge, stage, data = d, variance = var_spec(d$uncertainty_sd^2)),
+    rc_loess(discharge, stage, data = d, variance = var_spec(d$uncertainty_sd^2),
              span = 1)
   )
   for (fit in fits) {
-    expect_equal(fit$settings$wts$values, 1 / d$uncertainty_sd^2)
+    expect_equal(fit$settings$variance$values, d$uncertainty_sd^2)
   }
 })
 
-test_that("specified weights stay aligned when gaugings are dropped", {
+test_that("specified variances stay aligned when gaugings are dropped", {
   d <- spec_data()
-  w <- d$wts
+  w <- d$variance
   d$discharge[2] <- NA
-  fit <- rc_powerlaw(discharge, stage, data = d, wts = wts_spec(w))
-  expect_equal(fit$weights_used, w[-2])
+  fit <- rc_powerlaw(discharge, stage, data = d, variance = var_spec(w))
+  expect_equal(fit$weights_used, 1 / w[-2])
 })
 
 test_that("weights of the wrong length are an error", {
-  expect_error(rc_powerlaw(discharge, stage, data = thompson, wts = wts_spec(1:3)))
-  expect_error(rc_poly(discharge, stage, data = thompson, wts = wts_spec(1:3)))
-  expect_error(rc_loess(discharge, stage, data = thompson, wts = wts_spec(1:3)))
+  expect_error(rc_powerlaw(discharge, stage, data = thompson, variance = var_spec(1:3)))
+  expect_error(rc_poly(discharge, stage, data = thompson, variance = var_spec(1:3)))
+  expect_error(rc_loess(discharge, stage, data = thompson, variance = var_spec(1:3)))
 })
 
 test_that("invalid levels are rejected", {
@@ -83,7 +83,7 @@ test_that("invalid levels are rejected", {
 })
 
 test_that("an unknown weighting scheme is an error", {
-  expect_error(rc_powerlaw(discharge, stage, data = thompson, wts = "bogus"))
+  expect_error(rc_powerlaw(discharge, stage, data = thompson, variance = "bogus"))
 })
 
 test_that("predict() defaults to the observed stage range", {
@@ -103,8 +103,8 @@ test_that("print() describes the fit and returns it invisibly", {
 # -- rc_powerlaw --------------------------------------------------------------------
 
 test_that("rc_powerlaw: proportional weights give sensible limits", {
-  fit <- rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
-  expect_equal(fit$settings$wts$type, "prop")
+  fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
+  expect_equal(fit$settings$variance$type, "prop")
   p <- predict(fit, new_stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
   expect_true(all(p$ci_lwr < p$fit & p$fit < p$ci_upr))
   expect_true(all(p$pi_lwr < p$ci_lwr & p$ci_upr < p$pi_upr))
@@ -114,7 +114,7 @@ test_that("rc_powerlaw: proportional weights give sensible limits", {
 
 test_that("rc_powerlaw: specified weights give NA prediction limits with a note", {
   d <- spec_data()
-  fit <- rc_powerlaw(discharge, stage, data = d, wts = wts_spec(d$wts))
+  fit <- rc_powerlaw(discharge, stage, data = d, variance = var_spec(d$variance))
   expect_message(
     p <- predict(fit, new_stage = c(1, 3), conflev = 0.95, predlev = 0.95),
     "specified weights"
@@ -140,7 +140,7 @@ test_that("rc_poly: a straight line matches lm()", {
 })
 
 test_that("rc_poly: proportional weights fit and give limits", {
-  fit <- rc_poly(discharge, stage, data = thompson, wts = "prop")
+  fit <- rc_poly(discharge, stage, data = thompson, variance = "prop")
   expect_s3_class(fit$model, "nls")
   p <- predict(fit, new_stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
   expect_named(p, c("stage", "fit", "ci_lwr", "ci_upr", "pi_lwr", "pi_upr"))
@@ -150,8 +150,8 @@ test_that("rc_poly: proportional weights fit and give limits", {
 
 test_that("rc_poly: specified weights give NA prediction limits with a note", {
   d <- spec_data()
-  fit <- rc_poly(discharge, stage, data = d, wts = wts_spec(d$wts))
-  expect_equal(fit$settings$wts$type, "spec")
+  fit <- rc_poly(discharge, stage, data = d, variance = var_spec(d$variance))
+  expect_equal(fit$settings$variance$type, "spec")
   expect_message(
     p <- predict(fit, new_stage = c(1, 3), conflev = 0.95, predlev = 0.95),
     "specified weights"
@@ -166,8 +166,8 @@ test_that("rc_loess: every weighting fits", {
   d <- spec_data()
   fits <- list(
     none = rc_loess(discharge, stage, data = thompson),
-    prop = rc_loess(discharge, stage, data = thompson, wts = "prop"),
-    spec = rc_loess(discharge, stage, data = d, wts = wts_spec(d$wts),
+    prop = rc_loess(discharge, stage, data = thompson, variance = "prop"),
+    spec = rc_loess(discharge, stage, data = d, variance = var_spec(d$variance),
                     span = 1)
   )
   for (nm in names(fits)) {
@@ -236,10 +236,10 @@ test_that("fixing c at its estimate keeps the curve but narrows the limits", {
   expect_lt(p_fixed$ci_upr - p_fixed$ci_lwr, p_est$ci_upr - p_est$ci_lwr)
 })
 
-test_that("the log-scale fit explains why it takes no weights", {
+test_that("the log-scale fit explains why it takes no variance scheme", {
   expect_error(
-    rc_powerlaw_log(discharge, stage, data = thompson, wts = "prop"),
-    "weighting is not implemented for the log-scale fit"
+    rc_powerlaw_log(discharge, stage, data = thompson, variance = "prop"),
+    "not implemented for the log-scale fit"
   )
   # other stray arguments still get the usual error
   expect_error(
@@ -250,9 +250,9 @@ test_that("the log-scale fit explains why it takes no weights", {
 
 
 test_that("rc_powerlaw() holds a given offset fixed, under every weighting", {
-  for (wts in list("none", "prop", "power")) {
-    est <- rc_powerlaw(discharge, stage, data = thompson, wts = wts)
-    fixed <- rc_powerlaw(discharge, stage, data = thompson, wts = wts,
+  for (scheme in list("none", "prop", "power")) {
+    est <- rc_powerlaw(discharge, stage, data = thompson, variance = scheme)
+    fixed <- rc_powerlaw(discharge, stage, data = thompson, variance = scheme,
                          offset = est$pars$c)
     expect_equal(fixed$pars$c, est$pars$c)
     expect_equal(fixed$settings$offset, est$pars$c)

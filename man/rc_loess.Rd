@@ -12,7 +12,7 @@ rc_loess(
   degree = 2,
   span = 0.75,
   extrapolate = TRUE,
-  wts = wts_none()
+  variance = var_none()
 )
 }
 \arguments{
@@ -37,9 +37,10 @@ observed stage range? Default is \code{TRUE}. If \code{FALSE}, predictions outsi
 the range of the gaugings are \code{NA}. (This sets loess's \code{surface} to
 \code{"direct"} or \code{"interpolate"}; see \code{\link[stats:predict.loess]{stats::predict.loess()}}.)}
 
-\item{wts}{How the scatter of the gaugings is modelled: \code{wts_none()} (or
-\code{"none"}, the default), \code{wts_prop()} (or \code{"prop"}), or \code{wts_spec()}
-with the weights. See \link{wts}. Under \code{wts_prop()}
+\item{variance}{How the variance of the gaugings about the curve is
+modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}, and note
+that this interface is experimental. Under \code{var_prop()}
 the loess curve is refitted in rounds, like the parametric fits.}
 }
 \value{

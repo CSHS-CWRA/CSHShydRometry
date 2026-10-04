@@ -11,9 +11,10 @@
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param degree Polynomial degree; positive whole number. Default 2.
-#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
-#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
-#'   with the weights. See [wts].
+#' @param variance How the variance of the gaugings about the curve is
+#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), or `var_spec()` with the variances. See [variance], and note
+#'   that this interface is experimental.
 #' @return An `rc_poly` object; see [rating_curve] for its contents. The
 #'   coefficients are named `b0`, `b1`, ... by power of `stage`.
 #' @examples
@@ -26,7 +27,7 @@ rc_poly <- function(
   ...,
   data = NULL,
   degree = 2,
-  wts = wts_none()
+  variance = var_none()
 ) {
   # error checks and warnings
   # discharge and stage may use columns of `data`, or be vectors
@@ -39,13 +40,14 @@ rc_poly <- function(
   checkmate::assert_count(degree, positive = TRUE)
   # the weighting scheme; specified weights are kept aligned with the
   # gaugings that remain
-  weighting <- resolve_wts(
-    wts,
+  weighting <- resolve_variance(
+    variance,
     keep = stats::complete.cases(discharge, stage),
     fitter = "rc_poly"
   )
   wts_code <- weighting$type
-  wts <- weighting$values
+  # the engine fits with weights, the reciprocals of the variances
+  wts <- if (weighting$type == "spec") 1 / weighting$values
 
   # remove missing observations
   qh <- drop_incomplete(discharge, stage)
@@ -121,10 +123,10 @@ rc_poly <- function(
   outlist <- list(
     gaugings = qh,
     pars = pars,
-    settings = list(degree = degree, wts = weighting),
+    settings = list(degree = degree, variance = weighting),
     weights_used = wts,
     irls = irls,
-    wts = weighting,
+    variance = weighting,
     rse = mod_sum$sigma,
     model = mod_poly
   )
@@ -150,7 +152,7 @@ predict.rc_poly <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  wts_code <- object$settings$wts$type
+  wts_code <- object$settings$variance$type
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }

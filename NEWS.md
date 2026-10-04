@@ -14,17 +14,17 @@
   methods (`rc_2seg_*()`) and for curves with more segments.
 
 * `rc_gnls()` is removed. The scatter it modelled, proportional to the flow
-  raised to an estimated power, is now a weighting scheme of its own,
-  `wts_power()`: `rc_powerlaw(wts = wts_power())`, or `wts = "power"`. It adds
+  raised to an estimated power, is now a variance scheme of its own,
+  `var_power()`: `rc_powerlaw(variance = var_power())`, or `variance = "power"`. It adds
   a parameter, the power, so it is fitted by generalised least squares with
   `nlme::gnls()` as before, and is available in `rc_powerlaw()` only. The fit
-  now starts from the fit under `wts_prop()`, rather than from a straight
+  now starts from the fit under `var_prop()`, rather than from a straight
   line on the log-log scale, and records the estimated power in
-  `fit$wts$exponent`. `rc_gnls()` also took any nlme variance function
+  `fit$variance$exponent`. `rc_gnls()` also took any nlme variance function
   (`var_type`); only the power of the mean, which every example used, is
   kept.
 
-* Limits for fits under `wts_power()` are now computed by the delta method,
+* Limits for fits under `var_power()` are now computed by the delta method,
   as for the other power-law fits, rather than simulated by
   `nlraa::predict_gnls()`. They are the same every time `predict()` is
   called, and treat the estimated power as known. The simulated confidence
@@ -54,13 +54,24 @@
   single-segment fit or a misspelt `conflev`, is now an error rather than
   silently ignored.
 
-* Weighting is chosen by a single argument, `wts`, in `rc_powerlaw()`, `rc_poly()`,
-  `rc_loess()` and `rc_2seg_powerlaw()`. It replaces `wts_code`, `wts`, `wts_tol`
-  and `wts_maxiter`, whose meanings depended on one another. `wts` takes
-  `wts_none()` (the default), `wts_prop(tol, maxiter)`, `wts_power()` or
-  `wts_spec(values)`, or the shorthand `"none"`, `"prop"` or `"power"`; see
-  `?wts`. The weights given to `wts_spec()` are an ordinary vector, such as
-  `wts_spec(1 / sauze$uncertainty_sd^2)`.
+* How the gaugings scatter about the curve is chosen by a single argument,
+  `variance`, in `rc_powerlaw()`, `rc_poly()`, `rc_loess()` and
+  `rc_2seg_powerlaw()`. It replaces `wts_code`, `wts`, `wts_tol` and
+  `wts_maxiter`, whose meanings depended on one another. `variance` takes a
+  variance scheme: `var_none()` (the default), `var_prop(tol, maxiter)`,
+  `var_power()` or `var_spec(values)`, or the shorthand `"none"`, `"prop"`
+  or `"power"`; see `?variance`. The schemes describe variances, not
+  weights: the fits weight each gauging by the reciprocal of its variance.
+  So `var_spec()` takes the variances themselves, such as
+  `var_spec(sauze$uncertainty_sd^2)`, as an ordinary vector. Describing
+  variances leaves room to combine sources of scatter, such as measurement
+  error and the rest, by adding them. This interface is experimental.
+
+* New `fitted()` and `residuals()` methods for every fit. `residuals()` gives
+  observed minus fitted discharge, or, with `type = "pearson"`, residuals
+  scaled by their modelled standard deviation, for checking the variance
+  scheme and normality. Use these rather than the `model` element, which
+  depends on how a fit is computed and may change.
 
 * The settings passed to `nls()` are given as a single `control` argument,
   as from `stats::nls.control()`, like `nls()` itself. It replaces `nls_tol`
@@ -138,7 +149,7 @@
     `q` and `h` for the two-segment one).
   * The bias-corrected coefficients of the log-scale fits move from `pars` to
     `a_corrected`, and the power formerly in `pars$t_gnls` of `rc_gnls()`
-    fits to `wts$exponent` (see `rc_gnls()` above).
+    fits to `variance$exponent` (see `rc_gnls()` above).
 
 * Package dependencies: R >= 4.0.0 is now required (was 4.1). tidyr and nls2
   are no longer used, and MASS is no longer suggested.
@@ -163,7 +174,7 @@
 
 * `coef()` returns the estimated parameters as a flat named vector.
 
-* Proportional weights (`wts_prop()`) are fitted more robustly:
+* Proportional weights (`var_prop()`) are fitted more robustly:
   * each reweighting round starts from the previous round's estimates, rather
     than from the initial starting values;
   * the rounds stop when no fitted discharge changes by more than `tol`
@@ -186,7 +197,7 @@
 * `nls_tol` had no effect in `rc_2seg_powerlaw()`: its `"port"` algorithm ignores
   `tol`. `control` now says so, and passes on the port algorithm's own
   settings, such as `rel.tol`.
-* User-supplied weights (now `wts_spec()`) fell out of step with the
+* User-supplied weights (now `var_spec()`) fell out of step with the
   gaugings when any gauging had a missing stage or discharge.
 * `rc_loess()` stored `NULL` for its residual standard error and degrees of
   freedom; it now stores `rse` and `enp`, the equivalent number of

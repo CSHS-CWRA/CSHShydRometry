@@ -10,7 +10,7 @@ one_seg_fits <- function() {
     rc_powerlaw_log_offset = rc_powerlaw_log(discharge, stage, offset = -1.3),
     rc_powerlaw_log = rc_powerlaw_log(discharge, stage),
     rc_powerlaw = rc_powerlaw(discharge, stage),
-    rc_power_wts_power = rc_powerlaw(discharge, stage, wts = wts_power()),
+    rc_power_var_power = rc_powerlaw(discharge, stage, variance = var_power()),
     rc_poly = rc_poly(discharge, stage),
     rc_loess = rc_loess(discharge, stage)
   )
@@ -20,7 +20,7 @@ two_seg_fit <- function() {
   rc_2seg_powerlaw(
     thompson$discharge,
     thompson$stage,
-    wts = "prop",
+    variance = "prop",
     kstart = 2
   )
 }
@@ -81,7 +81,7 @@ test_that("specified weights give NA prediction limits, not missing columns", {
   d <- thompson[keep, ]
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   sd <- d$uncertainty_pct / 100 * d$discharge / 2
-  fit <- rc_powerlaw(d$discharge, d$stage, wts = wts_spec(1 / sd^2))
+  fit <- rc_powerlaw(d$discharge, d$stage, variance = var_spec(sd^2))
   p <- suppressMessages(
     predict(fit, new_stage = c(1, 3), conflev = 0.95, predlev = 0.95)
   )

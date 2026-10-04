@@ -4,7 +4,7 @@
 #'
 #' Fits the power law \eqn{Q = a (h - c)^b} by nonlinear least squares on the
 #' original scale of discharge, with the scatter of the gaugings modelled as
-#' set by `wts`. The curve estimates the mean discharge at each stage.
+#' set by `variance`. The curve estimates the mean discharge at each stage.
 #'
 #' @section The offset:
 #' \eqn{c} is the offset: for a single power law, the stage at which the flow
@@ -22,9 +22,11 @@
 #'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
-#' @param wts How the scatter of the gaugings is modelled: `wts_none()` (or
-#'   `"none"`, the default), `wts_prop()` (or `"prop"`), or `wts_spec()`
-#'   with the weights. See [wts].
+#' @param variance How the variance of the gaugings about the curve is
+#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), `var_power()` (or `"power"`), or `var_spec()` with the
+#'   variances. See [variance], and note that this interface is
+#'   experimental.
 #' @param offset The offset, \eqn{c} in the formula: `NULL` (the default) to
 #'   estimate it, or a known value, below every gauged stage, to hold it
 #'   fixed.
@@ -35,18 +37,18 @@
 #' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # constant coefficient of variation instead of constant variance
-#' fit_prop <- rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
+#' fit_prop <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
 #' predict(fit_prop, new_stage = c(1, 3, 6), conflev = 0.95)
 #'
 #' # the offset known, say from a survey of the control
-#' rc_powerlaw(discharge, stage, data = thompson, wts = "prop", offset = -1.3)
+#' rc_powerlaw(discharge, stage, data = thompson, variance = "prop", offset = -1.3)
 #' @export
 rc_powerlaw <- function(
   discharge,
   stage,
   ...,
   data = NULL,
-  wts = wts_none(),
+  variance = var_none(),
   offset = NULL,
   control = stats::nls.control(maxiter = 1000, tol = 1e-6)
 ) {
@@ -62,8 +64,8 @@ rc_powerlaw <- function(
   checkmate::assert_list(control, names = "named")
   # the weighting scheme; specified weights are kept aligned with the
   # gaugings that remain
-  weighting <- resolve_wts(
-    wts,
+  weighting <- resolve_variance(
+    variance,
     keep = stats::complete.cases(discharge, stage),
     fitter = "rc_powerlaw",
     power_ok = TRUE
@@ -71,7 +73,8 @@ rc_powerlaw <- function(
   # as given, for refitting; `weighting` may gain an estimate below
   wts_given <- weighting
   wts_code <- weighting$type
-  wts <- weighting$values
+  # the engine fits with weights, the reciprocals of the variances
+  wts <- if (weighting$type == "spec") 1 / weighting$values
 
   ## remove missing observations
   qh <- drop_incomplete(discharge, stage)
@@ -118,8 +121,8 @@ rc_powerlaw <- function(
     )
   } else {
     # proportional weights, by iterative reweighting from the log-log curve;
-    # under wts_power() this is the starting point for estimating the power
-    rounds <- if (wts_code == "prop") weighting else wts_prop()
+    # under var_power() this is the starting point for estimating the power
+    rounds <- if (wts_code == "prop") weighting else var_prop()
     fit_fun <- function(wts, start) {
       stats::nls(
         formula,
@@ -145,7 +148,7 @@ rc_powerlaw <- function(
         formula,
         data = data.frame(discharge = discharge, stage = stage),
         start = as.list(stats::coef(mod_nls)),
-        weights = weighting$variance,
+        weights = weighting$varfunc,
         control = nlme::gnlsControl(maxIter = 1e5, minScale = 1e-5)
       )
       weighting$exponent <- unname(stats::coef(
@@ -164,10 +167,10 @@ rc_powerlaw <- function(
   outlist <- list(
     gaugings = qh,
     pars = list(a = coefs[["a"]], b = coefs[["b"]], c = c),
-    settings = list(wts = wts_given, offset = offset, control = control),
+    settings = list(variance = wts_given, offset = offset, control = control),
     weights_used = wts,
     irls = irls,
-    wts = weighting,
+    variance = weighting,
     rse = mod_sum$sigma,
     model = mod_nls
   )
@@ -200,12 +203,12 @@ rc_powerlaw <- function(
 #' interval covers the truth roughly, not exactly, 95% of the time. That is
 #' because the curve is nonlinear in its parameters and is approximated by
 #' a straight line about the estimates (the delta method), because the
-#' weights are themselves estimated from the fit (under [wts_prop()] and
-#' [wts_power()]), or, for [rc_loess()], because of the smoother's
+#' weights are themselves estimated from the fit (under [var_prop()] and
+#' [var_power()]), or, for [rc_loess()], because of the smoother's
 #' approximations. The approximation is good with plenty of gaugings, and
 #' poorer with few, or beyond the range of the gaugings. The limits are
 #' exact only for fits that are linear in their parameters with weights
-#' fixed in advance: [rc_poly()] with [wts_none()] or [wts_spec()], and
+#' fixed in advance: [rc_poly()] with [var_none()] or [var_spec()], and
 #' [rc_powerlaw_log()] with `offset` given.
 #' @return A tibble with the stages (`stage`), the predicted discharges
 #'   (`fit`) and, if requested, the lower and upper confidence limits
@@ -223,7 +226,7 @@ predict.rc_powerlaw <- function(
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
   predlim <- !is.null(predlev)
   conflim <- !is.null(conflev)
-  wts_code <- object$settings$wts$type
+  wts_code <- object$settings$variance$type
   if (predlim && wts_code == "spec") {
     message("Note: prediction limits cannot be computed for specified weights")
   }
@@ -234,7 +237,7 @@ predict.rc_powerlaw <- function(
   if (inherits(mod, "gnls")) {
     # the power was estimated, by nlme::gnls()
     return(gnls_limits(
-      mod, stage_df, object$pars, object$wts$exponent, conflev, predlev
+      mod, stage_df, object$pars, object$variance$exponent, conflev, predlev
     ))
   }
   yvec <- unname(stats::predict(mod, newdata = stage_df))

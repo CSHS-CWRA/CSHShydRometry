@@ -3,7 +3,8 @@
 #' Rating curve fits
 #'
 #' Every `rc_*()` constructor returns a list with class
-#' `c("rc_<method>", "rating_curve")` and these elements:
+#' `c("rc_<method>", "rating_curve")`. These elements are part of the
+#' interface:
 #'
 #' \describe{
 #'   \item{`gaugings`}{A tibble of the gaugings used, with columns
@@ -15,20 +16,25 @@
 #'     for [rc_loess()], which has no parameters. [coef()] returns the same
 #'     estimates as a flat named vector.}
 #'   \item{`settings`}{The arguments the fit was made with, including any
-#'     user-supplied weights, aligned with `gaugings`. Enough to refit.}
-#'   \item{`rse`}{The residual standard error (on the log scale for the
-#'     log-scale fits).}
-#'   \item{`model`}{The underlying model object, e.g. from [stats::nls()].}
+#'     user-supplied variances, aligned with `gaugings`. Enough to refit.}
+#'   \item{`variance`}{For constructors with a `variance` argument: the
+#'     variance scheme, with any estimated parameter filled in, such as the
+#'     power estimated under [var_power()] (`fit$variance$exponent`).}
 #' }
 #'
-#' Constructors with a `wts` argument also return `weights_used`, the
-#' weights the final model was fitted with, and `irls` (for iteratively
-#' reweighted least squares): `NULL`, or under [wts_prop()], which refits in
-#' rounds, a list giving the number of rounds (`iterations`) and whether they
-#' `converged`; and `wts`: the weighting scheme, with any estimated parameter
-#' filled in, such as the power estimated under [wts_power()]
-#' (`fit$wts$exponent`). Some constructors carry
-#' further elements, documented on their own help pages.
+#' Use [fitted()], [residuals()], [coef()] and [predict()] rather than
+#' reaching into the fit for those quantities.
+#'
+#' Fits also carry elements that depend on how they are computed, and that
+#' may change as the methods for modelling the scatter develop: `model`, the
+#' underlying model object, such as from [stats::nls()]; `rse`, the residual
+#' standard error (on the log scale for the log-scale fits); and, for
+#' constructors with a `variance` argument, `weights_used`, the weights the
+#' final model was fitted with, and `irls` (for iteratively reweighted least
+#' squares): `NULL`, or under [var_prop()], which refits in rounds, a list
+#' giving the number of rounds (`iterations`) and whether they `converged`.
+#' Some constructors carry further elements, documented on their own help
+#' pages.
 #'
 #' @name rating_curve
 NULL
@@ -78,4 +84,57 @@ coef.rating_curve <- function(object, ...) {
 #' @export
 coef.rc_2seg_powerlaw <- function(object, ...) {
   stats::coef(object$model)
+}
+
+
+#' Fitted values and residuals of a rating curve
+#'
+#' The fitted discharge at each gauging, and the residuals: the gaugings'
+#' departures from the curve.
+#'
+#' Residuals come in two types:
+#'
+#' * `"response"`: observed minus fitted discharge, in cubic meters per
+#'   second, for every fit, including those on the log scale.
+#' * `"pearson"`: each residual divided by its standard deviation under the
+#'   fit's variance scheme, as estimated. If the scheme describes the scatter
+#'   well, these have about the same spread at every stage, with a standard
+#'   deviation near 1, so they are the ones to check for a trend in the
+#'   scatter or for normality. For [rc_powerlaw_log()] they are the residuals
+#'   on the log scale, divided by `rse`.
+#'
+#' @param object A rating curve fit.
+#' @param ... Must be empty.
+#' @param type The type of residual: `"response"` (the default) or
+#'   `"pearson"`.
+#' @return A numeric vector, one value per gauging in `object$gaugings`.
+#' @examples
+#' fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
+#' head(fitted(fit))
+#' head(residuals(fit))
+#'
+#' # the scatter, scaled by its modelled standard deviation
+#' qqnorm(residuals(fit, type = "pearson"))
+#' @export
+fitted.rating_curve <- function(object, ...) {
+  rlang::check_dots_empty()
+  stats::predict(object, new_stage = object$gaugings$stage)$fit
+}
+
+
+#' @rdname fitted.rating_curve
+#' @export
+residuals.rating_curve <- function(object, ..., type = c("response", "pearson")) {
+  rlang::check_dots_empty()
+  type <- rlang::arg_match(type)
+  observed <- object$gaugings$discharge
+  fit <- stats::fitted(object)
+  if (type == "response") {
+    return(observed - fit)
+  }
+  if (inherits(object, "rc_powerlaw_log")) {
+    return((log(observed) - log(fit)) / object$rse)
+  }
+  # the weights are the reciprocals of the variances, up to the scale rse^2
+  (observed - fit) * sqrt(object$weights_used) / object$rse
 }

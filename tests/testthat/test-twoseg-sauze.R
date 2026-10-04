@@ -6,12 +6,12 @@
 # combination and carries a reported uncertainty for every gauging, so it is
 # what the two-segment code is exercised against where RBaM is installed.
 
-sauze_fit <- function(combine = "replace", wts = "none") {
+sauze_fit <- function(combine = "replace", variance = "none") {
   d <- RBaM::SauzeGaugings
-  if (identical(wts, "spec")) {
-    wts <- wts_spec(1 / d$uQ^2)
+  if (identical(variance, "spec")) {
+    variance <- var_spec(d$uQ^2)
   }
-  rc_2seg_powerlaw(Q, H, data = d, combine = combine, wts = wts, kstart = 1)
+  rc_2seg_powerlaw(Q, H, data = d, combine = combine, variance = variance, kstart = 1)
 }
 
 test_that("both ways of combining the segments fit under every weighting", {

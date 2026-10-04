@@ -71,22 +71,21 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
   removes the jump in the delta-method band at the breakpoint.
 * *(to discuss)* Bayesian fitting.
 
-**Weighting**
+**Variance**
 
-* Estimating the power in `wts_power()` within the package, for example by
+* Estimating the power in `var_power()` within the package, for example by
   maximising the profile likelihood over the power, refitting at each value
   by reweighting in rounds. That would make it available in every fitting
   function, not only `rc_powerlaw()`, and remove the dependence on
   `nlme::gnls()`.
 * Further estimated shapes for the scatter, such as an exponential
-  (`wts_exp()`).
+  (`var_exp()`).
 * *(priority)* An error model that combines each gauging's reported
   uncertainty with extra scatter estimated from the fit, as BaRatin does
   (its "remnant error"). This is the usual error model in the field, and
-  would give prediction limits where `wts_spec()` cannot. Whether it is a
-  new weighting scheme, such as `wts_comb()`, or takes another form is
-  open.
-* Weighting on the log-log scale, in `rc_powerlaw_log()`.
+  would give prediction limits where `var_spec()` cannot. Variance schemes
+  could be combined by adding them, such as `var_prop() + var_spec()`.
+* Variance schemes on the log-log scale, in `rc_powerlaw_log()`.
 
 **Predicting and uncertainty**
 
@@ -95,7 +94,10 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
   have no `method` argument; passing one is an error, as is any argument a
   method does not take.
 * Bootstrap settings (`B`, `seed`, ...) given as an object, like the
-  weighting schemes, rather than passed through `...`.
+  variance schemes, rather than passed through `...`.
+* Predicting a distribution: the predictive distribution of discharge at
+  each stage, as a probaverse distribution, rather than only limits. The
+  limits `predict()` returns would be quantiles of it.
 * *(to discuss)* The default interval method for multi-segment curves.
 * A faster bootstrap, running resamples in parallel.
 
@@ -129,7 +131,7 @@ leave open. If your change revisits one of them, update its entry.
 * In exported functions, put `...` straight after the required arguments, so
   that every optional argument has to be named in full.
 * `discharge` and `stage` are looked up in `data`, so users can refer to its
-  columns directly. Arguments of the `wts_*()` functions are ordinary
+  columns directly. Arguments of the `var_*()` functions are ordinary
   arguments; see [DESIGN.md](DESIGN.md).
 
 ### Prefer to email?

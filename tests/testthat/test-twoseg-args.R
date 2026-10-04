@@ -19,12 +19,12 @@ two_control <- function() {
   data.frame(stage = stage, discharge = mu * (1 + 0.03 * sin(7 * seq_along(stage))))
 }
 
-sauze_fit <- function(combine = "replace", wts = "none") {
+sauze_fit <- function(combine = "replace", variance = "none") {
   d <- sauze()
-  if (identical(wts, "spec")) {
-    wts <- wts_spec(1 / d$uQ^2)
+  if (identical(variance, "spec")) {
+    variance <- var_spec(d$uQ^2)
   }
-  rc_2seg_powerlaw(Q, H, data = d, combine = combine, wts = wts, kstart = 1)
+  rc_2seg_powerlaw(Q, H, data = d, combine = combine, variance = variance, kstart = 1)
 }
 
 # -- arguments -----------------------------------------------------------------
@@ -73,16 +73,16 @@ test_that("kstart must leave three gaugings in each segment", {
 
 test_that("two-segment fits keep the specified weights for the bootstrap", {
   d <- sauze()
-  fit <- rc_2seg_powerlaw(Q, H, data = d, wts = wts_spec(1 / d$uQ^2), kstart = 1)
-  expect_equal(fit$settings$wts$values, 1 / d$uQ^2)
+  fit <- rc_2seg_powerlaw(Q, H, data = d, variance = var_spec(d$uQ^2), kstart = 1)
+  expect_equal(fit$settings$variance$values, d$uQ^2)
 })
 
-test_that("specified weights stay aligned when gaugings are dropped", {
+test_that("specified variances stay aligned when gaugings are dropped", {
   d <- sauze()
-  w <- 1 / d$uQ^2
+  w <- d$uQ^2
   d$Q[5] <- NA
-  fit <- rc_2seg_powerlaw(Q, H, data = d, wts = wts_spec(w), kstart = 1)
-  expect_equal(fit$settings$wts$values, w[-5])
+  fit <- rc_2seg_powerlaw(Q, H, data = d, variance = var_spec(w), kstart = 1)
+  expect_equal(fit$settings$variance$values, w[-5])
   # and the bootstrap, which resamples them, still runs
   b <- suppressWarnings(
     boot_limits_2seg(fit, new_stage = 2, conflev = 0.9, B = 5, seed = 1)
@@ -121,7 +121,7 @@ test_that("boot prediction limits under each weighting", {
 
 test_that("boot refuses spec weights it cannot resample", {
   fit <- sauze_fit("replace", "spec")
-  fit$settings$wts$values <- NULL
+  fit$settings$variance$values <- NULL
   expect_error(boot_limits_2seg(fit, new_stage = 2, B = 5), "spec weights")
 })
 
@@ -174,7 +174,7 @@ test_that("starts that fail are recorded and passed over", {
   skip_if_not_installed("RBaM")
   d <- RBaM::SauzeGaugings
   # from starting breakpoints of 1.95 and above this fit used to fail
-  fit <- rc_2seg_powerlaw(Q, H, data = d, wts = wts_spec(1 / d$uQ^2),
+  fit <- rc_2seg_powerlaw(Q, H, data = d, variance = var_spec(d$uQ^2),
                      kbounds = c(1.5, 2.5))
   expect_true(anyNA(fit$kstart_search$k))
   expect_equal(fit$pars[["k"]], 1.62, tolerance = 0.01)

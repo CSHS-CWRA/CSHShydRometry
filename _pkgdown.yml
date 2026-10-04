@@ -19,10 +19,10 @@ reference:
     contents:
       - rc_2seg_powerlaw
 
-  - title: Weighting
+  - title: Variance
     desc: How the scatter of the gaugings about the curve is modelled.
     contents:
-      - wts
+      - variance
 
   - title: Predicting, with confidence and prediction limits
     contents:
@@ -35,6 +35,7 @@ reference:
     contents:
       - rating_curve
       - coef.rating_curve
+      - fitted.rating_curve
       - print.rating_curve
 
   - title: Data
