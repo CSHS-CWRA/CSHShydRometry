@@ -4,6 +4,11 @@ url: ~
 template:
   bootstrap: 5
 
+# Not on CRAN yet, so there are no release dates to look up (the lookup
+# also needs a network connection).
+news:
+  cran_dates: false
+
 reference:
   - title: Fitting a single-segment curve
     desc: >
