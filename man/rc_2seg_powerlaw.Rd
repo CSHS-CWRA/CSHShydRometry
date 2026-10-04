@@ -47,10 +47,9 @@ numeric vector tries each of its values. See Details.}
 \item{kbounds}{Lower and upper bounds for \code{k}, or \code{NULL} to keep at least
 three gaugings in each segment.}
 
-\item{variance}{How the variance of the gaugings about the curve is
-modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
-\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}, and note
-that this interface is experimental.}
+\item{variance}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} How the variance of
+the gaugings about the curve is modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}.}
 
 \item{control}{Settings for \code{\link[stats:nls]{stats::nls()}}, as from \code{\link[stats:nls.control]{stats::nls.control()}}.
 The fit uses the \code{"port"} algorithm, which ignores \code{tol}; its own

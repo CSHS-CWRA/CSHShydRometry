@@ -7,8 +7,8 @@
 #' [rc_loess()] or [rc_2seg_powerlaw()]. The fits weight each gauging by the
 #' reciprocal of its variance.
 #'
-#' **Experimental:** the interface for modelling the scatter is likely to
-#' grow, and may change.
+#' `r lifecycle::badge("experimental")` The interface for modelling the
+#' scatter is likely to grow, and may change.
 #'
 #' * `var_none()`: the variance is the same at every flow (ordinary least
 #'   squares).

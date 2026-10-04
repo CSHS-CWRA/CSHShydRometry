@@ -37,10 +37,9 @@ observed stage range? Default is \code{TRUE}. If \code{FALSE}, predictions outsi
 the range of the gaugings are \code{NA}. (This sets loess's \code{surface} to
 \code{"direct"} or \code{"interpolate"}; see \code{\link[stats:predict.loess]{stats::predict.loess()}}.)}
 
-\item{variance}{How the variance of the gaugings about the curve is
-modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
-\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}, and note
-that this interface is experimental. Under \code{var_prop()}
+\item{variance}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} How the variance of
+the gaugings about the curve is modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\code{"prop"}), or \code{var_spec()} with the variances. See \link{variance}. Under \code{var_prop()}
 the loess curve is refitted in rounds, like the parametric fits.}
 }
 \value{

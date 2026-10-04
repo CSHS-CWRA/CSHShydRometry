@@ -11,10 +11,9 @@
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
 #' @param degree Polynomial degree; positive whole number. Default 2.
-#' @param variance How the variance of the gaugings about the curve is
-#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
-#'   `"prop"`), or `var_spec()` with the variances. See [variance], and note
-#'   that this interface is experimental.
+#' @param variance `r lifecycle::badge("experimental")` How the variance of
+#'   the gaugings about the curve is modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), or `var_spec()` with the variances. See [variance].
 #' @return An `rc_poly` object; see [rating_curve] for its contents. The
 #'   coefficients are named `b0`, `b1`, ... by power of `stage`.
 #' @examples

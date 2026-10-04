@@ -16,10 +16,9 @@
 #'   observed stage range? Default is `TRUE`. If `FALSE`, predictions outside
 #'   the range of the gaugings are `NA`. (This sets loess's `surface` to
 #'   `"direct"` or `"interpolate"`; see [stats::predict.loess()].)
-#' @param variance How the variance of the gaugings about the curve is
-#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
-#'   `"prop"`), or `var_spec()` with the variances. See [variance], and note
-#'   that this interface is experimental. Under `var_prop()`
+#' @param variance `r lifecycle::badge("experimental")` How the variance of
+#'   the gaugings about the curve is modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), or `var_spec()` with the variances. See [variance]. Under `var_prop()`
 #'   the loess curve is refitted in rounds, like the parametric fits.
 #' @return An `rc_loess` object; see [rating_curve] for its contents. A loess
 #'   curve has no parameters, so `pars` is an empty list.

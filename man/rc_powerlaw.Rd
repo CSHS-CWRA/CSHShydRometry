@@ -27,11 +27,10 @@ to be named in full.}
 \item{data}{Optional data frame in which \code{discharge} and \code{stage} are
 evaluated.}
 
-\item{variance}{How the variance of the gaugings about the curve is
-modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
+\item{variance}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} How the variance of
+the gaugings about the curve is modelled: \code{var_none()} (or \code{"none"}, the default), \code{var_prop()} (or
 \code{"prop"}), \code{var_power()} (or \code{"power"}), or \code{var_spec()} with the
-variances. See \link{variance}, and note that this interface is
-experimental.}
+variances. See \link{variance}.}
 
 \item{offset}{The offset, \eqn{c} in the formula: \code{NULL} (the default) to
 estimate it, or a known value, below every gauged stage, to hold it

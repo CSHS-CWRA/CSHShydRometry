@@ -32,6 +32,7 @@ Depends:
 Imports:
     checkmate,
     investr,
+    lifecycle,
     nlme,
     rlang (>= 1.1.0),
     stats,

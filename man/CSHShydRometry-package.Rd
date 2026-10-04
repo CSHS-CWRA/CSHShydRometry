@@ -39,8 +39,8 @@ law takes over from the lower at the breakpoint; with
 \section{Variance}{
 
 The constructors that take \code{variance} offer four models of how the
-gaugings scatter about the curve (experimental: this interface may
-change):
+gaugings scatter about the curve. \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+This interface may change:
 \itemize{
 \item \code{\link[=var_none]{var_none()}} — the same scatter at every flow (constant variance).
 \item \code{\link[=var_prop]{var_prop()}} — scatter proportional to the flow.

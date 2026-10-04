@@ -32,8 +32,8 @@
 #'
 #' @section Variance:
 #' The constructors that take `variance` offer four models of how the
-#' gaugings scatter about the curve (experimental: this interface may
-#' change):
+#' gaugings scatter about the curve. `r lifecycle::badge("experimental")`
+#' This interface may change:
 #' \itemize{
 #'   \item [var_none()] — the same scatter at every flow (constant variance).
 #'   \item [var_prop()] — scatter proportional to the flow.
@@ -74,4 +74,5 @@
 # (printing, `[`, no partial matching with `$`) once tibble is loaded;
 # calling it with `tibble::` alone would load it only on first use.
 #' @importFrom tibble tibble
+#' @importFrom lifecycle deprecated
 NULL

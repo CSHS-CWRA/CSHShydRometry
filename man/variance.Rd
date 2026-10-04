@@ -46,8 +46,8 @@ these as the \code{variance} argument of \code{\link[=rc_powerlaw]{rc_powerlaw()
 reciprocal of its variance.
 }
 \details{
-\strong{Experimental:} the interface for modelling the scatter is likely to
-grow, and may change.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} The interface for modelling the
+scatter is likely to grow, and may change.
 \itemize{
 \item \code{var_none()}: the variance is the same at every flow (ordinary least
 squares).

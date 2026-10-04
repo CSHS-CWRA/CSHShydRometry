@@ -22,11 +22,10 @@
 #'   evaluated.
 #' @param ... Must be empty. Present so that every argument after it has
 #'   to be named in full.
-#' @param variance How the variance of the gaugings about the curve is
-#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#' @param variance `r lifecycle::badge("experimental")` How the variance of
+#'   the gaugings about the curve is modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
 #'   `"prop"`), `var_power()` (or `"power"`), or `var_spec()` with the
-#'   variances. See [variance], and note that this interface is
-#'   experimental.
+#'   variances. See [variance].
 #' @param offset The offset, \eqn{c} in the formula: `NULL` (the default) to
 #'   estimate it, or a known value, below every gauged stage, to hold it
 #'   fixed.

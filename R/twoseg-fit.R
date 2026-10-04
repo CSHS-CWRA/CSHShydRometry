@@ -23,10 +23,9 @@
 #' @param kfixed If `TRUE`, hold the breakpoint `k` fixed at `kstart`.
 #' @param kbounds Lower and upper bounds for `k`, or `NULL` to keep at least
 #'   three gaugings in each segment.
-#' @param variance How the variance of the gaugings about the curve is
-#'   modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
-#'   `"prop"`), or `var_spec()` with the variances. See [variance], and note
-#'   that this interface is experimental.
+#' @param variance `r lifecycle::badge("experimental")` How the variance of
+#'   the gaugings about the curve is modelled: `var_none()` (or `"none"`, the default), `var_prop()` (or
+#'   `"prop"`), or `var_spec()` with the variances. See [variance].
 #' @param control Settings for [stats::nls()], as from [stats::nls.control()].
 #'   The fit uses the `"port"` algorithm, which ignores `tol`; its own
 #'   settings, such as `rel.tol`, can be added to the list (see
