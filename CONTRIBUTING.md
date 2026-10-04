@@ -63,8 +63,10 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
   segment, and a 1 where that segment carries flow in that range, so
   "replace" is `rbind(c(1, 0), c(0, 1))` and "add" is
   `rbind(c(1, 0), c(1, 1))`. `combine` could accept such a matrix, keeping
-  "replace" and "add" as shorthands. *(to discuss)* How to make the matrix
-  easy to specify; see the design notes.
+  "replace" and "add" as shorthands, but users should never have to write
+  one: common configurations need names. `rc_2seg_powerlaw()` stays as a
+  convenience for two segments. *(to discuss)* How to name the
+  configurations; see the design notes.
 * A breakpoint-averaged interval method for two-segment curves, which
   removes the jump in the delta-method band at the breakpoint.
 * *(to discuss)* Bayesian fitting.
@@ -78,8 +80,12 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
   `nlme::gnls()`.
 * Further estimated shapes for the scatter, such as an exponential
   (`wts_exp()`).
-* Known uncertainty plus extra scatter that grows with the flow, as one
-  scheme (`wts_comb()`).
+* *(priority)* An error model that combines each gauging's reported
+  uncertainty with extra scatter estimated from the fit, as BaRatin does
+  (its "remnant error"). This is the usual error model in the field, and
+  would give prediction limits where `wts_spec()` cannot. Whether it is a
+  new weighting scheme, such as `wts_comb()`, or takes another form is
+  open.
 * Weighting on the log-log scale, in `rc_powerlaw_log()`.
 
 **Predicting and uncertainty**
@@ -97,7 +103,11 @@ agreed before the work starts. Items marked *(to discuss)* are undecided.
 
 * A `plot()` method, drawing the curve with stage on the vertical axis.
 * `fitted()` and `residuals()` methods.
-* Ratings that shift over time: checking for drift, and fitting by period.
+* *(priority)* Ratings that shift over time, as the Thompson gaugings do:
+  checking for drift, fitting by period, and curves that change with time.
+  This would add an optional time argument (such as `date`) to the fitting
+  functions and a matching `new_date` to `predict()`, with a `date` column
+  in its output.
 
 **Data**
 

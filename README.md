@@ -292,9 +292,12 @@ CSHShydRometry instead fits by least squares, with no priors to specify.
 Its limits come from the delta method or a bootstrap, and it has
 explicit schemes for how the scatter changes with the flow. That makes
 it quick to use, and a classical reference against which to compare the
-Bayesian methods. For a comparison of methods for rating-curve
-uncertainty, see Kiang et al. (2018), “A comparison of methods for
-streamflow uncertainty estimation”, *Water Resources Research*,
+Bayesian methods. Beware that notation differs between tools: BaRatin,
+for example, writes the power law as $Q = a(h - b)^c$, swapping the
+roles of $b$ and $c$ used here. For a comparison of methods for
+rating-curve uncertainty, see Kiang et al. (2018), “A comparison of
+methods for streamflow uncertainty estimation”, *Water Resources
+Research*,
 [doi:10.1029/2018WR022708](https://doi.org/10.1029/2018WR022708).
 
 ## Learn more
@@ -309,21 +312,21 @@ streamflow uncertainty estimation”, *Water Resources Research*,
 To cite CSHShydRometry in publications, please use the following (which
 `citation("CSHShydRometry")` also prints):
 
-    To cite package 'CSHShydRometry' in publications use:
+Coia V, Moore RD, Whitfield P (2026). *CSHShydRometry: Statistical
+Methods for Rating Curves*. R package version 0.0.1.9000,
+<https://github.com/CSHS-CWRA/CSHShydRometry>.
 
-      Coia V, Moore RD, Whitfield P (2026). _CSHShydRometry: Statistical
-      Methods for Rating Curves_. R package version 0.0.1.9000,
-      <https://github.com/CSHS-CWRA/CSHShydRometry>.
+As BibTeX:
 
-    A BibTeX entry for LaTeX users is
-
-      @Manual{,
-        title = {CSHShydRometry: Statistical Methods for Rating Curves},
-        author = {Vincenzo Coia and R. Dan Moore and Paul Whitfield},
-        year = {2026},
-        note = {R package version 0.0.1.9000},
-        url = {https://github.com/CSHS-CWRA/CSHShydRometry},
-      }
+``` bibtex
+@Manual{,
+  title = {CSHShydRometry: Statistical Methods for Rating Curves},
+  author = {Vincenzo Coia and R. Dan Moore and Paul Whitfield},
+  year = {2026},
+  note = {R package version 0.0.1.9000},
+  url = {https://github.com/CSHS-CWRA/CSHShydRometry},
+}
+```
 
 ## Acknowledgements
 

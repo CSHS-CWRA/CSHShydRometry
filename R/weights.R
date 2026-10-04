@@ -24,10 +24,12 @@
 #'   compare it with the fit under `wts_prop()`. The estimated power is kept on
 #'   the fit, in `fit$wts$exponent`. The limits from `predict()` treat it as
 #'   known, so they leave out the uncertainty in the power.
-#' * `wts_spec()`: the scatter of each gauging is known, typically from its
-#'   reported uncertainty, and given as weights: the reciprocal of each
-#'   gauging's variance. A new gauging's scatter is then not estimated, so
-#'   prediction limits are returned as `NA`.
+#' * `wts_spec()`: the relative scatter of the gaugings is known, typically
+#'   from their reported uncertainties, and given as weights: the reciprocal
+#'   of each gauging's variance. Only the weights' relative sizes matter: the
+#'   fit estimates a common scale factor, the residual standard error, which
+#'   is 1 when the gaugings scatter exactly as their weights say. A new
+#'   gauging has no weight, so prediction limits are returned as `NA`.
 #'
 #' The strings `"none"`, `"prop"` and `"power"` are shorthand for
 #' `wts_none()`, `wts_prop()` and `wts_power()` with their defaults.

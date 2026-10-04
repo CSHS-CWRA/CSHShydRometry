@@ -245,7 +245,9 @@ CSHShydRometry instead fits by least squares, with no priors to specify. Its
 limits come from the delta method or a bootstrap, and it has explicit
 schemes for how the scatter changes with the flow. That makes it quick to
 use, and a classical reference against which to compare the Bayesian
-methods. For a comparison of methods for rating-curve uncertainty, see
+methods. Beware that notation differs between tools: BaRatin, for example,
+writes the power law as $Q = a(h - b)^c$, swapping the roles of $b$ and $c$
+used here. For a comparison of methods for rating-curve uncertainty, see
 Kiang et al. (2018), "A comparison of methods for streamflow uncertainty
 estimation", *Water Resources Research*,
 [doi:10.1029/2018WR022708](https://doi.org/10.1029/2018WR022708).
@@ -262,8 +264,10 @@ estimation", *Water Resources Research*,
 To cite CSHShydRometry in publications, please use the following (which
 `citation("CSHShydRometry")` also prints):
 
-```{r citation, echo = FALSE, comment = ""}
-citation("CSHShydRometry")
+```{r citation, echo = FALSE, results = "asis"}
+cit <- citation("CSHShydRometry")
+cat(format(cit, style = "text"), "\n\nAs BibTeX:\n\n")
+cat("``` bibtex", format(cit, style = "bibtex"), "```", sep = "\n")
 ```
 
 ## Acknowledgements

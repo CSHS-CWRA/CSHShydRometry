@@ -65,10 +65,12 @@ made with \code{\link[nlme:gnls]{nlme::gnls()}}. The estimate can be unstable wi
 compare it with the fit under \code{wts_prop()}. The estimated power is kept on
 the fit, in \code{fit$wts$exponent}. The limits from \code{predict()} treat it as
 known, so they leave out the uncertainty in the power.
-\item \code{wts_spec()}: the scatter of each gauging is known, typically from its
-reported uncertainty, and given as weights: the reciprocal of each
-gauging's variance. A new gauging's scatter is then not estimated, so
-prediction limits are returned as \code{NA}.
+\item \code{wts_spec()}: the relative scatter of the gaugings is known, typically
+from their reported uncertainties, and given as weights: the reciprocal
+of each gauging's variance. Only the weights' relative sizes matter: the
+fit estimates a common scale factor, the residual standard error, which
+is 1 when the gaugings scatter exactly as their weights say. A new
+gauging has no weight, so prediction limits are returned as \code{NA}.
 }
 
 The strings \code{"none"}, \code{"prop"} and \code{"power"} are shorthand for
