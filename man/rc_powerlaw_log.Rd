@@ -83,7 +83,7 @@ fixed <- rc_powerlaw_log(
   discharge,
   stage,
   data = thompson,
-  offset = fit$pars$c
+  offset = fit$curve_parameters$c
 )
 predict(fixed, new_stage = c(1, 3, 6), conflev = 0.95)
 }

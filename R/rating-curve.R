@@ -9,7 +9,7 @@
 #' \describe{
 #'   \item{`gaugings`}{A tibble of the gaugings used, with columns
 #'     `discharge` and `stage`, after dropping any with a missing value.}
-#'   \item{`pars`}{The estimated parameters of the curve, as a named list with
+#'   \item{`curve_parameters`}{The estimated parameters of the curve, as a named list with
 #'     one element per parameter type. For a multi-segment curve an element
 #'     holds one value per segment (for `k`, per breakpoint); elements may
 #'     differ in length where a parameter is fixed by how the segments join. Empty
@@ -60,8 +60,8 @@ print.rating_curve <- function(x, ...) {
 
 #' Estimated parameters of a rating curve
 #'
-#' The contents of `object$pars` as a flat named numeric vector. For a
-#' single-segment curve the names are those of `pars`; for a multi-segment
+#' The contents of `object$curve_parameters` as a flat named numeric vector. For a
+#' single-segment curve the names are those of `curve_parameters`; for a multi-segment
 #' curve they carry the segment number, as in the model formula (`a1`, `b2`,
 #' `k`, ...).
 #'
@@ -72,7 +72,7 @@ print.rating_curve <- function(x, ...) {
 #' coef(rc_powerlaw(discharge, stage, data = thompson))
 #' @export
 coef.rating_curve <- function(object, ...) {
-  pars <- object$pars
+  pars <- object$curve_parameters
   if (!length(pars)) {
     return(stats::setNames(numeric(0), character(0)))
   }

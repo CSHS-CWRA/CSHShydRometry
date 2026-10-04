@@ -44,7 +44,7 @@ the loess curve is refitted in rounds, like the parametric fits.}
 }
 \value{
 An \code{rc_loess} object; see \link{rating_curve} for its contents. A loess
-curve has no parameters, so \code{pars} is an empty list.
+curve has no parameters, so \code{curve_parameters} is an empty list.
 }
 \description{
 Fit rating curve using loess smoother

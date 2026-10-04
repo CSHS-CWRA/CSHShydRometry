@@ -132,7 +132,7 @@ arithmetic mean by a factor that grows with the scatter. With scatter of
 about `r round(100 * fit_log$rse)`% here, the difference is small:
 
 ```{r}
-fit_log$a_corrected / fit_log$pars$a
+fit_log$a_corrected / fit_log$curve_parameters$a
 ```
 
 ### The offset
@@ -145,7 +145,7 @@ that are too narrow:
 
 ```{r}
 fixed <- rc_powerlaw_log(discharge, stage, data = thompson,
-                      offset = fit_log$pars$c)
+                      offset = fit_log$curve_parameters$c)
 width_at <- function(fit, at) {
   p <- predict(fit, new_stage = at, conflev = 0.95)
   p$ci_upr - p$ci_lwr
@@ -199,7 +199,7 @@ sauze <- data.frame(
 )
 fit2 <- rc_2seg_powerlaw(discharge, stage, data = sauze,
                       variance = var_spec(sauze$uncertainty_sd^2))
-near_k <- fit2$pars$k + c(-0.05, 0.05)
+near_k <- fit2$curve_parameters$k + c(-0.05, 0.05)
 
 delta <- predict(fit2, new_stage = near_k, conflev = 0.95)
 boot <- predict(fit2, new_stage = near_k, conflev = 0.95,

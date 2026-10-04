@@ -58,7 +58,7 @@
 #'   discharge,
 #'   stage,
 #'   data = thompson,
-#'   offset = fit$pars$c
+#'   offset = fit$curve_parameters$c
 #' )
 #' predict(fixed, new_stage = c(1, 3, 6), conflev = 0.95)
 #' @export
@@ -131,7 +131,7 @@ rc_powerlaw_log <- function(
   a_dbc <- (a / length(resids)) * sum(exp(resids))
   outlist <- list(
     gaugings = tibble::as_tibble(qh),
-    pars = list(a = a, b = b, c = c),
+    curve_parameters = list(a = a, b = b, c = c),
     a_corrected = c(nbc = a_nbc, dbc = a_dbc),
     settings = list(offset = offset, control = control),
     rse = rse,

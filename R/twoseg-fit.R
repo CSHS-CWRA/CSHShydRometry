@@ -68,7 +68,7 @@
 #' then rest on that one start.
 #'
 #' @return An object of class `c("rc_2seg_powerlaw", "rating_curve")`; see
-#'   [rating_curve] for its contents. `pars` holds the estimated parameters by
+#'   [rating_curve] for its contents. `curve_parameters` holds the estimated parameters by
 #'   type, one value per segment: under `"replace"`, `a` has a single value
 #'   because the upper segment's coefficient is fixed by continuity, and under
 #'   `"add"`, `c` has a single value because the upper segment is
@@ -95,7 +95,7 @@
 #'   sauze <- RBaM::SauzeGaugings
 #'   repl <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
 #'   add <- rc_2seg_powerlaw(Q, H, data = sauze, combine = "add", kstart = 1)
-#'   c(replace = repl$pars[["k"]], add = add$pars[["k"]])
+#'   c(replace = repl$curve_parameters[["k"]], add = add$curve_parameters[["k"]])
 #'
 #'   # variances from the reported gauging uncertainties
 #'   rc_2seg_powerlaw(
@@ -433,7 +433,7 @@ rc_2seg_powerlaw <- function(
   }
   outlist <- list(
     gaugings = qh,
-    pars = pars,
+    curve_parameters = pars,
     # Everything needed to refit these data from scratch. boot_limits_2seg()
     # resamples and refits, so it has to reproduce the original call exactly;
     # without this it would silently fall back on the argument defaults.

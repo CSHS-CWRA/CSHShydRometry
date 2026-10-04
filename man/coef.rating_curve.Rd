@@ -18,8 +18,8 @@
 A named numeric vector; empty for \code{\link[=rc_loess]{rc_loess()}}.
 }
 \description{
-The contents of \code{object$pars} as a flat named numeric vector. For a
-single-segment curve the names are those of \code{pars}; for a multi-segment
+The contents of \code{object$curve_parameters} as a flat named numeric vector. For a
+single-segment curve the names are those of \code{curve_parameters}; for a multi-segment
 curve they carry the segment number, as in the model formula (\code{a1}, \code{b2},
 \code{k}, ...).
 }

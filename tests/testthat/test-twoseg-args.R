@@ -45,7 +45,7 @@ test_that("a misspelled argument is an error, not ignored", {
 test_that("kfixed holds the breakpoint at kstart", {
   expect_error(rc_2seg_powerlaw(Q, H, data = sauze(), kfixed = TRUE), "kstart")
   fit <- rc_2seg_powerlaw(Q, H, data = sauze(), kfixed = TRUE, kstart = 1.8)
-  expect_equal(fit$pars[["k"]], 1.8)
+  expect_equal(fit$curve_parameters[["k"]], 1.8)
 })
 
 test_that("kbounds limit the breakpoint search", {
@@ -54,10 +54,10 @@ test_that("kbounds limit the breakpoint search", {
   # platforms. This fit converges from any start between about 1.05 and 1.75.
   d <- two_control()
   fit <- rc_2seg_powerlaw(discharge, stage, data = d, kbounds = c(1, 2), kstart = 1.5)
-  expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
+  expect_equal(fit$curve_parameters[["k"]], 1.5, tolerance = 0.02)
   fit2 <- rc_2seg_powerlaw(discharge, stage, data = d, kstart = 1.3, kbounds = c(1, 2))
   expect_equal(fit2$settings$kbounds, c(1, 2))
-  expect_equal(fit2$pars[["k"]], fit$pars[["k"]], tolerance = 1e-4)
+  expect_equal(fit2$curve_parameters[["k"]], fit$curve_parameters[["k"]], tolerance = 1e-4)
   expect_error(
     rc_2seg_powerlaw(discharge, stage, data = d, kstart = 3, kbounds = c(1, 2)),
     "invalid"
@@ -150,14 +150,14 @@ test_that("by default, starting breakpoints span the search range", {
   expect_null(fit$settings$kstart)
   # the fit kept is the most likely of those that succeeded
   expect_equal(max(s$loglik, na.rm = TRUE), s$loglik[which.max(s$loglik)])
-  expect_equal(fit$pars[["k"]], s$k[which.max(s$loglik)])
-  expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
+  expect_equal(fit$curve_parameters[["k"]], s$k[which.max(s$loglik)])
+  expect_equal(fit$curve_parameters[["k"]], 1.5, tolerance = 0.02)
 })
 
 test_that("kbounds set the range the default starts span", {
   fit <- rc_2seg_powerlaw(discharge, stage, data = two_control(), kbounds = c(1, 2))
   expect_true(all(fit$kstart_search$kstart > 1 & fit$kstart_search$kstart < 2))
-  expect_equal(fit$pars[["k"]], 1.5, tolerance = 0.02)
+  expect_equal(fit$curve_parameters[["k"]], 1.5, tolerance = 0.02)
 })
 
 test_that("a vector of starting breakpoints is tried in turn", {
@@ -177,7 +177,7 @@ test_that("starts that fail are recorded and passed over", {
   fit <- rc_2seg_powerlaw(Q, H, data = d, variance = var_spec(d$uQ^2),
                      kbounds = c(1.5, 2.5))
   expect_true(anyNA(fit$kstart_search$k))
-  expect_equal(fit$pars[["k"]], 1.62, tolerance = 0.01)
+  expect_equal(fit$curve_parameters[["k"]], 1.62, tolerance = 0.01)
 })
 
 test_that("a fit that fails from every start is an error", {

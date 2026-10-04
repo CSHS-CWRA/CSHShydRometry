@@ -82,7 +82,7 @@ and users never handle weights. The interface is marked experimental.
 - Arguments and columns are named in full (`discharge`, `stage`), not with
   extreme abbreviations (`q`, `h`).
 - In formulas, a power law is `Q = a (h - c)^b`, and the parameters are
-  named `a`, `b` and `c` in `pars` and `coef()`. As an argument, though, `c`
+  named `a`, `b` and `c` in `curve_parameters` and `coef()`. As an argument, though, `c`
   is named `offset`.
 
 **Why.**
@@ -125,14 +125,14 @@ and users never handle weights. The interface is marked experimental.
 
 ## What a fit contains
 
-**Decision.** Every fit has `gaugings`, `pars` and `settings`, and, where
+**Decision.** Every fit has `gaugings`, `curve_parameters` and `settings`, and, where
 it takes a `variance` argument, `variance`; see `?rating_curve`. Other
 elements, such as `model`, `rse`, `weights_used` and `irls`, depend on how
 the fit is computed, and are documented as liable to change. Users get
 fitted values, residuals and parameters through `fitted()`, `residuals()`
 and `coef()`.
 
-- `pars` holds the parameters of the *curve* only, as a named list with one
+- `curve_parameters` holds the parameters of the *curve* only, as a named list with one
   element per parameter type and, for multi-segment curves, one value per
   segment. Elements may differ in length, where a configuration fixes a
   parameter. `coef()` flattens it.

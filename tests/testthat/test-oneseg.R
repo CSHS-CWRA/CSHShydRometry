@@ -16,7 +16,7 @@ spec_data <- function() {
 test_that("discharge and stage may be vectors or columns of data", {
   from_vectors <- rc_powerlaw(thompson$discharge, thompson$stage)
   from_columns <- rc_powerlaw(discharge, stage, data = thompson)
-  expect_equal(from_vectors$pars, from_columns$pars)
+  expect_equal(from_vectors$curve_parameters, from_columns$curve_parameters)
 })
 
 test_that("arguments after discharge and stage must be named", {
@@ -29,7 +29,7 @@ test_that("arguments after discharge and stage must be named", {
 
 test_that("column names are found when called from inside another function", {
   wrapper <- function(d) rc_powerlaw_log(discharge, stage, data = d)
-  expect_equal(wrapper(thompson)$pars, rc_powerlaw_log(discharge, stage, data = thompson)$pars)
+  expect_equal(wrapper(thompson)$curve_parameters, rc_powerlaw_log(discharge, stage, data = thompson)$curve_parameters)
   local_q <- thompson$discharge
   local_h <- thompson$stage
   inner <- function() rc_powerlaw_log(local_q, local_h)
@@ -128,7 +128,7 @@ test_that("rc_powerlaw: specified weights give NA prediction limits with a note"
 test_that("rc_poly: degree sets the number of coefficients", {
   for (deg in 1:3) {
     fit <- rc_poly(discharge, stage, data = thompson, degree = deg)
-    expect_named(fit$pars, paste0("b", 0:deg))
+    expect_named(fit$curve_parameters, paste0("b", 0:deg))
   }
   expect_error(rc_poly(discharge, stage, data = thompson, degree = 0))
 })
@@ -198,8 +198,8 @@ test_that("rc_loess: prediction limits are NA with a note", {
 test_that("log-scale fits report bias-corrected coefficients", {
   for (fit in list(rc_powerlaw_log(discharge, stage, data = thompson),
                    rc_powerlaw_log(discharge, stage, data = thompson, offset = -1.3))) {
-    expect_gt(fit$a_corrected[["nbc"]], fit$pars$a)
-    expect_true(fit$pars$c < min(thompson$stage))
+    expect_gt(fit$a_corrected[["nbc"]], fit$curve_parameters$a)
+    expect_true(fit$curve_parameters$c < min(thompson$stage))
   }
 })
 
@@ -213,7 +213,7 @@ test_that("log-scale limits are positive", {
 
 test_that("a known c is held fixed, and gives a linear fit on the log scale", {
   fit <- rc_powerlaw_log(discharge, stage, data = thompson, offset = -1.3)
-  expect_equal(fit$pars$c, -1.3)
+  expect_equal(fit$curve_parameters$c, -1.3)
   expect_equal(fit$settings$offset, -1.3)
   expect_s3_class(fit$model, "lm")
   expect_null(rc_powerlaw_log(discharge, stage, data = thompson)$settings$offset)
@@ -227,9 +227,9 @@ test_that("fixing c at its estimate keeps the curve but narrows the limits", {
   # this is what the former rc_log_ols() did: estimate c, then treat it as
   # known, leaving its uncertainty out of the limits
   est <- rc_powerlaw_log(discharge, stage, data = thompson)
-  fixed <- rc_powerlaw_log(discharge, stage, data = thompson, offset = est$pars$c)
-  expect_equal(fixed$pars$a, est$pars$a, tolerance = 1e-6)
-  expect_equal(fixed$pars$b, est$pars$b, tolerance = 1e-6)
+  fixed <- rc_powerlaw_log(discharge, stage, data = thompson, offset = est$curve_parameters$c)
+  expect_equal(fixed$curve_parameters$a, est$curve_parameters$a, tolerance = 1e-6)
+  expect_equal(fixed$curve_parameters$b, est$curve_parameters$b, tolerance = 1e-6)
   p_est <- predict(est, new_stage = 3, conflev = 0.95)
   p_fixed <- predict(fixed, new_stage = 3, conflev = 0.95)
   expect_equal(p_fixed$fit, p_est$fit, tolerance = 1e-6)
@@ -253,9 +253,9 @@ test_that("rc_powerlaw() holds a given offset fixed, under every weighting", {
   for (scheme in list("none", "prop", "power")) {
     est <- rc_powerlaw(discharge, stage, data = thompson, variance = scheme)
     fixed <- rc_powerlaw(discharge, stage, data = thompson, variance = scheme,
-                         offset = est$pars$c)
-    expect_equal(fixed$pars$c, est$pars$c)
-    expect_equal(fixed$settings$offset, est$pars$c)
+                         offset = est$curve_parameters$c)
+    expect_equal(fixed$curve_parameters$c, est$curve_parameters$c)
+    expect_equal(fixed$settings$offset, est$curve_parameters$c)
     expect_named(coef(fixed$model), c("a", "b"))
     # the same curve, with limits that leave out the uncertainty in c
     expect_equal(coef(fixed), coef(est), tolerance = 1e-4)

@@ -1,4 +1,4 @@
-# The structure every fit shares: pars, settings, coef(), and the record of
+# The structure every fit shares: curve_parameters, settings, coef(), and the record of
 # the proportional-weight reweighting.
 
 all_fits <- function() {
@@ -22,18 +22,18 @@ test_that("every fit has the shared elements", {
     fit <- fits[[nm]]
     expect_s3_class(fit, "rating_curve")
     expect_named(fit$gaugings, c("discharge", "stage"), info = nm)
-    expect_type(fit$pars, "list")
+    expect_type(fit$curve_parameters, "list")
     expect_type(fit$settings, "list")
     expect_true(is.numeric(fit$rse) && length(fit$rse) == 1L, info = nm)
     expect_false(is.null(fit$model), info = nm)
   }
 })
 
-test_that("coef() flattens pars into a named numeric vector", {
+test_that("coef() flattens curve_parameters into a named numeric vector", {
   for (nm in names(fits <- all_fits())) {
     cf <- coef(fits[[nm]])
     expect_type(cf, "double")
-    expect_length(cf, length(unlist(fits[[nm]]$pars)))
+    expect_length(cf, length(unlist(fits[[nm]]$curve_parameters)))
     expect_false(is.null(names(cf)), info = nm)
   }
   expect_named(coef(rc_powerlaw(discharge, stage, data = thompson)), c("a", "b", "c"))
@@ -45,17 +45,17 @@ test_that("one-segment coef() agrees with the underlying nls model", {
   expect_equal(coef(fit), stats::coef(fit$model))
 })
 
-test_that("two-segment pars hold one value per segment", {
+test_that("two-segment curve_parameters hold one value per segment", {
   skip_if_not_installed("RBaM")
   d <- RBaM::SauzeGaugings
   pw <- rc_2seg_powerlaw(Q, H, data = d, kstart = 1)
-  expect_named(pw$pars, c("a", "b", "c", "k"))
-  expect_equal(lengths(pw$pars), c(a = 1L, b = 2L, c = 2L, k = 1L))
+  expect_named(pw$curve_parameters, c("a", "b", "c", "k"))
+  expect_equal(lengths(pw$curve_parameters), c(a = 1L, b = 2L, c = 2L, k = 1L))
   expect_named(coef(pw), c("a1", "b1", "c1", "b2", "c2", "k"))
-  expect_equal(unname(coef(pw)[["b2"]]), pw$pars$b[2])
+  expect_equal(unname(coef(pw)[["b2"]]), pw$curve_parameters$b[2])
 
   cp <- rc_2seg_powerlaw(Q, H, data = d, combine = "add", kstart = 1)
-  expect_equal(lengths(cp$pars), c(a = 2L, b = 2L, c = 1L, k = 1L))
+  expect_equal(lengths(cp$curve_parameters), c(a = 2L, b = 2L, c = 1L, k = 1L))
   expect_named(coef(cp), c("a1", "b1", "c1", "a2", "b2", "k"))
 })
 
@@ -91,7 +91,7 @@ test_that("the fit records its weighting scheme, with any estimate", {
   expect_s3_class(rc_powerlaw(discharge, stage, data = thompson)$variance, "rc_var_none")
   # the power describes the scatter, not the curve
   expect_named(coef(fit), c("a", "b", "c"))
-  expect_named(fit$pars, c("a", "b", "c"))
+  expect_named(fit$curve_parameters, c("a", "b", "c"))
 })
 
 # -- reweighting ---------------------------------------------------------------

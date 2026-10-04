@@ -21,7 +21,7 @@ test_that("both ways of combining the segments fit under every weighting", {
       fit <- sauze_fit(cfg, wc)
       expect_s3_class(fit, "rc_2seg_powerlaw")
       expect_s3_class(fit, "rating_curve")
-      k <- fit$pars[["k"]]
+      k <- fit$curve_parameters[["k"]]
       expect_true(
         k > min(RBaM::SauzeGaugings$H) && k < max(RBaM::SauzeGaugings$H),
         info = paste(cfg, wc)
@@ -36,7 +36,7 @@ test_that("the breakpoint is where the record says it should be", {
   # combinations should land in the same neighbourhood
   ks <- vapply(
     c("replace", "add"),
-    function(cfg) sauze_fit(cfg, "spec")$pars[["k"]],
+    function(cfg) sauze_fit(cfg, "spec")$curve_parameters[["k"]],
     numeric(1)
   )
   expect_true(all(ks > 1.2 & ks < 2.2))
@@ -56,7 +56,7 @@ test_that("specified weights give confidence but not prediction limits", {
 test_that("the delta band jumps at the breakpoint and the bootstrap does not", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("replace", "spec")
-  k <- fit$pars[["k"]]
+  k <- fit$curve_parameters[["k"]]
   hh <- c(k - 0.05, k + 0.05)
 
   d <- suppressMessages(predict(fit, new_stage = hh, conflev = 0.95))
@@ -88,7 +88,7 @@ test_that("both methods agree on the fitted curve", {
 test_that("adding the segments is continuous at the breakpoint", {
   skip_if_not_installed("RBaM")
   fit <- sauze_fit("add", "spec")
-  k <- fit$pars[["k"]]
+  k <- fit$curve_parameters[["k"]]
   p <- predict(fit, new_stage = c(k - 1e-6, k + 1e-6))
   expect_equal(p$fit[1], p$fit[2], tolerance = 1e-5)
 })

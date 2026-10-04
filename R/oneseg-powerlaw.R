@@ -165,7 +165,7 @@ rc_powerlaw <- function(
   qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
-    pars = list(a = coefs[["a"]], b = coefs[["b"]], c = c),
+    curve_parameters = list(a = coefs[["a"]], b = coefs[["b"]], c = c),
     settings = list(variance = wts_given, offset = offset, control = control),
     weights_used = wts,
     irls = irls,
@@ -236,7 +236,7 @@ predict.rc_powerlaw <- function(
   if (inherits(mod, "gnls")) {
     # the power was estimated, by nlme::gnls()
     return(gnls_limits(
-      mod, stage_df, object$pars, object$variance$exponent, conflev, predlev
+      mod, stage_df, object$curve_parameters, object$variance$exponent, conflev, predlev
     ))
   }
   yvec <- unname(stats::predict(mod, newdata = stage_df))

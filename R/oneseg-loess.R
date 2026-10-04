@@ -21,7 +21,7 @@
 #'   `"prop"`), or `var_spec()` with the variances. See [variance]. Under `var_prop()`
 #'   the loess curve is refitted in rounds, like the parametric fits.
 #' @return An `rc_loess` object; see [rating_curve] for its contents. A loess
-#'   curve has no parameters, so `pars` is an empty list.
+#'   curve has no parameters, so `curve_parameters` is an empty list.
 #' @examples
 #' fit <- rc_loess(discharge, stage, data = thompson)
 #' predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
@@ -97,7 +97,7 @@ rc_loess <- function(
   qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
-    pars = list(),
+    curve_parameters = list(),
     settings = list(
       degree = degree,
       span = span,

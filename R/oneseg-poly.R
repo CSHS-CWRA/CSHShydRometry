@@ -121,7 +121,7 @@ rc_poly <- function(
   qh <- tibble::as_tibble(qh)
   outlist <- list(
     gaugings = qh,
-    pars = pars,
+    curve_parameters = pars,
     settings = list(degree = degree, variance = weighting),
     weights_used = wts,
     irls = irls,

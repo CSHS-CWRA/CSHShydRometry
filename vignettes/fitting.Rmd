@@ -256,7 +256,7 @@ fit_repl <- rc_2seg_powerlaw(discharge, stage, data = sauze,
 fit_add <- rc_2seg_powerlaw(discharge, stage, data = sauze,
                          combine = "add",
                          variance = var_spec(sauze$uncertainty_sd^2))
-c(replace = fit_repl$pars$k, add = fit_add$pars$k)
+c(replace = fit_repl$curve_parameters$k, add = fit_add$curve_parameters$k)
 ```
 
 The fit is sensitive to where the search for the breakpoint starts, so by
@@ -272,7 +272,7 @@ plot(stage ~ discharge, data = sauze, col = "grey50",
      xlab = "Discharge (m³/s)", ylab = "Stage (m)")
 lines(stage ~ fit, data = predict(fit_repl), lwd = 2)
 lines(stage ~ fit, data = predict(fit_add), lwd = 2, lty = 2)
-abline(h = fit_repl$pars$k, col = "grey", lty = 3)
+abline(h = fit_repl$curve_parameters$k, col = "grey", lty = 3)
 legend("bottomright", c("Upper segment replaces", "Upper segment adds"),
        lty = 1:2, lwd = 2, bty = "n")
 ```

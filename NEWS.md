@@ -135,9 +135,10 @@
 
 * Fit objects are restructured, the same way for every model (see
   `?rating_curve`):
-  * `pars` is a named list of the estimated curve parameters, one element per
-    parameter type. For two-segment fits each element holds one value per
-    segment, so `pars$b` is `c(b1, b2)`. `rc_poly()` names its coefficients
+  * `curve_parameters` (formerly `pars`) is a named list of the estimated
+    curve parameters, one element per parameter type. For two-segment fits
+    each element holds one value per segment, so `curve_parameters$b` is
+    `c(b1, b2)`. `coef()` gives them as a flat named vector. `rc_poly()` names its coefficients
     `b0`, `b1`, ...; `rc_loess()` has none.
   * `weights_used` holds the weights the final model was fitted with
     (formerly `weights`).

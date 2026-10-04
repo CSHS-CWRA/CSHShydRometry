@@ -58,7 +58,7 @@ settings, such as \code{rel.tol}, can be added to the list (see
 }
 \value{
 An object of class \code{c("rc_2seg_powerlaw", "rating_curve")}; see
-\link{rating_curve} for its contents. \code{pars} holds the estimated parameters by
+\link{rating_curve} for its contents. \code{curve_parameters} holds the estimated parameters by
 type, one value per segment: under \code{"replace"}, \code{a} has a single value
 because the upper segment's coefficient is fixed by continuity, and under
 \code{"add"}, \code{c} has a single value because the upper segment is
@@ -125,7 +125,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
   sauze <- RBaM::SauzeGaugings
   repl <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
   add <- rc_2seg_powerlaw(Q, H, data = sauze, combine = "add", kstart = 1)
-  c(replace = repl$pars[["k"]], add = add$pars[["k"]])
+  c(replace = repl$curve_parameters[["k"]], add = add$curve_parameters[["k"]])
 
   # variances from the reported gauging uncertainties
   rc_2seg_powerlaw(

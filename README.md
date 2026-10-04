@@ -234,7 +234,7 @@ fit2 <- rc_2seg_powerlaw(
   data = sauze,
   variance = var_spec(sauze$uncertainty_sd^2)
 )
-fit2$pars$k
+fit2$curve_parameters$k
 #> [1] 1.621688
 ```
 
@@ -253,7 +253,7 @@ Just either side of the breakpoint, the delta band jumps and the
 bootstrap band does not:
 
 ``` r
-near_k <- fit2$pars$k + c(-0.05, 0.05)
+near_k <- fit2$curve_parameters$k + c(-0.05, 0.05)
 delta <- predict(
   fit2,
   new_stage = near_k,
