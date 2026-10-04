@@ -91,10 +91,7 @@ and users never handle weights. The interface is marked experimental.
   of zero flow, which `c` is only for a single power law: for a segment of a
   multi-segment curve it is not.
 - An argument `c = ` reads as R's `c()`, so the argument has a name in
-  words. "Offset" is BaRatin's term for the parameter, and holds for any
-  segment. "Zero flow stage" does not hold for segments, and "activation
-  stage" is, in BaRatin, the breakpoint (our `k`), not `c`.
-  *(to confirm with R. Dan Moore and Paul Whitfield)*
+  words. "Offset" holds for any segment; "zero flow stage" does not.
 
 ## Arguments
 
