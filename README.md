@@ -179,8 +179,8 @@ rbind(
 #> 2     3  835.   816.   855.
 ```
 
-To label each row with its model, use `dplyr::bind_rows()` with named
-arguments:
+To label each row with its model, the dplyr package (not a dependency of
+this one) can stack them with named arguments:
 
 ``` r
 dplyr::bind_rows(
@@ -188,11 +188,6 @@ dplyr::bind_rows(
   poly = predict(fit_poly, new_stage = 3, conflev = 0.95),
   .id = "model"
 )
-#> # A tibble: 2 × 5
-#>   model stage   fit ci_lwr ci_upr
-#>   <chr> <dbl> <dbl>  <dbl>  <dbl>
-#> 1 power     3  832.   814.   850.
-#> 2 poly      3  835.   816.   855.
 ```
 
 ## Two-segment curves

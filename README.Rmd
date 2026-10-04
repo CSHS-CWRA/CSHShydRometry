@@ -147,10 +147,10 @@ rbind(
 )
 ```
 
-To label each row with its model, use `dplyr::bind_rows()` with named
-arguments:
+To label each row with its model, the dplyr package (not a dependency of
+this one) can stack them with named arguments:
 
-```{r stack-labelled, eval = requireNamespace("dplyr", quietly = TRUE)}
+```r
 dplyr::bind_rows(
   power = predict(fit, new_stage = 3, conflev = 0.95),
   poly = predict(fit_poly, new_stage = 3, conflev = 0.95),
