@@ -92,24 +92,27 @@ coef.rc_2seg_powerlaw <- function(object, ...) {
 #' The fitted discharge at each gauging, and the residuals: the gaugings'
 #' departures from the curve.
 #'
-#' Residuals are always differences, observed minus fitted, on the scale the
-#' model is fitted on: the log scale for [rc_powerlaw_log()], so
-#' `log(observed) - log(fitted)`, and discharge, in cubic meters per second,
-#' for every other fit. Nothing is transformed back.
+#' Residuals are calculated on the scale the model is fitted on: the log
+#' scale for [rc_powerlaw_log()], and discharge, in cubic meters per second,
+#' for every other fit. Nothing is transformed back. The `type` of residual
+#' is one of:
 #'
-#' With `divide_by_sd = TRUE`, each residual is divided by the fit's estimated
-#' standard deviation of a gauging at that stage, on the same scale, as given
-#' by its variance scheme: for example `rse * fitted` under [var_prop()]. If
-#' the variance scheme describes the scatter well, the results have about the
-#' same spread at every stage, with a standard deviation near 1, so they are
-#' the ones to check for a trend in the scatter or for normality. This is the
-#' standard deviation of a gauging's scatter, not of the residual itself: it
-#' makes no adjustment for the uncertainty in the fitted curve.
+#' * `"difference"`: observed minus fitted, so `log(observed) - log(fitted)`
+#'   for [rc_powerlaw_log()].
+#' * `"scaled"`: the difference divided by the fit's estimated standard
+#'   deviation of a gauging at that stage, on the same scale, as given by its
+#'   variance scheme: for example `rse * fitted` under [var_prop()]. These
+#'   are also known as Pearson residuals. If the variance scheme describes
+#'   the scatter well, they have about the same spread at every stage, with a
+#'   standard deviation near 1, so they are the ones to check for a trend in
+#'   the scatter or for normality. The standard deviation is that of a
+#'   gauging's scatter, not of the residual itself: it makes no adjustment
+#'   for the uncertainty in the fitted curve.
 #'
 #' @param object A rating curve fit.
 #' @param ... Must be empty.
-#' @param divide_by_sd Whether to divide each residual by the estimated
-#'   standard deviation of a gauging at its stage.
+#' @param type The type of residual: `"difference"` (the default) or
+#'   `"scaled"`.
 #' @return A numeric vector, one value per gauging in `object$gaugings`.
 #' @examples
 #' fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
@@ -117,7 +120,7 @@ coef.rc_2seg_powerlaw <- function(object, ...) {
 #' head(residuals(fit))
 #'
 #' # the residuals in standard deviations, to check the variance scheme
-#' qqnorm(residuals(fit, divide_by_sd = TRUE))
+#' qqnorm(residuals(fit, type = "scaled"))
 #' @export
 fitted.rating_curve <- function(object, ...) {
   rlang::check_dots_empty()
@@ -127,9 +130,13 @@ fitted.rating_curve <- function(object, ...) {
 
 #' @rdname fitted.rating_curve
 #' @export
-residuals.rating_curve <- function(object, ..., divide_by_sd = FALSE) {
+residuals.rating_curve <- function(
+  object,
+  ...,
+  type = c("difference", "scaled")
+) {
   rlang::check_dots_empty()
-  checkmate::assert_flag(divide_by_sd)
+  type <- rlang::arg_match(type)
   observed <- object$gaugings$discharge
   fit <- stats::fitted(object)
   if (inherits(object, "rc_powerlaw_log")) {
@@ -141,7 +148,7 @@ residuals.rating_curve <- function(object, ..., divide_by_sd = FALSE) {
     residual <- observed - fit
     sd <- object$rse / sqrt(object$weights_used)
   }
-  if (divide_by_sd) {
+  if (type == "scaled") {
     residual <- residual / sd
   }
   residual

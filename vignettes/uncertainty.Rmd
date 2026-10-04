@@ -100,12 +100,12 @@ because the estimates average over many gaugings. Prediction limits depend
 on it directly: they are only as good as the assumed shape of the scatter,
 and if it is skewed or has heavy tails they can miss, especially at high
 levels such as 0.99. So look at the residuals before relying on prediction
-limits. The residuals divided by their estimated standard deviation are the
-ones to check. Here, for the power law under `var_prop()`, they look roughly
+limits. The scaled residuals, each divided by its estimated standard
+deviation, are the ones to check. Here, for the power law under `var_prop()`, they look roughly
 normal:
 
 ```{r, fig.height = 3.4}
-scaled <- residuals(fit, divide_by_sd = TRUE)
+scaled <- residuals(fit, type = "scaled")
 qqnorm(scaled, main = "Residuals, in standard deviations")
 qqline(scaled)
 ```
