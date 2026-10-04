@@ -3,8 +3,11 @@
 
 # The gaugings with a reported uncertainty, and weights from it: the
 # uncertainty is a percentage of the discharge at two standard deviations.
+# The gauging reported as 0.0226% is left out: it is probably a fraction
+# entered as a percentage (see ?thompson), and its weight would be over 99.9%
+# of the total, forcing the curve through it.
 spec_data <- function() {
-  d <- thompson[!is.na(thompson$uncertainty_pct), ]
+  d <- thompson[!is.na(thompson$uncertainty_pct) & thompson$uncertainty_pct > 1, ]
   d$wts <- 1 / (d$uncertainty_pct / 100 * d$discharge / 2)^2
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   d

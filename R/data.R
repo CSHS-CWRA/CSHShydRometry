@@ -11,7 +11,7 @@
 #' `uncertainty_pct` is mostly `NA`. It is a percentage of the discharge at
 #' two standard deviations, so the standard uncertainty of a discharge, in
 #' cubic meters per second, is `uncertainty_pct / 100 * discharge / 2`.
-#' Fits using `wts_code = "spec"` need a complete weight vector, and so need
+#' Fits using [wts_spec()] need a weight for every gauging, and so need
 #' either the subset with an uncertainty or weights from elsewhere.
 #'
 #' The rating at the station has shifted over the decades: gaugings from
@@ -24,7 +24,9 @@
 #' One uncertainty may be incorrect: the gauging of 2018-11-01 has 0.0226,
 #' where the others lie between about 2.5 and 11. It may have been entered as
 #' a fraction (2.26%) rather than a percentage. It is kept as it appears in
-#' the records.
+#' the records, but leave it out of fits using [wts_spec()]: weighted by it,
+#' it would carry over 99.9% of the total weight, and the curve would be
+#' forced through it.
 #'
 #' @section Getting the data yourself:
 #' Individual discharge measurements (field visits) are not published on the

@@ -76,7 +76,8 @@ test_that("a single prediction stage works", {
 })
 
 test_that("specified weights give NA prediction limits, not missing columns", {
-  keep <- !is.na(thompson$uncertainty_pct)
+  # leave out the doubtful 0.0226% gauging; see ?thompson
+  keep <- !is.na(thompson$uncertainty_pct) & thompson$uncertainty_pct > 1
   d <- thompson[keep, ]
   skip_if(nrow(d) < 10, "too few gaugings with a reported uncertainty")
   sd <- d$uncertainty_pct / 100 * d$discharge / 2

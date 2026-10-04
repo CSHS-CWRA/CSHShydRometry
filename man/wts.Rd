@@ -86,8 +86,10 @@ rc_powerlaw(discharge, stage, data = thompson, wts = "prop")
 fit <- rc_powerlaw(discharge, stage, data = thompson, wts = wts_power())
 fit$wts$exponent
 
-# weights from each gauging's reported uncertainty
-d <- thompson[!is.na(thompson$uncertainty_pct), ]
+# weights from each gauging's reported uncertainty, leaving out the one
+# reported as 0.0226\%, probably a fraction entered as a percentage (see
+# ?thompson): its weight would be over 99.9\% of the total
+d <- thompson[!is.na(thompson$uncertainty_pct) & thompson$uncertainty_pct > 1, ]
 d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
 rc_powerlaw(discharge, stage, data = d, wts = wts_spec(1 / d$uncertainty_sd^2))
 }
