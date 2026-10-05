@@ -37,120 +37,68 @@ The package is not on CRAN yet. Get it from GitHub:
 remotes::install_github("CSHS-CWRA/CSHShydRometry")
 ```
 
-## Fitting a single-segment rating curve
-
-```{r}
-library(CSHShydRometry)
-```
+## A first rating curve
 
 The package comes with 93 gaugings from the Thompson River (Water Survey of
-Canada station 08LF051), made between 1994 and 2024. `stage` is in meters and
-`discharge` in cubic meters per second. A few gaugings also carry a reported
-uncertainty.
-
-```{r}
-head(thompson)
-```
-
-By convention, rating curves are drawn with stage on the vertical axis.
-Discharge rises faster than stage, so the points bend over to the right:
+Canada station 08LF051), with `stage` in meters and `discharge` in cubic
+meters per second. Rating curves are drawn with stage on the vertical axis:
 
 ```{r plot-data}
+library(CSHShydRometry)
 plot(stage ~ discharge, data = thompson)
 ```
 
-The classic rating curve is a power law relating discharge $Q$ to stage $h$:
-
-$$
-Q = a (h - c)^b.
-$$
-
-Here $c$ is the stage at which the flow would stop, $b$ says how quickly the
-flow grows as the water rises above that, and $a$ sets the scale: it is the
-discharge when the water is (a hypothetical) one meter above $c$.
-
-`rc_powerlaw()` is one method, which fits this relationship by (nonlinear) least squares:
+The classic rating curve is a power law, $Q = a (h - c)^b$, relating
+discharge $Q$ to stage $h$, where $c$ is the offset: the stage at which the
+flow would stop. `rc_powerlaw()` fits it by least squares. These gaugings
+scatter more at higher flows, so we let the standard deviation of the
+scatter grow in proportion to the flow, with `variance = "prop"`:
 
 ```{r fit}
-fit <- rc_powerlaw(discharge, stage, data = thompson)
-```
-
-Like the result of statistical models commonly used in R, such as `lm()` or `glm()`, 
-`fit` is a fitted-model object. Printing
-it says what kind of model it is, and it works with the usual tools, such as
-`coef()` and `predict()`. `?rating_curve` describes what is inside.
-
-```{r fit-print}
-fit
-```
-
-Here are the estimates of the parameters $a$, $b$, and $c$:
-
-```{r coef}
+fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
 coef(fit)
 ```
 
-## Predicting discharge
+## Confidence and prediction limits
 
-`predict()` evaluates the curve at the stages you give it:
-
-```{r predict}
-predict(fit, new_stage = c(1, 3, 6))
-```
-
-Ask for a confidence level to get limits for the curve itself, and a
-prediction level to get limits for a new gauging:
+`predict()` evaluates the curve at the stages you give it. Ask for a
+confidence level to get limits for the curve itself, and a prediction level
+to get limits for a new gauging:
 
 ```{r limits}
 predict(fit, new_stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
 ```
 
-Leave out `stage` to cover the whole range of the gaugings, which is handy for
+Leave out `new_stage` to cover the range of the gaugings, which is handy for
 plotting:
 
 ```{r band}
 band <- predict(fit, conflev = 0.95, predlev = 0.95)
-
-plot(stage ~ discharge, data = thompson)
+plot(stage ~ discharge, data = thompson, col = "grey50")
 lines(stage ~ fit, data = band)
 lines(stage ~ pi_lwr, data = band, lty = 2)
 lines(stage ~ pi_upr, data = band, lty = 2)
 ```
 
-The dashed lines are the 95% prediction limits. The confidence limits are
-there too, in `ci_lwr` and `ci_upr`, but on this scale they sit almost on the
-curve.
+The dashed lines are the 95% prediction limits. The confidence limits, in
+`ci_lwr` and `ci_upr`, sit almost on the curve at this scale.
 
 ## Other models
 
-Every model has an `rc_*()` function and a `predict()` method:
+Every model has an `rc_*()` function, and swapping one for another changes
+one line:
 
-- `rc_powerlaw()`: power law, fitted on the original scale.
-- `rc_powerlaw_log()`: power law, fitted on the log–log scale.
+- `rc_powerlaw()`: a power law, fitted on the original scale.
+- `rc_powerlaw_log()`: a power law, fitted on the log-log scale.
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
-- `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (more below).
+- `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (below).
 
-Swapping one model for another changes one line:
-
-```{r poly}
-fit_poly <- rc_poly(discharge, stage, data = thompson)
-predict(fit_poly, new_stage = c(1, 3, 6))
-```
-
-`predict()` always gives back the same columns, so results from different
-models can be stacked with `rbind()`:
-
-```{r stack}
-rbind(
-  predict(fit, new_stage = 3, conflev = 0.95),
-  predict(fit_poly, new_stage = 3, conflev = 0.95)
-)
-```
-
-To label each row with its model, the dplyr package (not a dependency of
-this one) can stack them with named arguments:
+`predict()` gives back the same columns for every model, so results stack
+with `rbind()`, or, to label each row with its model, with
+`dplyr::bind_rows()` (dplyr is not a dependency of this package):
 
 ```r
+fit_poly <- rc_poly(discharge, stage, data = thompson, variance = "prop")
 dplyr::bind_rows(
   power = predict(fit, new_stage = 3, conflev = 0.95),
   poly = predict(fit_poly, new_stage = 3, conflev = 0.95),
@@ -160,79 +108,40 @@ dplyr::bind_rows(
 
 ## Two-segment curves
 
-Where the river's control changes (say, when the water rises out of the
-channel and over a floodplain), one power law is not enough. The Ardèche at
-Sauze, from the RBaM package, is such a river. RBaM calls its columns `H`,
-`Q` and `uQ`; here we give them the names used in this package. Each gauging
-comes with its standard uncertainty, in cubic meters per second:
+Where the river's control changes, say when the water rises out of the
+channel onto a floodplain, one power law is not enough. `rc_2seg_powerlaw()`
+fits two power laws that meet at a breakpoint stage, estimated along with
+them. The Ardèche at Sauze, from the RBaM package, is such a river; each of
+its gaugings comes with a reported standard uncertainty, which gives its
+variance:
 
-```{r sauze}
+```{r twoseg}
 sauze <- data.frame(
   stage = RBaM::SauzeGaugings$H,
   discharge = RBaM::SauzeGaugings$Q,
   uncertainty_sd = RBaM::SauzeGaugings$uQ
 )
-head(sauze)
-```
-
-Below about 1 m the stage climbs steeply with discharge; above about 2 m it
-climbs much more slowly. There are no gaugings in between, so where the control
-changes has to be estimated:
-
-```{r plot-sauze}
-plot(stage ~ discharge, data = sauze)
-```
-
-`rc_2seg_powerlaw()` fits two power laws that meet at a breakpoint, $k$. Here we
-give each gauging the variance of its reported uncertainty:
-
-```{r twoseg}
 fit2 <- rc_2seg_powerlaw(
   discharge, stage,
   data = sauze,
   variance = var_spec(sauze$uncertainty_sd^2)
 )
-fit2$curve_parameters$k
+
+plot(stage ~ discharge, data = sauze, col = "grey50")
+lines(stage ~ fit, data = predict(fit2))
+abline(h = fit2$curve_parameters$k, lty = 3)
 ```
 
-The fit is sensitive to where the breakpoint search starts, so by default it
-tries several starting points and keeps the best.
+The dotted line marks the estimated breakpoint. The curve has a corner
+there, so near it, use `predict(fit2, method = "boot")` for limits: the
+default delta method is fast, but unreliable at the corner.
 
-### Limits near the breakpoint
+## Learn more
 
-For two-segment curves, `predict()` offers two ways to compute the limits.
-The default, `method = "delta"`, is fast but unreliable near the breakpoint:
-the curve has a corner there, and the method's straight-line approximation
-jumps across it. `method = "boot"` refits the curve to resampled gaugings;
-it is slow, but it behaves at the breakpoint.
-
-Just either side of the breakpoint, the delta band jumps and the bootstrap
-band does not:
-
-```{r delta-boot}
-near_k <- fit2$curve_parameters$k + c(-0.05, 0.05)
-delta <- predict(
-  fit2,
-  new_stage = near_k,
-  conflev = 0.95
-)
-boot <- predict(
-  fit2,
-  new_stage = near_k,
-  conflev = 0.95,
-  method = "boot",
-  B = 200,
-  seed = 1
-)
-
-delta$ci_upr - delta$ci_lwr
-boot$ci_upr - boot$ci_lwr
-```
-
-In a simulation study, a nominal 95% delta interval covered the true curve
-only about two-thirds of the time just above the breakpoint, against roughly
-97% for the bootstrap. Away from the breakpoint the two agree. So use
-`"delta"` for a quick look, and `"boot"` where the interval matters.
+- `vignette("fitting")`: choosing gaugings, looking at their scatter, and
+  every way the package fits a curve.
+- `vignette("uncertainty")`: confidence and prediction limits, what they
+  assume, and where they mislead.
 
 ## Related software
 
@@ -262,13 +171,6 @@ used here. For a comparison of methods for rating-curve uncertainty, see
 Kiang et al. (2018), "A comparison of methods for streamflow uncertainty
 estimation", *Water Resources Research*,
 [doi:10.1029/2018WR022708](https://doi.org/10.1029/2018WR022708).
-
-## Learn more
-
-- `vignette("fitting")`: choosing gaugings, looking at their scatter, and
-  every way the package fits a curve.
-- `vignette("uncertainty")`: confidence and prediction limits, and where they
-  mislead.
 
 ## Citation
 
