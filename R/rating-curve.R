@@ -99,10 +99,13 @@ coef.rc_2seg_powerlaw <- function(object, ...) {
 #'
 #' * `"difference"`: observed minus fitted, so `log(observed) - log(fitted)`
 #'   for [rc_powerlaw_log()].
-#' * `"scaled"`: the difference divided by the fit's estimated standard
-#'   deviation of a gauging at that stage, on the same scale, as given by its
-#'   variance scheme: for example `rse * fitted` under [var_prop()]. These
-#'   are also known as Pearson residuals. If the variance scheme describes
+#' * `"scaled"`: the difference divided by the estimated standard deviation
+#'   of a gauging at that stage, on the same scale. That standard deviation
+#'   comes from the fit's variance scheme. Under [var_none()] it is the same
+#'   at every stage; under [var_prop()] it is proportional to the fitted
+#'   discharge, so a gauging where the curve gives twice the flow is
+#'   expected to scatter twice as much. These residuals are also known as
+#'   Pearson residuals. If the variance scheme describes
 #'   the scatter well, they have about the same spread at every stage, with a
 #'   standard deviation near 1, so they are the ones to check for a trend in
 #'   the scatter or for normality. The standard deviation is that of a
