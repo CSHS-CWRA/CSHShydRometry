@@ -96,8 +96,8 @@ changes one line:
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
 - `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (below).
 
-`predict()` gives back the same columns for every model, so results
-stack.
+`predict()` gives back the same columns for every model, so results from
+different models line up:
 
 ``` r
 fit_poly <- rc_poly(
@@ -147,8 +147,9 @@ abline(h = fit2$curve_parameters$k, lty = 3)
 <img src="man/figures/README-twoseg-1.png" alt="" width="100%" />
 
 The dotted line marks the estimated breakpoint. The curve has a corner
-there, so near it, use `predict(fit2, method = "boot")` for limits: the
-default delta method is fast, but unreliable at the corner.
+there, so for limits near it, use
+`predict(fit2, conflev = 0.95, method = "boot")`: the default delta
+method is fast, but unreliable at the corner.
 
 ## Learn more
 
@@ -169,12 +170,12 @@ proprietary.
 
 Open-source tools for fitting rating curves are mostly Bayesian:
 
-| Software | Language | Approach |
-|----|----|----|
-| [BaRatin / BaRatinAGE](https://github.com/BaRatin-tools/BaRatinAGE) (INRAE) | Fortran, with a graphical interface | Bayesian; priors from the hydraulic controls; multi-segment curves through a configuration matrix |
-| [RBaM](https://CRAN.R-project.org/package=RBaM) (INRAE) | R | R interface to BaM, the engine behind BaRatin |
-| [bdrc](https://CRAN.R-project.org/package=bdrc) | R | Bayesian hierarchical power law and generalized power law, with constant or varying scatter |
-| [ratingcurve](https://github.com/thodson-usgs/ratingcurve) (USGS, provisional) | Python | Bayesian segmented power law, with PyMC |
+| Software                                                                       | Language                            | Approach                                                                                          |
+|--------------------------------------------------------------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------|
+| [BaRatin / BaRatinAGE](https://github.com/BaRatin-tools/BaRatinAGE) (INRAE)    | Fortran, with a graphical interface | Bayesian; priors from the hydraulic controls; multi-segment curves through a configuration matrix |
+| [RBaM](https://CRAN.R-project.org/package=RBaM) (INRAE)                        | R                                   | R interface to BaM, the engine behind BaRatin                                                     |
+| [bdrc](https://CRAN.R-project.org/package=bdrc)                                | R                                   | Bayesian hierarchical power law and generalized power law, with constant or varying scatter       |
+| [ratingcurve](https://github.com/thodson-usgs/ratingcurve) (USGS, provisional) | Python                              | Bayesian segmented power law, with PyMC                                                           |
 
 CSHShydRometry instead fits by least squares, with no priors to specify.
 Its limits come from the delta method or a bootstrap, and it has
@@ -213,7 +214,7 @@ As BibTeX:
 
 The name of this R package is in recognition of the support provided by
 the [Canadian Society for Hydrological Sciences
-(CSHS)](https://cwra.org/en/affiliates-programs/cshs/) which is an
+(CSHS)](https://cwra.org/en/affiliates-programs/cshs/), which is an
 affiliated society of the Canadian Water Resources Association (CWRA).
 
 ## Contributing

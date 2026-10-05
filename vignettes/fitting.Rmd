@@ -53,7 +53,11 @@ A rating curve describes the river while its channel stays the same. Channels
 change, through erosion, deposition or work on the control, so a curve is
 usually fitted to gaugings from one period of stable conditions.
 
-One way to check is to fit a model to the entire dataset, and see whether the gaugings systematically miss the curve over time. We'll build that model here via `rc_powerlaw_log()`, which is explained below; what matters is its residuals, shown here as a percent deviation from the model's predicted discharge.
+One way to check is to fit a model to the entire dataset and see whether
+the gaugings systematically miss the curve over time. We'll build that model
+here with `rc_powerlaw_log()`, which is explained below. What matters here
+are its residuals, which are on the log scale, so multiplied by 100 they are
+roughly percentage departures from the curve.
 
 ```{r}
 fit_all <- rc_powerlaw_log(discharge, stage, data = thompson)
@@ -65,9 +69,9 @@ abline(h = 0, col = "grey")
 lines(lowess(thompson$date, 100 * departure, f = 0.3), lwd = 2)
 ```
 
-There's a systematic error in the predictions depending on when the gaugings were obtained: low in the 1990s, high in the 2000s,
-and so on. The Water Survey's own rating changed too, as the `rating_table`
-column records.
+The curve's error depends on when the gaugings were made: its predictions
+are too low in the 1990s, too high in the 2000s, and so on. The Water
+Survey's own rating changed too, as the `rating_table` column records.
 
 For a rating to use in practice, you would choose a stable period and keep
 only its gaugings, for example with `subset(thompson, rating_table == "11")`.
@@ -123,11 +127,11 @@ par(op)
 The residuals fan out as the flow grows, while the relative residuals stay
 roughly even. The scatter is roughly proportional to the flow: a constant
 percentage, not a constant amount. That matters for the fit, because
-ordinary least squares doesn't perform as well when the residuals scatter more with increasing flow.
+ordinary least squares doesn't perform as well when the residuals scatter
+more with increasing flow.
 
-There are two
-ways to allow for it, both below: model the variance, or fit on the log
-scale.
+There are two ways to allow for it, both below: model the variance, or fit
+on the log scale.
 
 ## A power law on the original scale
 
@@ -141,29 +145,39 @@ fit <- rc_powerlaw(discharge, stage, data = thompson)
 coef(fit)
 ```
 
-To improve the least squares estimation, the `variance` argument allows you
-to specify how you think the scatter changes with the flow. By
-default it is the same at every flow (`var_none()`). With `var_prop()` its
-standard deviation is assumed proportional to the flow, which is more appropriate for the Thompson dataset; this option has the effect of weighting each gauging inversely to its variance.
+To improve the least squares estimation, the `variance` argument lets you
+specify how you think the scatter changes with the flow. By default it is
+the same at every flow (`var_none()`). With `var_prop()` its standard
+deviation is assumed proportional to the flow, which suits the Thompson
+gaugings better. Either way, the fit weights each gauging by the reciprocal
+of its variance.
 
 ```{r}
 fit_prop <- rc_powerlaw(
-     discharge,
-     stage,
-     data = thompson,
-     variance = var_prop()
+  discharge,
+  stage,
+  data = thompson,
+  variance = var_prop()
 )
 coef(fit_prop)
 ```
 
-It's worth knowing about the additional gymnastics that's needed when specifying a variance structure. When we say that the standard deviation of flow is proportional to flow itself, we don't mean the _observed_ flow -- we're talking about the _average_ flow for a given stage -- the thing being predicted. That's because we're talking about the (vertical) scatter around the _curve_. So, the weights we choose depends on the fitted curve, and the fitted curve depends on the weights. To deal with this, we iteratively fit and re-weight until the fit settles -- hence "iteratively reweighted least squares" (IRLS). For this case, here are the number of iterations needed:
+It's worth knowing about the extra gymnastics this takes. When we say that
+the standard deviation of the flow is proportional to the flow itself, we
+don't mean the _observed_ flow, but the _average_ flow at a given stage: the
+thing being predicted. That's because we're talking about the (vertical)
+scatter around the _curve_. So the weights depend on the fitted curve, and
+the fitted curve depends on the weights. To deal with this, the fit is
+repeated, reweighting each time, until it settles; hence "iteratively
+reweighted least squares" (IRLS). Here is the number of iterations it
+took:
 
 ```{r}
 fit_prop$irls$iterations
 ```
 
-Besides `var_prop()`, `var_power()` goes one step further and estimates the power of the flow to
-which the scatter is proportional:
+`var_power()` goes one step further than `var_prop()`, and estimates the
+power of the flow to which the scatter is proportional:
 
 ```{r}
 fit_power <- rc_powerlaw(
@@ -245,15 +259,15 @@ dplyr::bind_rows(
   cubic = predict(fit_cubic, new_stage = at),
   .id = "model"
 )
-> # A tibble: 6 × 3
->   model      stage   fit
->   <chr>      <dbl> <dbl>
-> 1 power_prop     1  252.
-> 2 power_prop     4 1208.
-> 3 power_prop     8 3476.
-> 4 cubic          1  249.
-> 5 cubic          4 1226.
-> 6 cubic          8 3399.
+#> # A tibble: 6 × 3
+#>   model      stage   fit
+#>   <chr>      <dbl> <dbl>
+#> 1 power_prop     1  252.
+#> 2 power_prop     4 1208.
+#> 3 power_prop     8 3476.
+#> 4 cubic          1  249.
+#> 5 cubic          4 1226.
+#> 6 cubic          8 3399.
 ```
 
 Without `new_stage`, `predict()` covers the range of the gaugings, which
@@ -280,7 +294,7 @@ fits two power laws that meet at a breakpoint stage, $k$.
 
 The Ardèche at Sauze, from the RBaM package, has such a change. RBaM calls
 its columns `H`, `Q` and `uQ`; here they get the names used in this package.
-Each gauging comes with its standard uncertainty, in cubic metres per second.
+Each gauging comes with its standard uncertainty, in cubic meters per second.
 
 ```{r, eval = has_rbam}
 sauze <- tibble::tibble(

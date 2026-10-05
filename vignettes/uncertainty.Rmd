@@ -32,12 +32,14 @@ library(CSHShydRometry)
 
 `predict()` gives two kinds of limits, each at a level you choose:
 
-- **Confidence limits** (`conflev`) bound how "wobbly" the *curve* is, had
-  it been fit under a different dataset. They reflect how well the gaugings
-  pin the curve down, and they narrow as more gaugings are collected.
+- **Confidence limits** (`conflev`) bound how "wobbly" the *curve* is: how
+  much it could differ had it been fit to a different set of gaugings. They
+  reflect how well the gaugings pin the curve down, and they narrow as more
+  gaugings are collected.
 - **Prediction limits** (`predlev`) bound what flow could reasonably
-  materialize for a given stage. They add the scatter of individual gaugings about the curve, and do not narrow below that scatter however many
-  gaugings there are. They are always wider than confidence limits.
+  materialize for a given stage. They add the scatter of individual
+  gaugings about the curve, and do not narrow below that scatter however
+  many gaugings there are. They are always wider than confidence limits.
 
 ```{r}
 fit <- rc_powerlaw(
@@ -100,8 +102,8 @@ low flow and wide at high flow, as the gaugings are.
 
 Under `var_spec()`, each gauging's variance is supplied, up to a common
 factor, rather than modelled, so the fit says nothing about the scatter of a
-new gauging. Its prediction
-limits come back as `NA`, while its confidence limits are computed as usual.
+new gauging. Its prediction limits come back as `NA`, while its confidence
+limits are computed as usual.
 
 ## What the limits assume
 
@@ -121,8 +123,12 @@ qqnorm(scaled, main = "Residuals, in standard deviations")
 qqline(scaled)
 ```
 
-Even with normal scatter, the non-linearity of the stage-discharge relationship means that normality no longer holds for prediction limits and especially confidence limits. However, the assumption is approximately true with plenty of gaugings (thanks to the Delta method). In practice, this means that the 95% interval from most fits covers the truth
-only roughly 95% of the time. See `?predict.rc_powerlaw`.
+Even with normal scatter, the curve is nonlinear in its parameters, so its
+estimate is not exactly normal. That affects confidence limits most, and
+prediction limits less. With plenty of gaugings the estimate is close to
+normal, and the delta method, which the limits use, works well. In
+practice, a 95% interval from most fits covers the truth roughly, not
+exactly, 95% of the time; see `?predict.rc_powerlaw`.
 
 ## Fits on the log scale
 
@@ -275,10 +281,9 @@ par(op)
 
 The delta band jumps at the breakpoint: just above it, the band is several
 times wider than just below. The jump comes from the approximation, not the
-data, and the bootstrap band has none. In a
-simulation study, a nominal 95% delta interval covered the true curve only
-about two-thirds of the time just above the breakpoint, against roughly 97%
-for the bootstrap.
+data, and the bootstrap band has none. In a simulation study, a nominal 95%
+delta interval covered the true curve only about two-thirds of the time just
+above the breakpoint, against roughly 97% for the bootstrap.
 
 The bootstrap costs a full refit per resample, and the refits repeat the
 search over starting breakpoints. So use `"delta"` for a quick look, and

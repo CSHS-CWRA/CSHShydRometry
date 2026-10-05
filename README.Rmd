@@ -93,7 +93,8 @@ one line:
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
 - `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (below).
 
-`predict()` gives back the same columns for every model, so results stack.
+`predict()` gives back the same columns for every model, so results from
+different models line up:
 
 ```{r}
 fit_poly <- rc_poly(
@@ -133,8 +134,9 @@ abline(h = fit2$curve_parameters$k, lty = 3)
 ```
 
 The dotted line marks the estimated breakpoint. The curve has a corner
-there, so near it, use `predict(fit2, method = "boot")` for limits: the
-default delta method is fast, but unreliable at the corner.
+there, so for limits near it, use
+`predict(fit2, conflev = 0.95, method = "boot")`: the default delta method is
+fast, but unreliable at the corner.
 
 ## Learn more
 
@@ -186,7 +188,7 @@ cat("``` bibtex", format(cit, style = "bibtex"), "```", sep = "\n")
 ## Acknowledgements
 
 The name of this R package is in recognition of the support provided by the
-[Canadian Society for Hydrological Sciences (CSHS)](https://cwra.org/en/affiliates-programs/cshs/)
+[Canadian Society for Hydrological Sciences (CSHS)](https://cwra.org/en/affiliates-programs/cshs/),
 which is an affiliated society of the Canadian Water Resources Association (CWRA).
 
 ## Contributing
