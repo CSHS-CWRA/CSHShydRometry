@@ -32,18 +32,10 @@ is one of:
 \itemize{
 \item \code{"difference"}: observed minus fitted, so \code{log(observed) - log(fitted)}
 for \code{\link[=rc_powerlaw_log]{rc_powerlaw_log()}}.
-\item \code{"scaled"}: the difference divided by the estimated standard deviation
-of a gauging at that stage, on the same scale. That standard deviation
-comes from the fit's variance scheme. Under \code{\link[=var_none]{var_none()}} it is the same
-at every stage; under \code{\link[=var_prop]{var_prop()}} it is proportional to the fitted
-discharge, so a gauging where the curve gives twice the flow is
-expected to scatter twice as much. These residuals are also known as
-Pearson residuals. If the variance scheme describes
-the scatter well, they have about the same spread at every stage, with a
-standard deviation near 1, so they are the ones to check for a trend in
-the scatter or for normality. The standard deviation is that of a
-gauging's scatter, not of the residual itself: it makes no adjustment
-for the uncertainty in the fitted curve.
+\item \code{"scaled"}: the difference divided by the standard deviation the fit's
+variance scheme gives a gauging at that stage (also known as Pearson
+residuals). Use these to check the variance scheme: if it is right,
+they spread about equally at every stage.
 }
 }
 \examples{
