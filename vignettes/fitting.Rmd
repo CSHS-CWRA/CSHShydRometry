@@ -93,11 +93,21 @@ Now check whether the residuals have an even spread about the curve.
 
 ```{r residual-plots, echo = FALSE, fig.height = 3.4}
 op <- par(mfrow = c(1, 2))
-plot(fitted_q, residual_q, xlab = "Fitted discharge (m³/s)",
-     ylab = "Residual (m³/s)", main = "Residuals")
+plot(
+  fitted_q,
+  residual_q,
+  xlab = "Fitted discharge (m³/s)",
+  ylab = "Residual (m³/s)",
+  main = "Residuals"
+)
 abline(h = 0, col = "grey")
-plot(fitted_q, 100 * residual_q / fitted_q, xlab = "Fitted discharge (m³/s)",
-     ylab = "Residual (%)", main = "Relative residuals")
+plot(
+  fitted_q,
+  100 * residual_q / fitted_q,
+  xlab = "Fitted discharge (m³/s)",
+  ylab = "Residual (%)",
+  main = "Relative residuals"
+)
 abline(h = 0, col = "grey")
 par(op)
 ```
@@ -156,7 +166,12 @@ Besides `var_prop()`, `var_power()` goes one step further and estimates the powe
 which the scatter is proportional:
 
 ```{r}
-fit_power <- rc_powerlaw(discharge, stage, data = thompson, variance = var_power())
+fit_power <- rc_powerlaw(
+  discharge,
+  stage,
+  data = thompson,
+  variance = var_power()
+)
 fit_power$variance$exponent
 ```
 

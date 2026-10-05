@@ -83,7 +83,8 @@ lines(stage ~ pi_upr, data = band, lty = 2)
 <img src="man/figures/README-band-1.png" alt="" width="100%" />
 
 The dashed lines are the 95% prediction limits. The confidence limits,
-in `ci_lwr` and `ci_upr`, sit almost on the curve at this scale.
+in `ci_lwr` and `ci_upr`, sit almost on the curve at this scale, and are
+not shown.
 
 ## Other models
 
@@ -96,16 +97,25 @@ changes one line:
 - `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (below).
 
 `predict()` gives back the same columns for every model, so results
-stack with `rbind()`, or, to label each row with its model, with
-`dplyr::bind_rows()` (dplyr is not a dependency of this package):
+stack.
 
 ``` r
-fit_poly <- rc_poly(discharge, stage, data = thompson, variance = "prop")
-dplyr::bind_rows(
-  power = predict(fit, new_stage = 3, conflev = 0.95),
-  poly = predict(fit_poly, new_stage = 3, conflev = 0.95),
-  .id = "model"
+fit_poly <- rc_poly(
+  discharge,
+  stage,
+  data = thompson,
+  variance = "prop"
 )
+predict(fit, new_stage = 3, conflev = 0.95)
+#> # A tibble: 1 × 4
+#>   stage   fit ci_lwr ci_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>
+#> 1     3  816.   806.   826.
+predict(fit_poly, new_stage = 3, conflev = 0.95)
+#> # A tibble: 1 × 4
+#>   stage   fit ci_lwr ci_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>
+#> 1     3  812.   802.   821.
 ```
 
 ## Two-segment curves
@@ -118,7 +128,7 @@ package, is such a river; each of its gaugings comes with a reported
 standard uncertainty, which gives its variance:
 
 ``` r
-sauze <- data.frame(
+sauze <- tibble::tibble(
   stage = RBaM::SauzeGaugings$H,
   discharge = RBaM::SauzeGaugings$Q,
   uncertainty_sd = RBaM::SauzeGaugings$uQ
@@ -159,12 +169,12 @@ proprietary.
 
 Open-source tools for fitting rating curves are mostly Bayesian:
 
-| Software                                                                       | Language                            | Approach                                                                                          |
-|--------------------------------------------------------------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------|
-| [BaRatin / BaRatinAGE](https://github.com/BaRatin-tools/BaRatinAGE) (INRAE)    | Fortran, with a graphical interface | Bayesian; priors from the hydraulic controls; multi-segment curves through a configuration matrix |
-| [RBaM](https://CRAN.R-project.org/package=RBaM) (INRAE)                        | R                                   | R interface to BaM, the engine behind BaRatin                                                     |
-| [bdrc](https://CRAN.R-project.org/package=bdrc)                                | R                                   | Bayesian hierarchical power law and generalized power law, with constant or varying scatter       |
-| [ratingcurve](https://github.com/thodson-usgs/ratingcurve) (USGS, provisional) | Python                              | Bayesian segmented power law, with PyMC                                                           |
+| Software | Language | Approach |
+|----|----|----|
+| [BaRatin / BaRatinAGE](https://github.com/BaRatin-tools/BaRatinAGE) (INRAE) | Fortran, with a graphical interface | Bayesian; priors from the hydraulic controls; multi-segment curves through a configuration matrix |
+| [RBaM](https://CRAN.R-project.org/package=RBaM) (INRAE) | R | R interface to BaM, the engine behind BaRatin |
+| [bdrc](https://CRAN.R-project.org/package=bdrc) | R | Bayesian hierarchical power law and generalized power law, with constant or varying scatter |
+| [ratingcurve](https://github.com/thodson-usgs/ratingcurve) (USGS, provisional) | Python | Bayesian segmented power law, with PyMC |
 
 CSHShydRometry instead fits by least squares, with no priors to specify.
 Its limits come from the delta method or a bootstrap, and it has

@@ -32,16 +32,19 @@ library(CSHShydRometry)
 
 `predict()` gives two kinds of limits, each at a level you choose:
 
-- **Confidence limits** (`conflev`) bound the *curve*: the mean discharge at
-  a stage. They reflect only how well the gaugings pin the curve down, and
-  narrow as gaugings accumulate.
-- **Prediction limits** (`predlev`) bound a *single new gauging* at that
-  stage. They add the scatter of individual gaugings about the curve, so they
-  are always wider, and do not narrow below that scatter however many
-  gaugings there are.
+- **Confidence limits** (`conflev`) bound how "wobbly" the *curve* is, had
+  it been fit under a different dataset. They reflect how well the gaugings
+  pin the curve down, and they narrow as more gaugings are collected.
+- **Prediction limits** (`predlev`) bound what flow could reasonably
+  materialize for a given stage. They add the scatter of individual gaugings about the curve, and do not narrow below that scatter however many
+  gaugings there are. They are always wider than confidence limits.
 
 ```{r}
-fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
+fit <- rc_powerlaw(
+  discharge, stage,
+  data = thompson,
+  variance = "prop"
+)
 predict(fit, new_stage = c(1, 4, 8), conflev = 0.95, predlev = 0.95)
 ```
 
@@ -69,16 +72,24 @@ The variance scheme is a statement about the scatter, so it decides how the
 prediction limits change with the flow. With `var_none()` the scatter is the
 same at every flow; with `var_prop()` it grows in proportion to the flow.
 
+Let's make a function to calculate prediction interval widths.
+
 ```{r}
-at <- c(1, 8)
-widths <- function(fit) {
+pi_widths <- function(fit, at) {
   p <- predict(fit, new_stage = at, predlev = 0.95)
   p$pi_upr - p$pi_lwr
 }
-data.frame(
+```
+
+Now apply that function to see how the widths differ:
+
+```{r}
+at <- c(1, 8)
+fit_none <- rc_powerlaw(discharge, stage, data = thompson)
+tibble::tibble(
   stage = at,
-  none = widths(rc_powerlaw(discharge, stage, data = thompson)),
-  prop = widths(fit)
+  none = pi_widths(fit_none, at = at),
+  prop = pi_widths(fit, at = at)
 )
 ```
 
@@ -94,7 +105,7 @@ limits come back as `NA`, while its confidence limits are computed as usual.
 
 ## What the limits assume
 
-The limits use the t distribution, which assumes the gaugings scatter
+The limits use the _t_ distribution, which assumes the gaugings scatter
 normally about the curve. Confidence limits depend on this only mildly,
 because the estimates average over many gaugings. Prediction limits depend
 on it directly: they are only as good as the assumed shape of the scatter,
@@ -102,7 +113,7 @@ and if it is skewed or has heavy tails they can miss, especially at high
 levels such as 0.99. So look at the residuals before relying on prediction
 limits. The scaled residuals, each divided by its estimated standard
 deviation, are the ones to check. Here, for the power law under
-`var_prop()`, they look roughly normal:
+`var_prop()`, they look roughly normal according to a Q-Q plot:
 
 ```{r, fig.height = 3.4}
 scaled <- residuals(fit, type = "scaled")
@@ -110,10 +121,8 @@ qqnorm(scaled, main = "Residuals, in standard deviations")
 qqline(scaled)
 ```
 
-Even with normal scatter, a 95% interval from most fits covers the truth
-only roughly 95% of the time, because the calculation approximates the
-curve by a straight line about its estimates. The approximation is good with
-plenty of gaugings, and poorer with few; see `?predict.rc_powerlaw`.
+Even with normal scatter, the non-linearity of the stage-discharge relationship means that normality no longer holds for prediction limits and especially confidence limits. However, the assumption is approximately true with plenty of gaugings (thanks to the Delta method). In practice, this means that the 95% interval from most fits covers the truth
+only roughly 95% of the time. See `?predict.rc_powerlaw`.
 
 ## Fits on the log scale
 
@@ -144,13 +153,16 @@ estimated from the same gaugings, though, gives the same curve with limits
 that are too narrow:
 
 ```{r}
-fixed <- rc_powerlaw_log(discharge, stage, data = thompson,
-                      offset = fit_log$curve_parameters$c)
-width_at <- function(fit, at) {
+fixed <- rc_powerlaw_log(
+  discharge, stage,
+  data = thompson,
+  offset = fit_log$curve_parameters$c
+)
+ci_widths <- function(fit, at) {
   p <- predict(fit, new_stage = at, conflev = 0.95)
   p$ci_upr - p$ci_lwr
 }
-c(c_estimated = width_at(fit_log, 3), c_fixed = width_at(fixed, 3))
+c(c_estimated = ci_widths(fit_log, 3), c_fixed = ci_widths(fixed, 3))
 ```
 
 ## Beyond the gaugings
@@ -165,17 +177,33 @@ top <- max(thompson$stage)
 beyond <- seq(top, 1.5 * top, length.out = 50)
 fits <- list(
   "Power law" = fit,
-  "Cubic polynomial" = rc_poly(discharge, stage, data = thompson, degree = 3),
+  "Cubic polynomial" = rc_poly(
+    discharge,
+    stage,
+    data = thompson,
+    degree = 3
+  ),
   "Loess" = rc_loess(discharge, stage, data = thompson)
 )
 curves <- lapply(fits, predict, new_stage = beyond)
 
-plot(NULL, xlim = range(sapply(curves, function(p) range(p$fit))),
-     ylim = range(beyond), xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+plot(
+  NULL,
+  xlim = range(sapply(curves, function(p) range(p$fit))),
+  ylim = range(beyond),
+  xlab = "Discharge (m³/s)",
+  ylab = "Stage (m)"
+)
 for (i in seq_along(curves)) {
   lines(stage ~ fit, data = curves[[i]], lty = i, lwd = 2)
 }
-legend("bottomright", names(fits), lty = seq_along(fits), lwd = 2, bty = "n")
+legend(
+  "bottomright",
+  names(fits),
+  lty = seq_along(fits),
+  lwd = 2,
+  bty = "n"
+)
 ```
 
 The power law follows the physics of flow through a control, so it is the
@@ -192,27 +220,62 @@ corner there, and the approximation jumps across it. `method = "boot"` refits
 the curve to resampled gaugings instead, which makes no such approximation.
 
 ```{r, eval = has_rbam}
-sauze <- data.frame(
+sauze <- tibble::tibble(
   stage = RBaM::SauzeGaugings$H,
   discharge = RBaM::SauzeGaugings$Q,
   uncertainty_sd = RBaM::SauzeGaugings$uQ
 )
-fit2 <- rc_2seg_powerlaw(discharge, stage, data = sauze,
-                      variance = var_spec(sauze$uncertainty_sd^2))
-near_k <- fit2$curve_parameters$k + c(-0.05, 0.05)
+fit2 <- rc_2seg_powerlaw(
+  discharge,
+  stage,
+  data = sauze,
+  variance = var_spec(sauze$uncertainty_sd^2)
+)
+k <- fit2$curve_parameters$k
+near_k <- seq(k - 0.5, k + 0.5, length.out = 51)
 
-delta <- predict(fit2, new_stage = near_k, conflev = 0.95)
-boot <- predict(fit2, new_stage = near_k, conflev = 0.95,
-                method = "boot", B = 200, seed = 1)
-data.frame(
-  stage = near_k,
-  delta_width = delta$ci_upr - delta$ci_lwr,
-  boot_width = boot$ci_upr - boot$ci_lwr
+bands <- list(
+  "Delta method" = predict(fit2, new_stage = near_k, conflev = 0.95),
+  "Bootstrap" = predict(
+    fit2,
+    new_stage = near_k,
+    conflev = 0.95,
+    method = "boot",
+    B = 200,
+    seed = 1
+  )
 )
 ```
 
-Just above the breakpoint the delta band is several times wider than just
-below it, a jump that comes from the approximation, not the data. In a
+The two 95% confidence bands either side of the breakpoint, marked by the
+dotted line:
+
+```{r, eval = has_rbam, fig.height = 3.6}
+discharge_range <- range(sapply(bands, function(b) {
+  range(b$ci_lwr, b$ci_upr)
+}))
+op <- par(mfrow = c(1, 2))
+for (method in names(bands)) {
+  band <- bands[[method]]
+  plot(
+    stage ~ fit,
+    data = band,
+    type = "l",
+    xlim = discharge_range,
+    main = method,
+    xlab = "Discharge (m³/s)",
+    ylab = "Stage (m)"
+  )
+  lines(stage ~ ci_lwr, data = band, lty = 2)
+  lines(stage ~ ci_upr, data = band, lty = 2)
+  abline(h = k, col = "grey", lty = 3)
+}
+par(op)
+```
+
+The delta band jumps at the breakpoint: just above it, the band is several
+times wider than just below. The jump comes from the approximation, not the
+data, and the bootstrap band has none. In a
 simulation study, a nominal 95% delta interval covered the true curve only
 about two-thirds of the time just above the breakpoint, against roughly 97%
 for the bootstrap.

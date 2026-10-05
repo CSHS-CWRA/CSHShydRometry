@@ -81,7 +81,7 @@ lines(stage ~ pi_upr, data = band, lty = 2)
 ```
 
 The dashed lines are the 95% prediction limits. The confidence limits, in
-`ci_lwr` and `ci_upr`, sit almost on the curve at this scale.
+`ci_lwr` and `ci_upr`, sit almost on the curve at this scale, and are not shown.
 
 ## Other models
 
@@ -93,17 +93,17 @@ one line:
 - `rc_poly()`, `rc_loess()`: a polynomial, or a smooth curve.
 - `rc_2seg_powerlaw()`: two power laws joined at a breakpoint (below).
 
-`predict()` gives back the same columns for every model, so results stack
-with `rbind()`, or, to label each row with its model, with
-`dplyr::bind_rows()` (dplyr is not a dependency of this package):
+`predict()` gives back the same columns for every model, so results stack.
 
-```r
-fit_poly <- rc_poly(discharge, stage, data = thompson, variance = "prop")
-dplyr::bind_rows(
-  power = predict(fit, new_stage = 3, conflev = 0.95),
-  poly = predict(fit_poly, new_stage = 3, conflev = 0.95),
-  .id = "model"
+```{r}
+fit_poly <- rc_poly(
+  discharge,
+  stage,
+  data = thompson,
+  variance = "prop"
 )
+predict(fit, new_stage = 3, conflev = 0.95)
+predict(fit_poly, new_stage = 3, conflev = 0.95)
 ```
 
 ## Two-segment curves
@@ -116,7 +116,7 @@ its gaugings comes with a reported standard uncertainty, which gives its
 variance:
 
 ```{r twoseg}
-sauze <- data.frame(
+sauze <- tibble::tibble(
   stage = RBaM::SauzeGaugings$H,
   discharge = RBaM::SauzeGaugings$Q,
   uncertainty_sd = RBaM::SauzeGaugings$uQ
