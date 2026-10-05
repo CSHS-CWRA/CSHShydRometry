@@ -79,13 +79,19 @@ ratings.
 
 Before choosing a model, look at how the gaugings scatter about a fitted curve.
 A loess smoother makes few assumptions about the curve's shape, so its
-residuals show the scatter fairly:
+residuals show the scatter fairly.
 
-```{r, fig.height = 3.4}
+Fit the model and get the fitted values and the residuals.
+
+```{r}
 smooth <- rc_loess(discharge, stage, data = thompson)
 fitted_q <- fitted(smooth)
 residual_q <- residuals(smooth)
+```
 
+Now check whether the residuals have an even spread about the curve.
+
+```{r residual-plots, echo = FALSE, fig.height = 3.4}
 op <- par(mfrow = c(1, 2))
 plot(fitted_q, residual_q, xlab = "Fitted discharge (m³/s)",
      ylab = "Residual (m³/s)", main = "Residuals")
@@ -96,39 +102,57 @@ abline(h = 0, col = "grey")
 par(op)
 ```
 
+<details>
+<summary>Show the code</summary>
+
+```{r ref.label = "residual-plots", eval = FALSE}
+```
+
+</details>
+
 The residuals fan out as the flow grows, while the relative residuals stay
 roughly even. The scatter is roughly proportional to the flow: a constant
 percentage, not a constant amount. That matters for the fit, because
-ordinary least squares assumes the same scatter at every flow. There are two
+ordinary least squares doesn't perform as well when the residuals scatter more with increasing flow.
+
+There are two
 ways to allow for it, both below: model the variance, or fit on the log
 scale.
 
 ## A power law on the original scale
 
 The usual rating curve is a power law, $Q = a (h - c)^b$, where $Q$ is
-discharge, $h$ is stage, and $c$, the offset, is the stage at which the flow
-would stop.
-`rc_powerlaw()` fits it by least squares on the original scale:
+discharge and $h$ is stage. The model parameters are $a$, $b$, and $c$,
+with $c$ being the offset: the stage at which the flow would stop.
+`rc_powerlaw()` fits this model by least squares on the original scale:
 
 ```{r}
 fit <- rc_powerlaw(discharge, stage, data = thompson)
 coef(fit)
 ```
 
-The `variance` argument says how the scatter changes with the flow. By
+To improve the least squares estimation, the `variance` argument allows you
+to specify how you think the scatter changes with the flow. By
 default it is the same at every flow (`var_none()`). With `var_prop()` its
-standard deviation is proportional to the flow, as the residuals suggested.
-The fit weights each gauging by the reciprocal of its variance, and those
-weights depend on the fitted curve, so the fit is repeated, reweighting each
-time, until it settles:
+standard deviation is assumed proportional to the flow, which is more appropriate for the Thompson dataset; this option has the effect of weighting each gauging inversely to its variance.
 
 ```{r}
-fit_prop <- rc_powerlaw(discharge, stage, data = thompson, variance = var_prop())
+fit_prop <- rc_powerlaw(
+     discharge,
+     stage,
+     data = thompson,
+     variance = var_prop()
+)
 coef(fit_prop)
+```
+
+It's worth knowing about the additional gymnastics that's needed when specifying a variance structure. When we say that the standard deviation of flow is proportional to flow itself, we don't mean the _observed_ flow -- we're talking about the _average_ flow for a given stage -- the thing being predicted. That's because we're talking about the (vertical) scatter around the _curve_. So, the weights we choose depends on the fitted curve, and the fitted curve depends on the weights. To deal with this, we iteratively fit and re-weight until the fit settles -- hence "iteratively reweighted least squares" (IRLS). For this case, here are the number of iterations needed:
+
+```{r}
 fit_prop$irls$iterations
 ```
 
-`var_power()` goes one step further and estimates the power of the flow to
+Besides `var_prop()`, `var_power()` goes one step further and estimates the power of the flow to
 which the scatter is proportional:
 
 ```{r}
