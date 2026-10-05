@@ -53,9 +53,7 @@ A rating curve describes the river while its channel stays the same. Channels
 change, through erosion, deposition or work on the control, so a curve is
 usually fitted to gaugings from one period of stable conditions.
 
-One way to check is to fit a single curve to every gauging and see whether
-the gaugings drift away from it over time. The fit here, `rc_powerlaw_log()`, is
-explained below; its residuals are on the log scale, so 0.05 means about 5%.
+One way to check is to fit a model to the entire dataset, and see whether the gaugings systematically miss the curve over time. We'll build that model here via `rc_powerlaw_log()`, which is explained below; what matters is its residuals, shown here as a percent deviation from the model's predicted discharge.
 
 ```{r}
 fit_all <- rc_powerlaw_log(discharge, stage, data = thompson)
@@ -67,14 +65,9 @@ abline(h = 0, col = "grey")
 lines(lowess(thompson$date, 100 * departure, f = 0.3), lwd = 2)
 ```
 
-The gaugings drift by several percent, up in the 1990s, down in the 2000s,
-and so on: as much as their scatter about the curve. The Water Survey's own
-rating changed too, three times between 2020 and 2024, as the `rating_table`
-column records:
-
-```{r}
-table(thompson$rating_table, useNA = "ifany")
-```
+There's a systematic error in the predictions depending on when the gaugings were obtained: low in the 1990s, high in the 2000s,
+and so on. The Water Survey's own rating changed too, as the `rating_table`
+column records.
 
 For a rating to use in practice, you would choose a stable period and keep
 only its gaugings, for example with `subset(thompson, rating_table == "11")`.
@@ -84,8 +77,8 @@ ratings.
 
 ## Looking at the scatter
 
-Before choosing a model, look at how the gaugings scatter about a curve.
-A loess smooth makes few assumptions about the curve's shape, so its
+Before choosing a model, look at how the gaugings scatter about a fitted curve.
+A loess smoother makes few assumptions about the curve's shape, so its
 residuals show the scatter fairly:
 
 ```{r, fig.height = 3.4}
