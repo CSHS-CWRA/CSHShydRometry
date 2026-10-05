@@ -211,23 +211,38 @@ fit_smooth <- rc_loess(discharge, stage, data = thompson)
 
 ## Comparing the fits
 
-Every fit has a `predict()` method that returns the same columns, so the
-curves can be compared side by side at chosen stages:
+Every fit has a `predict()` method, so the curves can be compared at chosen
+stages:
 
 ```{r}
 at <- c(1, 4, 8)
-data.frame(
-  stage = at,
-  power = predict(fit, new_stage = at)$fit,
-  power_prop = predict(fit_prop, new_stage = at)$fit,
-  power_log = predict(fit_log, new_stage = at)$fit,
-  cubic = predict(fit_cubic, new_stage = at)$fit,
-  loess = predict(fit_smooth, new_stage = at)$fit
-)
+predict(fit_prop, new_stage = at)
+predict(fit_cubic, new_stage = at)
 ```
 
-Without `stage`, `predict()` covers the range of the gaugings, which makes it
-easy to draw the curves:
+`predict()` returns the same columns for every model, so the results stack.
+With the dplyr package (not a dependency of this one), `bind_rows()` can
+label each row with its model:
+
+```r
+dplyr::bind_rows(
+  power_prop = predict(fit_prop, new_stage = at),
+  cubic = predict(fit_cubic, new_stage = at),
+  .id = "model"
+)
+> # A tibble: 6 × 3
+>   model      stage   fit
+>   <chr>      <dbl> <dbl>
+> 1 power_prop     1  252.
+> 2 power_prop     4 1208.
+> 3 power_prop     8 3476.
+> 4 cubic          1  249.
+> 5 cubic          4 1226.
+> 6 cubic          8 3399.
+```
+
+Without `new_stage`, `predict()` covers the range of the gaugings, which
+makes it easy to draw the curves:
 
 ```{r}
 plot(stage ~ discharge, data = thompson, col = "grey50",
@@ -253,27 +268,54 @@ its columns `H`, `Q` and `uQ`; here they get the names used in this package.
 Each gauging comes with its standard uncertainty, in cubic metres per second.
 
 ```{r, eval = has_rbam}
-sauze <- data.frame(
+sauze <- tibble::tibble(
   stage = RBaM::SauzeGaugings$H,
   discharge = RBaM::SauzeGaugings$Q,
   uncertainty_sd = RBaM::SauzeGaugings$uQ
 )
-plot(stage ~ discharge, data = sauze,
-     xlab = "Discharge (m³/s)", ylab = "Stage (m)")
+plot(
+  stage ~ discharge,
+  data = sauze,
+  xlab = "Discharge (m³/s)",
+  ylab = "Stage (m)"
+)
 ```
 
 The reported uncertainties give the variances directly, through `var_spec()`.
-How the two segments combine above the breakpoint is set by `combine`:
-`"replace"` (the default) lets the upper power law take over from the lower
-one, and `"add"` adds it to the discharge the lower one carries.
+Below the breakpoint, $h < k$, the curve is a single power law,
+$Q = a_1 (h - c_1)^{b_1}$. How the two segments combine above it, $h \ge k$,
+is set by `combine`. With `"replace"` (the default), the upper power law
+takes over from the lower one:
+
+$$
+Q = a_2 (h - c_2)^{b_2},
+\qquad \text{where } a_2 = \frac{a_1 (k - c_1)^{b_1}}{(k - c_2)^{b_2}},
+$$
+
+so that the two meet at the breakpoint. With `"add"`, the upper power law
+adds to the discharge the lower one carries at the breakpoint, as when flow
+spills onto a floodplain:
+
+$$
+Q = a_1 (k - c_1)^{b_1} + a_2 (h - k)^{b_2}.
+$$
 
 ```{r, eval = has_rbam}
-fit_repl <- rc_2seg_powerlaw(discharge, stage, data = sauze,
-                          variance = var_spec(sauze$uncertainty_sd^2))
-fit_add <- rc_2seg_powerlaw(discharge, stage, data = sauze,
-                         combine = "add",
-                         variance = var_spec(sauze$uncertainty_sd^2))
-c(replace = fit_repl$curve_parameters$k, add = fit_add$curve_parameters$k)
+fit_repl <- rc_2seg_powerlaw(
+  discharge, stage,
+  data = sauze,
+  variance = var_spec(sauze$uncertainty_sd^2)
+)
+fit_add <- rc_2seg_powerlaw(
+  discharge, stage,
+  data = sauze,
+  combine = "add",
+  variance = var_spec(sauze$uncertainty_sd^2)
+)
+c(
+  replace = fit_repl$curve_parameters$k,
+  add = fit_add$curve_parameters$k
+)
 ```
 
 The fit is sensitive to where the search for the breakpoint starts, so by
