@@ -1,74 +1,18 @@
 # Bootstrap interval method.
 
-#' Bootstrap confidence & prediction limits for a two-segment nls rating curve
+#' Bootstrap limits for a two-segment fit
 #'
-#' Case-resampling ("pairs") bootstrap: repeatedly resample the gaugings with
-#' replacement, refit the two-segment model on each resample, and summarise the
-#' resulting spread of fitted rating curves. Returns the same column layout as
-#' [predict.rc_2seg_powerlaw()] so the two can be plotted side by side.
+#' The `method = "boot"` back end of [predict.rc_2seg_powerlaw()], where the
+#' method and its arguments are documented. Each resample is refitted with
+#' the arguments recorded in `object$settings`, so the resamples reproduce
+#' the original call by construction.
 #'
-#' Why bootstrap? The delta-method limits in [predict.rc_2seg_powerlaw()] (via
-#' [investr::predFit()]) linearise the mean function about the fitted
-#' parameters, but the two-segment mean is not differentiable in the breakpoint
-#' `k` (it is an `ifelse` at `stage = k`). That produces an artificial, near-
-#' discontinuous widening of the delta-method band at the transition. The
-#' bootstrap makes no smoothness assumption, so comparing the two is a direct
-#' check on whether the widening near `k` is real or a delta-method artifact.
-#'
-#' Each resample is refit with the arguments recorded in `object$settings`, so
-#' the resamples reproduce the original call by construction rather than
-#' relying on the caller to restate it.
-#'
-#' @param object An `rc_2seg_powerlaw` fit (from [rc_2seg_powerlaw()]). The gaugings are
-#'   taken from `object$gaugings` and the fitting arguments from
-#'   `object$settings`. Under `var_spec()` the supplied variances are
-#'   resampled along with the cases.
-#' @param new_stage Stages at which to return limits. Defaults to
-#'   1000 points spanning the observed stage range.
-#' @param ... Must be empty. Present so that every argument after it has
-#'   to be named in full.
-#' @param conflev Coverage for the confidence (mean-curve) interval, or `NULL`.
-#' @param predlev Coverage for the prediction (new-observation) interval, or
-#'   `NULL`.
-#' @param B Number of resamples that must fit successfully.
-#' @param seed Optional RNG seed for reproducibility.
-#' @param max_tries_factor Cap on total resample attempts (`B * factor`) so a
-#'   run terminates even if some resamples fail to converge. A resample fails
-#'   if its fit errors or, under `var_prop()`, if its reweighting does
-#'   not converge; failed resamples are redrawn.
-#'
-#' @details
-#' Confidence limits are the pointwise percentiles of the bootstrap curves
-#' (fully nonparametric; this is the part that reveals the delta-method
-#' artifact). Prediction limits combine the bootstrap curve uncertainty (the sd
-#' of the bootstrap curves at each stage) with the observation-noise sd in
-#' quadrature, using a t-quantile on the fit's residual degrees of freedom. The
-#' observation-noise sd follows the error model:
-#' \itemize{
-#'   \item [var_none()]: homoscedastic, `sd(discharge - fitted)`.
-#'   \item [var_prop()]: constant coefficient of variation,
-#'         `fit * sd((discharge - fitted) / fitted)`.
-#'   \item [var_spec()]: a new observation's uncertainty is not identified by the
-#'         fit, so `pi_lwr`/`pi_upr` are returned as `NA`, as in every other
-#'         method.
-#' }
-#'
-#' @return A tibble with `stage`, the point-estimate
-#'   curve `fit`, and the requested `ci_lwr`/`ci_upr` and `pi_lwr`/`pi_upr`.
-#'   `attr(, "B_success")` records how many resamples converged.
-#' @examples
-#' if (requireNamespace("RBaM", quietly = TRUE)) {
-#'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
-#'   boot_limits_2seg(
-#'     fit,
-#'     new_stage = c(1, 2, 4),
-#'     conflev = 0.95,
-#'     B = 50,
-#'     seed = 1
-#'   )
-#' }
-#' @export
+#' @param object An `rc_2seg_powerlaw` fit.
+#' @param ... Must be empty.
+#' @param new_stage,conflev,predlev,B,seed,max_tries_factor As in
+#'   [predict.rc_2seg_powerlaw()].
+#' @return A tibble, with attribute `"B_success"`.
+#' @noRd
 boot_limits_2seg <- function(
   object,
   ...,
@@ -104,8 +48,9 @@ boot_limits_2seg <- function(
   wts_full <- if (wts_code == "spec") fit_args$variance$values
   if (wts_code == "spec" && (is.null(wts_full) || length(wts_full) != n)) {
     stop(
-      "boot_limits_2seg: spec weights must be supplied and aligned with the ",
-      "(NA-dropped) data."
+      "The bootstrap needs the variances given to `var_spec()`, one for each ",
+      "gauging the fit kept.",
+      call. = FALSE
     )
   }
   fit_grid <- as.numeric(
@@ -155,7 +100,7 @@ boot_limits_2seg <- function(
   }
   if (nb < B) {
     warning(sprintf(
-      "boot_limits_2seg: only %d of %d resamples converged.",
+      "Bootstrap: only %d of %d resamples converged.",
       nb,
       B
     ))

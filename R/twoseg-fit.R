@@ -61,8 +61,8 @@
 #' for quasi-likelihood. Under [var_prop()], fits whose reweighting converged
 #' are preferred. What each start led to is recorded in `kstart_search`.
 #'
-#' Each start costs a full fit, and [boot_limits_2seg()] repeats the same
-#' search for every resample. That is deliberate: a resample's best fit is
+#' Each start costs a full fit, and the bootstrap (`predict(method = "boot")`)
+#' repeats the same search for every resample. That is deliberate: a resample's best fit is
 #' often found from a different start than the original's, so starting the
 #' resamples only from the original estimate, or only from the optima the
 #' original search found, would understate the uncertainty in the breakpoint.
@@ -438,7 +438,7 @@ rc_2seg_powerlaw <- function(
   outlist <- list(
     gaugings = qh,
     curve_parameters = pars,
-    # Everything needed to refit these data from scratch. boot_limits_2seg()
+    # Everything needed to refit these data from scratch. The bootstrap
     # resamples and refits, so it has to reproduce the original call exactly;
     # without this it would silently fall back on the argument defaults.
     settings = list(

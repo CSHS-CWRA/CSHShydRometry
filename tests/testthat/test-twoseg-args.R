@@ -122,7 +122,7 @@ test_that("boot prediction limits under each weighting", {
 test_that("boot refuses spec weights it cannot resample", {
   fit <- sauze_fit("replace", "spec")
   fit$settings$variance$values <- NULL
-  expect_error(boot_limits_2seg(fit, new_stage = 2, B = 5), "spec weights")
+  expect_error(boot_limits_2seg(fit, new_stage = 2, B = 5), "variances given")
 })
 
 test_that("boot warns when too few resamples converge", {

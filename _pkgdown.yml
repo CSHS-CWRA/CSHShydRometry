@@ -32,8 +32,6 @@ reference:
   - title: Predicting, with confidence and prediction limits
     contents:
       - starts_with("predict.")
-      - delta_limits_2seg
-      - boot_limits_2seg
 
   - title: Fitted curves
     desc: What a fit contains, and the methods every fit shares.

@@ -2,12 +2,9 @@
 
 #' Predict discharge with confidence / prediction limits from a two-segment fit
 #'
-#' Evaluates the fitted rating curve on a grid of stage values and, optionally,
-#' attaches confidence and/or prediction limits. This is a thin dispatcher: it
-#' validates the arguments common to every method, then hands off to one of the
-#' `*_limits_2seg()` functions, which all take the same
-#' `(object, stage, conflev, predlev)` arguments and all return the same
-#' columns.
+#' Evaluates the fitted rating curve at the stages given and, optionally,
+#' attaches confidence and/or prediction limits, by the delta method or a
+#' bootstrap.
 #'
 #' @section Choosing a method:
 #' The default, `"delta"`, is fast and is the classical choice, but **it is not
@@ -28,6 +25,21 @@
 #' is, the draws too often land on impossible curves: negative or
 #' astronomically large discharges, giving limits that are meaningless.
 #'
+#' @section The bootstrap:
+#' `method = "boot"` resamples the gaugings with replacement, refits the
+#' two-segment curve to each resample with the arguments the fit was made
+#' with (repeating the search over starting breakpoints), and summarises the
+#' spread of the refitted curves. Under [var_spec()] the variances are
+#' resampled along with the gaugings. A resample fails if its fit errors or,
+#' under [var_prop()], if its reweighting does not converge; failed resamples
+#' are redrawn, up to `B * max_tries_factor` attempts in all.
+#'
+#' Confidence limits are the pointwise percentiles of the refitted curves.
+#' Prediction limits add the scatter of a new gauging to the spread of the
+#' refitted curves, using the t distribution on the fit's residual degrees of
+#' freedom. Under [var_spec()] they are `NA`, as for the delta method. The
+#' number of resamples that fitted is recorded in `attr(, "B_success")`.
+#'
 #' @section What the limits assume:
 #' Prediction limits, from either method, assume the scatter of the
 #' gaugings about the curve is normal, with the spread the weighting scheme
@@ -37,8 +49,16 @@
 #' breakpoint; bootstrap confidence limits do not.
 #'
 #' @param object An `rc_2seg_powerlaw` fit (from [rc_2seg_powerlaw()]).
-#' @param ... Passed on to the chosen limits function, such as `B` and `seed`
-#'   for `"boot"`. An argument that function does not take is an error.
+#' @param ... For `method = "boot"`, its settings:
+#'   \describe{
+#'     \item{`B`}{The number of resamples that must fit successfully
+#'       (default 1000).}
+#'     \item{`seed`}{An optional random seed, for reproducible limits.}
+#'     \item{`max_tries_factor`}{A cap on the attempts, `B *
+#'       max_tries_factor` (default 3), so that the bootstrap ends even if
+#'       many resamples fail.}
+#'   }
+#'   For `method = "delta"`, must be empty. Any other argument is an error.
 #' @param new_stage Stages at which to return limits. Defaults to
 #'   1000 points spanning the observed stage range.
 #' @param conflev Confidence level for the mean-curve (confidence) interval, or
@@ -47,13 +67,12 @@
 #'   omit it.
 #' @param method Interval method:
 #'   \itemize{
-#'     \item `"delta"` (the default): [delta_limits_2seg()], the linearised
-#'       delta method. Fast, but fixes the breakpoint at `k-hat` and so jumps
-#'       there; see the section above.
-#'     \item `"boot"`: [boot_limits_2seg()], which resamples the gaugings and
-#'       refits, and so does not rest on the asymptotic normal at all. Much the
-#'       slowest, since it refits the model `B` times, and the most trustworthy
-#'       at the breakpoint.
+#'     \item `"delta"` (the default): the linearised delta method. Fast, but
+#'       fixes the breakpoint at its estimate and so jumps there; see
+#'       "Choosing a method".
+#'     \item `"boot"`: a bootstrap, which resamples the gaugings and refits;
+#'       see "The bootstrap". Much the slowest, since it refits the model `B`
+#'       times, and the most trustworthy at the breakpoint.
 #'   }
 #' @return A tibble with column `stage`,
 #'   the fitted discharge `fit`, and, when requested, `ci_lwr`/`ci_upr` and
@@ -65,7 +84,6 @@
 #'   Named for the object's class, `rc_2seg_powerlaw`, so `predict(object)`
 #'   dispatches here. The one-segment models define their own `predict.rc_powerlaw`
 #'   for the `rc_powerlaw` class; the two do not collide.
-#' @seealso [delta_limits_2seg()], [boot_limits_2seg()].
 #' @examples
 #' if (requireNamespace("RBaM", quietly = TRUE)) {
 #'   sauze <- RBaM::SauzeGaugings
@@ -101,8 +119,8 @@ predict.rc_2seg_powerlaw <- function(
   method <- rlang::arg_match(method)
   checkmate::assert_number(conflev, null.ok = TRUE, lower = 0, upper = 1)
   checkmate::assert_number(predlev, null.ok = TRUE, lower = 0, upper = 1)
-  # new_stage is deliberately NOT resolved here: every *_limits_2seg() function
-  # defaults it the same way, so it resolves once, in whichever one runs.
+  # the work is done by an internal function for each method, which resolves
+  # new_stage and checks that ... holds only arguments it takes
   limits_fun <- switch(
     method,
     delta = delta_limits_2seg,
@@ -118,40 +136,18 @@ predict.rc_2seg_powerlaw <- function(
 }
 
 
-#' Delta-method confidence and prediction limits for a two-segment fit
+#' Delta-method limits for a two-segment fit
 #'
-#' Linearises the fitted curve about `theta-hat` and propagates the parameter
-#' covariance through that linearisation. Routed by weighting:
-#' \itemize{
-#'   \item [var_none()] / [var_spec()]: [investr::predFit()].
-#'   \item [var_prop()]: the delta method adapted to the proportional
-#'     error structure.
-#' }
-#' The linearisation holds the breakpoint fixed at `k-hat`, so the gradient
-#' switches abruptly from one segment's to the other's as `stage` crosses it and
-#' the band jumps. [boot_limits_2seg()] makes no smoothness assumption and is
-#' continuous there; prefer it when the interval near the breakpoint matters.
+#' The `method = "delta"` back end of [predict.rc_2seg_powerlaw()]. It
+#' linearises the curve about the estimates, holding the breakpoint fixed, so
+#' the band jumps at the breakpoint. Under `var_none()` and `var_spec()` it
+#' uses [investr::predFit()]; under `var_prop()`, `nlspw_limits()`.
 #'
-#' Prediction limits are not identified under `"spec"` weights -- the
-#' per-observation error variances are supplied, not estimated, so there is no
-#' single scatter to add to the mean curve. Those columns come back `NA`.
-#'
-#' @param object An `rc_2seg_powerlaw` fit (from [rc_2seg_powerlaw()]).
-#' @param new_stage Stages at which to return limits. Defaults to
-#'   1000 points spanning the observed stage range.
-#' @param ... Must be empty. Present so that every argument after it has
-#'   to be named in full.
-#' @param conflev,predlev Levels for the confidence and prediction intervals,
-#'   or `NULL` to omit either.
-#' @return A tibble; see
-#'   [predict.rc_2seg_powerlaw()] for the columns.
-#' @examples
-#' if (requireNamespace("RBaM", quietly = TRUE)) {
-#'   sauze <- RBaM::SauzeGaugings
-#'   fit <- rc_2seg_powerlaw(Q, H, data = sauze, kstart = 1)
-#'   delta_limits_2seg(fit, new_stage = c(1, 2, 4), conflev = 0.95)
-#' }
-#' @export
+#' @param object An `rc_2seg_powerlaw` fit.
+#' @param ... Must be empty.
+#' @param new_stage,conflev,predlev As in [predict.rc_2seg_powerlaw()].
+#' @return A tibble; see [predict.rc_2seg_powerlaw()] for the columns.
+#' @noRd
 delta_limits_2seg <- function(
   object,
   ...,

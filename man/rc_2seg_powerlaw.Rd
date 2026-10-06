@@ -100,8 +100,8 @@ the loss is \code{sum(discharge / fitted + log(fitted))}. See Wedderburn (1974)
 for quasi-likelihood. Under \code{\link[=var_prop]{var_prop()}}, fits whose reweighting converged
 are preferred. What each start led to is recorded in \code{kstart_search}.
 
-Each start costs a full fit, and \code{\link[=boot_limits_2seg]{boot_limits_2seg()}} repeats the same
-search for every resample. That is deliberate: a resample's best fit is
+Each start costs a full fit, and the bootstrap (\code{predict(method = "boot")})
+repeats the same search for every resample. That is deliberate: a resample's best fit is
 often found from a different start than the original's, so starting the
 resamples only from the original estimate, or only from the optima the
 original search found, would understate the uncertainty in the breakpoint.

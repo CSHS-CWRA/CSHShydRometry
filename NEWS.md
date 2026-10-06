@@ -45,8 +45,13 @@
 * `c` is called the offset, not the stage of zero flow. The two coincide for
   a single power law, but not for a segment of a multi-segment curve.
 
-* In every `predict()` method, and in `delta_limits_2seg()` and
-  `boot_limits_2seg()`, the stages to predict at are now given as
+* `delta_limits_2seg()` and `boot_limits_2seg()` are no longer exported. Use
+  `predict()` on a two-segment fit with `method = "delta"` (the default) or
+  `method = "boot"`, which gives the same results; the bootstrap's settings
+  (`B`, `seed`, `max_tries_factor`) are documented in
+  `?predict.rc_2seg_powerlaw`.
+
+* In every `predict()` method, the stages to predict at are now given as
   `new_stage`, not `stage`.
 
 * `predict()` methods no longer pass `...` on to the functions they call.
@@ -124,7 +129,7 @@
   to fail may now succeed, and fits that stopped at a local optimum may now
   find a better one, at a different breakpoint. What each start led to is
   recorded in `kstart_search`, and `settings$kstart` records `kstart` as
-  supplied, so that `boot_limits_2seg()` repeats the same search for every
+  supplied, so that the bootstrap repeats the same search for every
   resample. That costs one fit per start per resample, but shortcuts that
   start each resample only from the original estimate turned out to miss the
   resample's best fit too often, which would understate the uncertainty in
@@ -187,7 +192,7 @@
     an offset near zero;
   * running out of rounds (`maxiter`) gives a warning, and every fit
     records the number of rounds and whether they converged in `irls`.
-    `boot_limits_2seg()` treats a resample that does not converge as failed,
+    the bootstrap treats a resample that does not converge as failed,
     and redraws it;
   * `rc_loess()` now reweights in rounds too. It used to reweight once, from
     an unweighted fit, so its weights did not match its own fitted values.

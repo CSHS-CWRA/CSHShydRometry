@@ -16,8 +16,15 @@
 \arguments{
 \item{object}{An \code{rc_2seg_powerlaw} fit (from \code{\link[=rc_2seg_powerlaw]{rc_2seg_powerlaw()}}).}
 
-\item{...}{Passed on to the chosen limits function, such as \code{B} and \code{seed}
-for \code{"boot"}. An argument that function does not take is an error.}
+\item{...}{For \code{method = "boot"}, its settings:
+\describe{
+\item{\code{B}}{The number of resamples that must fit successfully
+(default 1000).}
+\item{\code{seed}}{An optional random seed, for reproducible limits.}
+\item{\code{max_tries_factor}}{A cap on the attempts, \code{B * max_tries_factor} (default 3), so that the bootstrap ends even if
+many resamples fail.}
+}
+For \code{method = "delta"}, must be empty. Any other argument is an error.}
 
 \item{new_stage}{Stages at which to return limits. Defaults to
 1000 points spanning the observed stage range.}
@@ -30,13 +37,12 @@ omit it.}
 
 \item{method}{Interval method:
 \itemize{
-\item \code{"delta"} (the default): \code{\link[=delta_limits_2seg]{delta_limits_2seg()}}, the linearised
-delta method. Fast, but fixes the breakpoint at \code{k-hat} and so jumps
-there; see the section above.
-\item \code{"boot"}: \code{\link[=boot_limits_2seg]{boot_limits_2seg()}}, which resamples the gaugings and
-refits, and so does not rest on the asymptotic normal at all. Much the
-slowest, since it refits the model \code{B} times, and the most trustworthy
-at the breakpoint.
+\item \code{"delta"} (the default): the linearised delta method. Fast, but
+fixes the breakpoint at its estimate and so jumps there; see
+"Choosing a method".
+\item \code{"boot"}: a bootstrap, which resamples the gaugings and refits;
+see "The bootstrap". Much the slowest, since it refits the model \code{B}
+times, and the most trustworthy at the breakpoint.
 }}
 }
 \value{
@@ -52,12 +58,9 @@ dispatches here. The one-segment models define their own \code{predict.rc_powerl
 for the \code{rc_powerlaw} class; the two do not collide.
 }
 \description{
-Evaluates the fitted rating curve on a grid of stage values and, optionally,
-attaches confidence and/or prediction limits. This is a thin dispatcher: it
-validates the arguments common to every method, then hands off to one of the
-\verb{*_limits_2seg()} functions, which all take the same
-\verb{(object, stage, conflev, predlev)} arguments and all return the same
-columns.
+Evaluates the fitted rating curve at the stages given and, optionally,
+attaches confidence and/or prediction limits, by the delta method or a
+bootstrap.
 }
 \section{Choosing a method}{
 
@@ -78,6 +81,23 @@ distribution and pushing each draw through the model -- was tried and
 dropped. When a segment is poorly identified, as the lower segment at Sauze
 is, the draws too often land on impossible curves: negative or
 astronomically large discharges, giving limits that are meaningless.
+}
+
+\section{The bootstrap}{
+
+\code{method = "boot"} resamples the gaugings with replacement, refits the
+two-segment curve to each resample with the arguments the fit was made
+with (repeating the search over starting breakpoints), and summarises the
+spread of the refitted curves. Under \code{\link[=var_spec]{var_spec()}} the variances are
+resampled along with the gaugings. A resample fails if its fit errors or,
+under \code{\link[=var_prop]{var_prop()}}, if its reweighting does not converge; failed resamples
+are redrawn, up to \code{B * max_tries_factor} attempts in all.
+
+Confidence limits are the pointwise percentiles of the refitted curves.
+Prediction limits add the scatter of a new gauging to the spread of the
+refitted curves, using the t distribution on the fit's residual degrees of
+freedom. Under \code{\link[=var_spec]{var_spec()}} they are \code{NA}, as for the delta method. The
+number of resamples that fitted is recorded in \code{attr(, "B_success")}.
 }
 
 \section{What the limits assume}{
@@ -113,7 +133,4 @@ rbind(
   predict(one, new_stage = 3, conflev = 0.95),
   predict(two, new_stage = 3, conflev = 0.95)
 )
-}
-\seealso{
-\code{\link[=delta_limits_2seg]{delta_limits_2seg()}}, \code{\link[=boot_limits_2seg]{boot_limits_2seg()}}.
 }
