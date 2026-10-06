@@ -243,18 +243,18 @@ rc_2seg_powerlaw <- function(
       a2start <- exp(pars_2[1])
       b2start <- pars_2[2]
     } else if (combine == "add") {
-      # Remove the low-flow discharge carried up to the breakpoint, then fit the
-      # remaining "excess" discharge against depth above k, (stage - k). Keep only
-      # positive residuals so the log is defined.
       if (kstart < c1start) {
         stop("`kstart` is below the starting value of `c1`")
       }
-      qh2$excess <- qh2$discharge - a1start * (kstart - c1start)^b1start
-      qh2 <- qh2[which(qh2$excess > 0), , drop = FALSE]
-      lm_mod <- stats::lm(log(excess) ~ log(stage - kstart), data = qh2)
-      pars_2 <- as.numeric(stats::coefficients(lm_mod))
-      a2start <- exp(pars_2[1])
-      b2start <- pars_2[2]
+      start_2 <- add_upper_start(
+        qh2,
+        kstart = kstart,
+        a1 = a1start,
+        b1 = b1start,
+        c1 = c1start
+      )
+      a2start <- start_2[["a2"]]
+      b2start <- start_2[["b2"]]
     }
 
     # -- 5. Assemble start values and bounds for the port algorithm ----
@@ -453,4 +453,33 @@ rc_2seg_powerlaw <- function(
     model = mod_nls
   )
   structure(outlist, class = c("rc_2seg_powerlaw", "rating_curve"))
+}
+
+
+#' Starting values for the upper power law of the "add" form
+#'
+#' Removes the discharge the lower segment carries at the breakpoint, then
+#' fits the remaining "excess" discharge against the depth above the
+#' breakpoint, `stage - kstart`, as a straight line on the log-log scale.
+#' Only gaugings strictly above the breakpoint with a positive excess can be
+#' logged. If fewer than two remain, there is no line to fit, so the upper
+#' power law starts from the lower one's values instead; these are only
+#' starting values, which the fit then refines.
+#'
+#' @param qh2 Gaugings at or above the starting breakpoint, with columns
+#'   `discharge` and `stage`.
+#' @param kstart The starting breakpoint.
+#' @param a1,b1,c1 Starting values for the lower power law.
+#' @return A list with elements `a2` and `b2`.
+#' @noRd
+add_upper_start <- function(qh2, kstart, a1, b1, c1) {
+  excess <- qh2$discharge - a1 * (kstart - c1)^b1
+  usable <- qh2$stage > kstart & excess > 0
+  if (sum(usable) < 2) {
+    return(list(a2 = a1, b2 = b1))
+  }
+  depth <- qh2$stage[usable] - kstart
+  line <- stats::lm(log(excess[usable]) ~ log(depth))
+  coefs <- unname(stats::coef(line))
+  list(a2 = exp(coefs[1]), b2 = coefs[2])
 }

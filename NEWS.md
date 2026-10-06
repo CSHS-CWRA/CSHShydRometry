@@ -194,6 +194,11 @@
 
 ## Bug fixes
 
+* `rc_2seg_powerlaw(combine = "add")` no longer fails from a starting
+  breakpoint at a gauged stage, or one leaving fewer than two gaugings above
+  the lower segment's curve. Its starting values for the upper power law
+  took the log of zero, or fitted a line through too few points.
+
 * `rc_poly(degree = 1)` fitted spurious quadratic and cubic terms.
 * `rc_2seg_powerlaw()` ignored `nls_maxiter`.
 * `nls_tol` had no effect in `rc_2seg_powerlaw()`: its `"port"` algorithm ignores

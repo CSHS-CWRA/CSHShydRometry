@@ -199,3 +199,24 @@ test_that("the likelihood orders fixed-weight fits by residual sum of squares", 
   )
 })
 
+
+test_that("the add form's upper starting values never fail", {
+  # a gauging exactly at the starting breakpoint is not logged
+  qh2 <- tibble::tibble(stage = c(2, 2.5, 3), discharge = c(50, 90, 150))
+  start <- add_upper_start(qh2, kstart = 2, a1 = 10, b1 = 1.5, c1 = 0)
+  expect_true(all(is.finite(unlist(start))))
+  # fewer than two gaugings with a positive excess: start from the lower
+  # power law instead of fitting a line
+  low <- tibble::tibble(stage = c(2.2, 2.5, 3), discharge = c(10, 20, 80))
+  expect_equal(
+    add_upper_start(low, kstart = 2, a1 = 10, b1 = 1.5, c1 = 0),
+    list(a2 = 10, b2 = 1.5)
+  )
+})
+
+test_that("a starting breakpoint at a gauged stage works under add", {
+  d <- sauze()
+  at_gauging <- sort(d$H)[length(d$H) - 3]
+  fit <- rc_2seg_powerlaw(Q, H, data = d, combine = "add", kstart = at_gauging)
+  expect_true(is.finite(fit$curve_parameters$k))
+})
