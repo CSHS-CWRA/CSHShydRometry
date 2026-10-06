@@ -151,21 +151,24 @@ reweight_in_rounds <- function(fit_fun, yp, start, tol, maxiter) {
 }
 
 
-#' Profile log-likelihood of a fit under its error model
+#' The loss a fit minimises, for comparing fits from different starts
 #'
-#' The normal log-likelihood, up to a constant, with the error variance of
-#' each observation proportional to `1 / w` and the common scale profiled
-#' out. Used to choose between fits of the same model from different starting
-#' values: with fixed weights it orders fits exactly as the weighted residual
-#' sum of squares does, and it stays comparable when, as under proportional
-#' weights, the weights themselves depend on the fit.
+#' With fixed weights (`var_none()`, `var_spec()`), the weighted residual sum
+#' of squares. Under `var_prop()`, the reweighting does not minimise a
+#' weighted sum of squares: it settles where the Gamma quasi-likelihood
+#' (Wedderburn, 1974) is maximised, so the loss is its negative,
+#' `sum(discharge / mu + log(mu))`. Either way, smaller is better, and fits
+#' are compared on the objective they actually optimise.
 #'
 #' @param discharge Observed discharges.
 #' @param mu Fitted discharges.
-#' @param w Weights, the reciprocal of each observation's relative variance.
+#' @param w Weights, used with fixed weights.
+#' @param variance_type The variance scheme's type, such as `"prop"`.
 #' @return A single number.
 #' @noRd
-profile_loglik <- function(discharge, mu, w) {
-  n <- length(discharge)
-  0.5 * sum(log(w)) - 0.5 * n * log(mean(w * (discharge - mu)^2))
+fit_loss <- function(discharge, mu, w, variance_type) {
+  if (variance_type == "prop") {
+    return(sum(discharge / mu + log(mu)))
+  }
+  sum(w * (discharge - mu)^2)
 }

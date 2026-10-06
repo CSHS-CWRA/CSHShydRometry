@@ -52,12 +52,14 @@
 #' The two-segment fit is sensitive to where it starts: from some starting
 #' breakpoints `nls()` fails outright, and from others it settles on a
 #' local optimum. Trying several starts guards against both. Of the fits that
-#' succeed, the one kept has the highest log-likelihood under the error model
-#' (for `"none"` and `"spec"`, the smallest weighted residual sum of squares;
-#' for `"prop"`, where the weights depend on the fit, the normal likelihood
-#' with standard deviation proportional to the mean). Under `"prop"`, fits
-#' whose reweighting converged are preferred. What each start led to is
-#' recorded in `kstart_search`.
+#' succeed, the one kept has the smallest loss, the quantity the fit
+#' minimises. Under [var_none()] and [var_spec()], that is the weighted
+#' residual sum of squares. Under [var_prop()] it is not what you might
+#' expect: the reweighting does not minimise the sum of squared relative
+#' residuals, but settles where the Gamma quasi-likelihood is maximised, so
+#' the loss is `sum(discharge / fitted + log(fitted))`. See Wedderburn (1974)
+#' for quasi-likelihood. Under [var_prop()], fits whose reweighting converged
+#' are preferred. What each start led to is recorded in `kstart_search`.
 #'
 #' Each start costs a full fit, and [boot_limits_2seg()] repeats the same
 #' search for every resample. That is deliberate: a resample's best fit is
@@ -75,7 +77,10 @@
 #'   measured from `k`. `coef()` gives the same estimates by their model
 #'   names (`a1`, `b1`, `c1`, ...). `kstart_search` is a tibble with a row
 #'   per starting breakpoint tried: the estimated breakpoint `k` it led to and
-#'   the log-likelihood `loglik` of that fit, both `NA` where the fit failed.
+#'   the `loss` of that fit (see Details), both `NA` where the fit failed.
+#' @references Wedderburn, R. W. M. (1974). Quasi-likelihood functions,
+#'   generalized linear models, and the Gauss-Newton method. *Biometrika*,
+#'   61(3), 439-447. \doi{10.1093/biomet/61.3.439}
 #' @examples
 #' # The Thompson is close to a single control, so its two-segment fit needs
 #' # proportional weights to converge.
@@ -385,23 +390,22 @@ rc_2seg_powerlaw <- function(
       call. = FALSE
     )
   }
-  loglik <- rep(NA_real_, length(fits))
+  loss <- rep(NA_real_, length(fits))
   k_hat <- rep(NA_real_, length(fits))
   for (i in which(ok)) {
     mu <- as.numeric(stats::fitted(fits[[i]]$model))
-    w_model <- if (wts_code == "prop") 1 / mu^2 else wts
-    loglik[i] <- profile_loglik(discharge, mu, w_model)
+    loss[i] <- fit_loss(discharge, mu, wts, wts_code)
     k_hat[i] <- stats::coef(fits[[i]]$model)[["k"]]
   }
-  kstart_search <- tibble::tibble(kstart = kstart, k = k_hat, loglik = loglik)
-  # prefer fits whose reweighting converged, then the highest likelihood
+  kstart_search <- tibble::tibble(kstart = kstart, k = k_hat, loss = loss)
+  # prefer fits whose reweighting converged, then the smallest loss
   converged <- vapply(
     fits,
     function(f) !inherits(f, "error") && !isFALSE(f$irls$converged),
     logical(1)
   )
   candidates <- if (any(converged)) which(converged) else which(ok)
-  best <- candidates[which.max(loglik[candidates])]
+  best <- candidates[which.min(loss[candidates])]
   mod_nls <- fits[[best]]$model
   wts <- fits[[best]]$weights
   irls <- fits[[best]]$irls

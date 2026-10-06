@@ -114,8 +114,11 @@
   making the limits meaningless. Use `method = "boot"` instead.
 
 * By default, `rc_2seg_powerlaw()` now tries 10 starting breakpoints spread across
-  the search range and keeps the most likely fit, rather than starting once
-  from the middle of the range. `kstart` may also be a vector of starting
+  the search range and keeps the fit with the smallest loss, rather than
+  starting once from the middle of the range. The loss is the quantity the
+  fit minimises: the weighted residual sum of squares, or, under
+  `var_prop()`, the negative Gamma quasi-likelihood (see
+  `?rc_2seg_powerlaw`). `kstart` may also be a vector of starting
   values to try. The fit is sensitive to where it starts: from some starts
   `nls()` fails, from others it stops at a local optimum. So fits that used
   to fail may now succeed, and fits that stopped at a local optimum may now

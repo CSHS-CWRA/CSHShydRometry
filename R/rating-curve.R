@@ -100,7 +100,7 @@ coef.rc_2seg_powerlaw <- function(object, ...) {
 #' * `"difference"`: observed minus fitted, so `log(observed) - log(fitted)`
 #'   for [rc_powerlaw_log()].
 #' * `"scaled"`: the difference divided by the standard deviation the fit's
-#'   variance scheme gives a gauging at that stage (also known as Pearson
+#'   variance scheme gives at that stage (also known as Pearson
 #'   residuals). Use these to check the variance scheme: if it is right,
 #'   they spread about equally at every stage.
 #'

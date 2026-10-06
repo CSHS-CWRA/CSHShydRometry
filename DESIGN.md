@@ -60,8 +60,7 @@ and users never handle weights. The interface is marked experimental.
 - `gnls()` is an implementation choice, not a statistical necessity. The
   power could be estimated for any fitting function, for example by
   maximising the profile likelihood over the power, refitting at each value
-  with the rounds (`profile_loglik()` already exists for the breakpoint
-  search). That would also extend `var_power()` beyond `rc_powerlaw()`, and
+  with the rounds. That would also extend `var_power()` beyond `rc_powerlaw()`, and
   could replace `gnls()` altogether.
 - Combining schemes, such as known gauging uncertainty plus scatter that
   grows with the flow, by adding them with `+`. Once two components each
@@ -179,6 +178,10 @@ built in.
 - `predict()` offers `method = "delta"` (the default, fast, unreliable near
   the breakpoint) and `method = "boot"`.
 - The bootstrap repeats the full breakpoint search for every resample.
+- Of the fits from different starts, the one kept has the smallest loss:
+  the quantity the fit minimises. Under `var_prop()`, that is the Gamma
+  quasi-likelihood (negated), not the sum of squared relative residuals:
+  reweighting in rounds settles where the quasi-likelihood is maximised.
 - How the segments combine above the breakpoint is `combine = "replace"` or
   `"add"`.
 

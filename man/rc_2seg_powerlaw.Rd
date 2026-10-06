@@ -65,7 +65,7 @@ because the upper segment's coefficient is fixed by continuity, and under
 measured from \code{k}. \code{coef()} gives the same estimates by their model
 names (\code{a1}, \code{b1}, \code{c1}, ...). \code{kstart_search} is a tibble with a row
 per starting breakpoint tried: the estimated breakpoint \code{k} it led to and
-the log-likelihood \code{loglik} of that fit, both \code{NA} where the fit failed.
+the \code{loss} of that fit (see Details), both \code{NA} where the fit failed.
 }
 \description{
 Fit two-segment power-law rating curve using nls on untransformed data
@@ -91,12 +91,14 @@ estimates, until the fitted discharges stabilise.
 The two-segment fit is sensitive to where it starts: from some starting
 breakpoints \code{nls()} fails outright, and from others it settles on a
 local optimum. Trying several starts guards against both. Of the fits that
-succeed, the one kept has the highest log-likelihood under the error model
-(for \code{"none"} and \code{"spec"}, the smallest weighted residual sum of squares;
-for \code{"prop"}, where the weights depend on the fit, the normal likelihood
-with standard deviation proportional to the mean). Under \code{"prop"}, fits
-whose reweighting converged are preferred. What each start led to is
-recorded in \code{kstart_search}.
+succeed, the one kept has the smallest loss, the quantity the fit
+minimises. Under \code{\link[=var_none]{var_none()}} and \code{\link[=var_spec]{var_spec()}}, that is the weighted
+residual sum of squares. Under \code{\link[=var_prop]{var_prop()}} it is not what you might
+expect: the reweighting does not minimise the sum of squared relative
+residuals, but settles where the Gamma quasi-likelihood is maximised, so
+the loss is \code{sum(discharge / fitted + log(fitted))}. See Wedderburn (1974)
+for quasi-likelihood. Under \code{\link[=var_prop]{var_prop()}}, fits whose reweighting converged
+are preferred. What each start led to is recorded in \code{kstart_search}.
 
 Each start costs a full fit, and \code{\link[=boot_limits_2seg]{boot_limits_2seg()}} repeats the same
 search for every resample. That is deliberate: a resample's best fit is
@@ -136,4 +138,9 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
     kstart = 1
   )
 }
+}
+\references{
+Wedderburn, R. W. M. (1974). Quasi-likelihood functions,
+generalized linear models, and the Gauss-Newton method. \emph{Biometrika},
+61(3), 439-447. \doi{10.1093/biomet/61.3.439}
 }

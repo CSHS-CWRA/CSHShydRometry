@@ -143,14 +143,13 @@ test_that("by default, starting breakpoints span the search range", {
   d <- two_control()
   fit <- rc_2seg_powerlaw(discharge, stage, data = d)
   s <- fit$kstart_search
-  expect_named(s, c("kstart", "k", "loglik"))
+  expect_named(s, c("kstart", "k", "loss"))
   expect_equal(nrow(s), 10L)
   hs <- sort(d$stage)
   expect_true(all(s$kstart > hs[3] & s$kstart < hs[length(hs) - 2]))
   expect_null(fit$settings$kstart)
-  # the fit kept is the most likely of those that succeeded
-  expect_equal(max(s$loglik, na.rm = TRUE), s$loglik[which.max(s$loglik)])
-  expect_equal(fit$curve_parameters[["k"]], s$k[which.max(s$loglik)])
+  # the fit kept has the smallest loss of those that succeeded
+  expect_equal(fit$curve_parameters[["k"]], s$k[which.min(s$loss)])
   expect_equal(fit$curve_parameters[["k"]], 1.5, tolerance = 0.02)
 })
 
@@ -187,16 +186,18 @@ test_that("a fit that fails from every start is an error", {
   )
 })
 
-test_that("the likelihood orders fixed-weight fits by residual sum of squares", {
+test_that("fits are compared on the loss they minimise", {
   discharge <- c(1, 2, 3, 4)
+  # fixed weights: the weighted residual sum of squares
   expect_equal(
-    profile_loglik(discharge, discharge + c(0.1, -0.1, 0.1, -0.1), rep(1, 4)),
-    -2 * log(0.01)
+    fit_loss(discharge, discharge + 0.1, w = rep(2, 4), variance_type = "none"),
+    2 * 4 * 0.01
   )
-  expect_gt(
-    profile_loglik(discharge, discharge + 0.1, rep(1, 4)),
-    profile_loglik(discharge, discharge + 0.2, rep(1, 4))
-  )
+  # proportional: the negative Gamma quasi-likelihood, smallest at mu = y
+  at_data <- fit_loss(discharge, discharge, w = NULL, variance_type = "prop")
+  expect_equal(at_data, sum(1 + log(discharge)))
+  expect_lt(at_data, fit_loss(discharge, discharge * 1.1, NULL, "prop"))
+  expect_lt(at_data, fit_loss(discharge, discharge * 0.9, NULL, "prop"))
 })
 
 
