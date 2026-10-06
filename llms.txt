@@ -1,0 +1,312 @@
+# CSHShydRometry
+
+A rating curve turns a river’s stage (its water level, which is easier
+to record continuously) into discharge (the flow, which is not). It is
+fitted to gaugings: occasions when both were measured. This package fits
+rating curves by a range of statistical methods, and calculates
+uncertainty associated with them.
+
+## Installation
+
+The package is not on CRAN yet. Get it from GitHub:
+
+``` r
+
+remotes::install_github("CSHS-CWRA/CSHShydRometry")
+```
+
+## A first rating curve
+
+The package comes with 93 gaugings from the Thompson River (Water Survey
+of Canada station 08LF051), with `stage` in meters and `discharge` in
+cubic meters per second. Rating curves are drawn with stage on the
+vertical axis:
+
+``` r
+
+library(CSHShydRometry)
+plot(stage ~ discharge, data = thompson)
+```
+
+![](reference/figures/README-plot-data-1.png)
+
+The classic rating curve is a power law, $`Q = a (h - c)^b`$, relating
+discharge $`Q`$ to stage $`h`$, where $`c`$ is the offset: the stage at
+which the flow would stop.
+[`rc_powerlaw()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_powerlaw.md)
+fits it by least squares. These gaugings scatter more at higher flows,
+so we let the standard deviation of the scatter grow in proportion to
+the flow, with `variance = "prop"`:
+
+``` r
+
+fit <- rc_powerlaw(discharge, stage, data = thompson, variance = "prop")
+coef(fit)
+#>         a         b         c 
+#> 52.487716  1.879973 -1.303340
+```
+
+## Confidence and prediction limits
+
+[`predict()`](https://rdrr.io/r/stats/predict.html) evaluates the curve
+at the stages you give it. Ask for a confidence level to get limits for
+the curve itself, and a prediction level to get limits for a new
+gauging:
+
+``` r
+
+predict(fit, new_stage = c(1, 3, 6), conflev = 0.95, predlev = 0.95)
+#> # A tibble: 3 × 6
+#>   stage   fit ci_lwr ci_upr pi_lwr pi_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
+#> 1     1  252.   249.   255.   232.   272.
+#> 2     3  816.   806.   826.   750.   882.
+#> 3     6 2205.  2178.  2232.  2027.  2383.
+```
+
+Leave out `new_stage` to cover the range of the gaugings, which is handy
+for plotting:
+
+``` r
+
+band <- predict(fit, conflev = 0.95, predlev = 0.95)
+plot(stage ~ discharge, data = thompson, col = "grey50")
+lines(stage ~ fit, data = band)
+lines(stage ~ pi_lwr, data = band, lty = 2)
+lines(stage ~ pi_upr, data = band, lty = 2)
+```
+
+![](reference/figures/README-band-1.png)
+
+The dashed lines are the 95% prediction limits. The confidence limits,
+in `ci_lwr` and `ci_upr`, sit almost on the curve at this scale, and are
+not shown.
+
+## Other models
+
+Every model has an `rc_*()` function, and swapping one for another
+changes one line:
+
+- [`rc_powerlaw()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_powerlaw.md):
+  a power law, fitted on the original scale.
+- [`rc_powerlaw_log()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_powerlaw_log.md):
+  a power law, fitted on the log-log scale.
+- [`rc_poly()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_poly.md),
+  [`rc_loess()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_loess.md):
+  a polynomial, or a smooth curve.
+- [`rc_2seg_powerlaw()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_2seg_powerlaw.md):
+  two power laws joined at a breakpoint (below).
+
+[`predict()`](https://rdrr.io/r/stats/predict.html) gives back the same
+columns for every model, so results from different models line up:
+
+``` r
+
+fit_poly <- rc_poly(
+  discharge,
+  stage,
+  data = thompson,
+  variance = "prop"
+)
+predict(fit, new_stage = 3, conflev = 0.95)
+#> # A tibble: 1 × 4
+#>   stage   fit ci_lwr ci_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>
+#> 1     3  816.   806.   826.
+predict(fit_poly, new_stage = 3, conflev = 0.95)
+#> # A tibble: 1 × 4
+#>   stage   fit ci_lwr ci_upr
+#>   <dbl> <dbl>  <dbl>  <dbl>
+#> 1     3  812.   802.   821.
+```
+
+## Two-segment curves
+
+Where the river’s control changes, say when the water rises out of the
+channel onto a floodplain, one power law is not enough.
+[`rc_2seg_powerlaw()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_2seg_powerlaw.md)
+fits two power laws that meet at a breakpoint stage, estimated along
+with them. The Ardèche at Sauze, from the RBaM package, is such a river;
+each of its gaugings comes with a reported standard uncertainty, which
+gives its variance:
+
+``` r
+
+sauze <- tibble::tibble(
+  stage = RBaM::SauzeGaugings$H,
+  discharge = RBaM::SauzeGaugings$Q,
+  uncertainty_sd = RBaM::SauzeGaugings$uQ
+)
+fit2 <- rc_2seg_powerlaw(
+  discharge, stage,
+  data = sauze,
+  variance = var_spec(sauze$uncertainty_sd^2)
+)
+
+plot(stage ~ discharge, data = sauze, col = "grey50")
+lines(stage ~ fit, data = predict(fit2))
+abline(h = fit2$curve_parameters$k, lty = 3)
+```
+
+![](reference/figures/README-twoseg-1.png)
+
+The dotted line marks the estimated breakpoint. The curve has a corner
+there, so for limits near it, use
+`predict(fit2, conflev = 0.95, method = "boot")`: the default delta
+method is fast, but unreliable at the corner.
+
+## Learn more
+
+The [package website](https://cshs-cwra.github.io/CSHShydRometry/) has
+the full reference and the vignettes:
+
+- [`vignette("fitting")`](https://cshs-cwra.github.io/CSHShydRometry/articles/fitting.md):
+  choosing gaugings, looking at their scatter, and every way the package
+  fits a curve.
+- [`vignette("uncertainty")`](https://cshs-cwra.github.io/CSHShydRometry/articles/uncertainty.md):
+  confidence and prediction limits, what they assume, and where they
+  mislead.
+
+## Related software
+
+Most agencies build ratings in commercial hydrometric data systems:
+[AQUARIUS Time-Series](https://aquaticinformatics.com/) (Aquatic
+Informatics), used by the Water Survey of Canada and the USGS, and
+[WISKI](https://www.kisters.net/) and
+[Hydstra](https://www.kisters.net/hydstra/) (KISTERS). They manage the
+whole workflow, from gaugings to published discharge, but are
+proprietary.
+
+Open-source tools for fitting rating curves are mostly Bayesian:
+
+| Software | Language | Approach |
+|----|----|----|
+| [BaRatin / BaRatinAGE](https://github.com/BaRatin-tools/BaRatinAGE) (INRAE) | Fortran, with a graphical interface | Bayesian; priors from the hydraulic controls; multi-segment curves through a configuration matrix |
+| [RBaM](https://CRAN.R-project.org/package=RBaM) (INRAE) | R | R interface to BaM, the engine behind BaRatin |
+| [bdrc](https://CRAN.R-project.org/package=bdrc) | R | Bayesian hierarchical power law and generalized power law, with constant or varying scatter |
+| [ratingcurve](https://github.com/thodson-usgs/ratingcurve) (USGS, provisional) | Python | Bayesian segmented power law, with PyMC |
+
+CSHShydRometry instead fits by least squares, with no priors to specify.
+Its limits come from the delta method or a bootstrap, and it has
+explicit schemes for how the scatter changes with the flow. That makes
+it quick to use, and a classical reference against which to compare the
+Bayesian methods. Beware that notation differs between tools: BaRatin,
+for example, writes the power law as $`Q = a(h - b)^c`$, swapping the
+roles of $`b`$ and $`c`$ used here. For a comparison of methods for
+rating-curve uncertainty, see Kiang et al. (2018), “A comparison of
+methods for streamflow uncertainty estimation”, *Water Resources
+Research*,
+[doi:10.1029/2018WR022708](https://doi.org/10.1029/2018WR022708).
+
+## Citation
+
+To cite CSHShydRometry in publications, please use the following (which
+`citation("CSHShydRometry")` also prints):
+
+Coia V, Moore RD, Whitfield P (2026). *CSHShydRometry: Statistical
+Methods for Rating Curves*. R package version 0.0.1.9000,
+<https://cshs-cwra.github.io/CSHShydRometry/>.
+
+As BibTeX:
+
+``` bibtex
+@Manual{,
+  title = {CSHShydRometry: Statistical Methods for Rating Curves},
+  author = {Vincenzo Coia and R. Dan Moore and Paul Whitfield},
+  year = {2026},
+  note = {R package version 0.0.1.9000},
+  url = {https://cshs-cwra.github.io/CSHShydRometry/},
+}
+```
+
+## Acknowledgements
+
+The name of this R package is in recognition of the support provided by
+the [Canadian Society for Hydrological Sciences
+(CSHS)](https://cwra.org/en/affiliates-programs/cshs/), which is an
+affiliated society of the Canadian Water Resources Association (CWRA).
+
+## Contributing
+
+Contributions are welcome; see
+[CONTRIBUTING.md](https://cshs-cwra.github.io/CSHShydRometry/CONTRIBUTING.md).
+Please note that this project is released with a [Contributor Code of
+Conduct](https://cshs-cwra.github.io/CSHShydRometry/CODE_OF_CONDUCT.md).
+By participating in this project you agree to abide by its terms.
+
+# Package index
+
+## Fitting a single-segment curve
+
+Each function fits one model, and returns a fit that
+[`predict()`](https://rdrr.io/r/stats/predict.html) and
+[`coef()`](https://rdrr.io/r/stats/coef.html) work with.
+
+- [`rc_powerlaw()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_powerlaw.md)
+  : Fit a power-law rating curve on the original scale
+- [`rc_powerlaw_log()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_powerlaw_log.md)
+  : Fit a power-law rating curve on the log-log scale
+- [`rc_poly()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_poly.md)
+  : Fit polynomial rating curve
+- [`rc_loess()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_loess.md)
+  : Fit rating curve using loess smoother
+
+## Fitting a two-segment curve
+
+- [`rc_2seg_powerlaw()`](https://cshs-cwra.github.io/CSHShydRometry/reference/rc_2seg_powerlaw.md)
+  : Fit two-segment power-law rating curve using nls on untransformed
+  data
+
+## Variance
+
+How the scatter of the gaugings about the curve is modelled.
+
+- [`var_none()`](https://cshs-cwra.github.io/CSHShydRometry/reference/variance.md)
+  [`var_prop()`](https://cshs-cwra.github.io/CSHShydRometry/reference/variance.md)
+  [`var_power()`](https://cshs-cwra.github.io/CSHShydRometry/reference/variance.md)
+  [`var_spec()`](https://cshs-cwra.github.io/CSHShydRometry/reference/variance.md)
+  [`print(`*`<rc_variance>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/variance.md)
+  : Variance schemes for rating-curve fits
+
+## Predicting, with confidence and prediction limits
+
+- [`predict(`*`<rc_2seg_powerlaw>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/predict.rc_2seg_powerlaw.md)
+  : Predict discharge with confidence / prediction limits from a
+  two-segment fit
+- [`predict(`*`<rc_loess>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/predict.rc_loess.md)
+  : Predict method for rc_loess objects
+- [`predict(`*`<rc_poly>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/predict.rc_poly.md)
+  : Predict method for rc_poly objects
+- [`predict(`*`<rc_powerlaw>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/predict.rc_powerlaw.md)
+  : Predict method for rc_powerlaw objects
+- [`predict(`*`<rc_powerlaw_log>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/predict.rc_powerlaw_log.md)
+  : Predict method for rc_powerlaw_log objects
+
+## Fitted curves
+
+What a fit contains, and the methods every fit shares.
+
+- [`rating_curve`](https://cshs-cwra.github.io/CSHShydRometry/reference/rating_curve.md)
+  : Rating curve fits
+- [`coef(`*`<rating_curve>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/coef.rating_curve.md)
+  [`coef(`*`<rc_2seg_powerlaw>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/coef.rating_curve.md)
+  : Estimated parameters of a rating curve
+- [`fitted(`*`<rating_curve>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/fitted.rating_curve.md)
+  [`residuals(`*`<rating_curve>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/fitted.rating_curve.md)
+  : Fitted values and residuals of a rating curve
+- [`print(`*`<rating_curve>`*`)`](https://cshs-cwra.github.io/CSHShydRometry/reference/print.rating_curve.md)
+  : Print a rating curve fit
+
+## Data
+
+- [`thompson`](https://cshs-cwra.github.io/CSHShydRometry/reference/thompson.md)
+  : Thompson River gaugings
+
+# Articles
+
+### All vignettes
+
+- [Fitting rating
+  curves](https://cshs-cwra.github.io/CSHShydRometry/articles/fitting.md):
+- [Uncertainty in predicted
+  discharge](https://cshs-cwra.github.io/CSHShydRometry/articles/uncertainty.md):
