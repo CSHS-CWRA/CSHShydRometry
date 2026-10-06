@@ -46,6 +46,7 @@ Suggests:
 Config/testthat/edition: 3
 LazyData: true
 License: MIT + file LICENSE
-URL: https://github.com/CSHS-CWRA/CSHShydRometry
+URL: https://cshs-cwra.github.io/CSHShydRometry/,
+    https://github.com/CSHS-CWRA/CSHShydRometry
 BugReports: https://github.com/CSHS-CWRA/CSHShydRometry/issues
 VignetteBuilder: knitr

@@ -153,6 +153,9 @@ method is fast, but unreliable at the corner.
 
 ## Learn more
 
+The [package website](https://cshs-cwra.github.io/CSHShydRometry/) has
+the full reference and the vignettes:
+
 - `vignette("fitting")`: choosing gaugings, looking at their scatter,
   and every way the package fits a curve.
 - `vignette("uncertainty")`: confidence and prediction limits, what they
@@ -196,7 +199,7 @@ To cite CSHShydRometry in publications, please use the following (which
 
 Coia V, Moore RD, Whitfield P (2026). *CSHShydRometry: Statistical
 Methods for Rating Curves*. R package version 0.0.1.9000,
-<https://github.com/CSHS-CWRA/CSHShydRometry>.
+<https://cshs-cwra.github.io/CSHShydRometry/>.
 
 As BibTeX:
 
@@ -206,7 +209,7 @@ As BibTeX:
   author = {Vincenzo Coia and R. Dan Moore and Paul Whitfield},
   year = {2026},
   note = {R package version 0.0.1.9000},
-  url = {https://github.com/CSHS-CWRA/CSHShydRometry},
+  url = {https://cshs-cwra.github.io/CSHShydRometry/},
 }
 ```
 

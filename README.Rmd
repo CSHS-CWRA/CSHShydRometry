@@ -140,6 +140,9 @@ fast, but unreliable at the corner.
 
 ## Learn more
 
+The [package website](https://cshs-cwra.github.io/CSHShydRometry/) has the
+full reference and the vignettes:
+
 - `vignette("fitting")`: choosing gaugings, looking at their scatter, and
   every way the package fits a curve.
 - `vignette("uncertainty")`: confidence and prediction limits, what they

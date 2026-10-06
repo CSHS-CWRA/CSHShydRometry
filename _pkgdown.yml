@@ -1,5 +1,7 @@
-# Not hosted yet: set `url` once there is a home for the site.
-url: ~
+# Hosted on GitHub Pages, built by .github/workflows/pkgdown.yaml. To move
+# it to a custom domain, change `url` and set the domain in the repository's
+# Pages settings.
+url: https://cshs-cwra.github.io/CSHShydRometry/
 
 template:
   bootstrap: 5
