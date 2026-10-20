@@ -154,7 +154,7 @@ fits this model by least squares on the original scale:
 fit <- rc_powerlaw(discharge, stage, data = thompson)
 coef(fit)
 #>          a          b          c 
-#> 80.6686509  1.7131161 -0.9044142
+#> 80.6686729  1.7131160 -0.9044139
 ```
 
 To improve the least squares estimation, the `variance` argument lets
@@ -245,7 +245,7 @@ scheme:
 fit_log <- rc_powerlaw_log(discharge, stage, data = thompson)
 coef(fit_log)
 #>         a         b         c 
-#> 52.398628  1.880339 -1.304109
+#> 52.398629  1.880339 -1.304108
 ```
 
 Back on the original scale, this curve estimates the geometric mean

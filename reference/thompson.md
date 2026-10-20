@@ -73,15 +73,3 @@ in the records, but leave it out of fits using
 [`var_spec()`](https://cshs-cwra.github.io/CSHShydRometry/reference/variance.md):
 weighted by it, it would carry over 99.9% of the total weight, and the
 curve would be forced through it.
-
-## Getting the data yourself
-
-Individual discharge measurements (field visits) are not published on
-the Water Survey's Water Level and Flow website,
-<https://wateroffice.ec.gc.ca>, which offers only the time series
-derived from them; its Frequently Asked Questions list field-visit
-observations among the data "typically not publicly available on this
-website". These records came from the Water Survey of Canada, and
-further or more recent measurements would have to be obtained from it
-directly. The station's page on the website does report its most recent
-discharge measurement.

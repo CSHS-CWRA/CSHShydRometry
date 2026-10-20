@@ -170,7 +170,7 @@ fit
 #> - Method: rc_2seg_powerlaw 
 coef(fit)
 #>          a1          b1          c1          b2          c2           k 
-#> 192.5532263   0.9018095  -0.3288885   1.7185012  -0.8851584   1.1800577 
+#> 192.5530314   0.9018104  -0.3288896   1.7185012  -0.8851583   1.1800579 
 
 # what each starting breakpoint led to
 fit$kstart_search

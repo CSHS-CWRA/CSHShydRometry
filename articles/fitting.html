@@ -202,7 +202,7 @@ original scale:</p>
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rc_powerlaw.html">rc_powerlaw</a></span><span class="op">(</span><span class="va">discharge</span>, <span class="va">stage</span>, data <span class="op">=</span> <span class="va">thompson</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          a          b          c </span></span>
-<span><span class="co">#&gt; 80.6686509  1.7131161 -0.9044142</span></span></code></pre></div>
+<span><span class="co">#&gt; 80.6686729  1.7131160 -0.9044139</span></span></code></pre></div>
 <p>To improve the least squares estimation, the <code>variance</code>
 argument lets you specify how you think the scatter changes with the
 flow. By default it is the same at every flow (<code><a href="../reference/variance.html">var_none()</a></code>).
@@ -268,7 +268,7 @@ choice of scale, with no variance scheme:</p>
 <code class="sourceCode R"><span><span class="va">fit_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rc_powerlaw_log.html">rc_powerlaw_log</a></span><span class="op">(</span><span class="va">discharge</span>, <span class="va">stage</span>, data <span class="op">=</span> <span class="va">thompson</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_log</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         a         b         c </span></span>
-<span><span class="co">#&gt; 52.398628  1.880339 -1.304109</span></span></code></pre></div>
+<span><span class="co">#&gt; 52.398629  1.880339 -1.304108</span></span></code></pre></div>
 <p>Back on the original scale, this curve estimates the geometric mean
 discharge at each stage, which is a little below the arithmetic mean.
 <code>fit_log$a_corrected</code> holds two versions of

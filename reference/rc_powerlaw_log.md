@@ -93,7 +93,7 @@ still be useful; check the residuals of the fit.
 fit <- rc_powerlaw_log(discharge, stage, data = thompson)
 coef(fit)
 #>         a         b         c 
-#> 52.398628  1.880339 -1.304109 
+#> 52.398629  1.880339 -1.304108 
 predict(fit, new_stage = c(1, 3, 6), conflev = 0.95)
 #> # A tibble: 3 × 4
 #>   stage   fit ci_lwr ci_upr

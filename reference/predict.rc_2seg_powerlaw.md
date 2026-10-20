@@ -155,7 +155,7 @@ if (requireNamespace("RBaM", quietly = TRUE)) {
 #>   <dbl>  <dbl>  <dbl>  <dbl>
 #> 1   1     84.0   78.5   95.3
 #> 2   1.5  141.   120.   184. 
-#> 3   2    259.   201.   308. 
+#> 3   2    259.   199.   308. 
 #> 4   4   1107.  1004.  1290. 
 
 # the columns returned never depend on the model or the method, so results

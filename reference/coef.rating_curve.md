@@ -35,5 +35,5 @@ A named numeric vector; empty for
 ``` r
 coef(rc_powerlaw(discharge, stage, data = thompson))
 #>          a          b          c 
-#> 80.6686509  1.7131161 -0.9044142 
+#> 80.6686729  1.7131160 -0.9044139 
 ```
