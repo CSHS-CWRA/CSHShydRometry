@@ -97,6 +97,8 @@ used only as a source of that data.
 
 Useful links:
 
+- <https://cshs-cwra.github.io/CSHShydRometry/>
+
 - <https://github.com/CSHS-CWRA/CSHShydRometry>
 
 - Report bugs at <https://github.com/CSHS-CWRA/CSHShydRometry/issues>

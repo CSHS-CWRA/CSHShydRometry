@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   fitting: fitting.html
   uncertainty: uncertainty.html
-last_built: 2026-10-06T13:11Z
+last_built: 2026-10-20T12:19Z
 urls:
   reference: https://cshs-cwra.github.io/CSHShydRometry/reference
   article: https://cshs-cwra.github.io/CSHShydRometry/articles

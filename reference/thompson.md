@@ -40,8 +40,12 @@ A tibble with 93 rows and 5 columns:
 
 ## Source
 
-Water Survey of Canada, station 08LF051 (Thompson River near Spences
-Bridge).
+Environment and Climate Change Canada (2026). Historical hydrometric
+data: Station 08LF051, Thompson River near Spences Bridge, BC (open
+water field visits, 1994-2024) \[Data set\]. Water Survey of Canada.
+<https://wateroffice.ec.gc.ca/>
+
+Included with the permission of the Water Survey of Canada.
 
 ## Details
 
