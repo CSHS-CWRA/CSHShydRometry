@@ -19,8 +19,12 @@ before 2020).}
 }
 }
 \source{
-Water Survey of Canada, station 08LF051 (Thompson River near
-Spences Bridge).
+Environment and Climate Change Canada (2026). Historical
+hydrometric data: Station 08LF051, Thompson River near Spences Bridge, BC
+(open water field visits, 1994-2024) [Data set]. Water Survey of
+Canada. \url{https://wateroffice.ec.gc.ca/}
+
+Included with the permission of the Water Survey of Canada.
 }
 \usage{
 thompson

@@ -78,6 +78,7 @@ only as a source of that data.
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://cshs-cwra.github.io/CSHShydRometry/}
   \item \url{https://github.com/CSHS-CWRA/CSHShydRometry}
   \item Report bugs at \url{https://github.com/CSHS-CWRA/CSHShydRometry/issues}
 }
