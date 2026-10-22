@@ -21,13 +21,6 @@
 #' illustration, but a rating for a given period should use gaugings from a
 #' period of stable channel conditions; see `vignette("fitting")`.
 #'
-#' One uncertainty may be incorrect: the gauging of 2018-11-01 has 0.0226,
-#' where the others lie between about 2.5 and 11. It may have been entered as
-#' a fraction (2.26%) rather than a percentage. It is kept as it appears in
-#' the records, but leave it out of fits using [var_spec()]: weighted by it,
-#' it would carry over 99.9% of the total weight, and the curve would be
-#' forced through it.
-#'
 #' @format A tibble with 93 rows and 5 columns:
 #' \describe{
 #'   \item{date}{Date of the measurement.}

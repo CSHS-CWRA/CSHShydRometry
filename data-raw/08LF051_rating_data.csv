@@ -103,7 +103,7 @@ Station ID,Date (UTC),Timezone Offset,Activity Type,Gauge Height,Mean Gauge Heig
 08LF051,2019-03-28T16:45:00Z,-8,Stage/Niveau d'eau,1.012,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Upgraded from 'Logger Value' field.,NA,NA,NA,NA,NA,Final/Finales,NA
 08LF051,2019-01-31T17:15:00Z,-8,Stage/Niveau d'eau,1.074,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3_Beta Sensor Reset Correction of 0.002,NA,NA,NA,NA,NA,Final/Finales,NA
 08LF051,2018-11-01T01:15:00Z,-8,Stage/Niveau d'eau,1.404,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.004,NA,NA,NA,NA,NA,Final/Finales,NA
-08LF051,2018-11-01T01:01:54Z,-8,Discharge/Débit,NA,1.404,315,NA,NA,NA,NA,NA,NA,Sources:Import,96,447.15,0.7,10.3,10.79,Final/Finales,0.0226
+08LF051,2018-11-01T01:01:54Z,-8,Discharge/Débit,NA,1.404,315,NA,NA,NA,NA,NA,NA,Sources:Import,96,447.15,0.7,10.3,10.79,Final/Finales,2.26
 08LF051,2018-11-01T00:00:00Z,-8,Stage/Niveau d'eau,1.403,NA,NA,NA,NA,NA,NA,NA,NA,Source:Manual Sensor Reset Correction of 0.004,NA,NA,NA,NA,NA,Final/Finales,NA
 08LF051,2018-08-21T23:25:00Z,-8,Stage/Niveau d'eau,2.46,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.3_Beta Sensor Reset Correction of 0.001,NA,NA,NA,NA,NA,Final/Finales,NA
 08LF051,2018-07-16T20:40:00Z,-8,Stage/Niveau d'eau,4.45,NA,NA,NA,NA,NA,NA,NA,NA,Source:eHSN v1.2.4 Sensor Reset Correction of -0.002,NA,NA,NA,NA,NA,Final/Finales,NA

@@ -32,12 +32,11 @@ test_that("weighting schemes print what they are", {
   expect_output(print(var_none()), "none")
   expect_output(print(var_prop(maxiter = 20)), "maxiter = 20")
   expect_output(print(var_spec(c(1, 2, 3))), "for 3 gaugings")
-  # leave out the doubtful 0.0226% gauging; see ?thompson
-  d <- thompson[!is.na(thompson$uncertainty_pct) & thompson$uncertainty_pct > 1, ]
+  d <- thompson[!is.na(thompson$uncertainty_pct), ]
   d$uncertainty_sd <- d$uncertainty_pct / 100 * d$discharge / 2
   fit <- rc_powerlaw(discharge, stage, data = d,
                 variance = var_spec(d$uncertainty_sd^2))
-  expect_output(print(fit$settings$variance), "for 18 gaugings")
+  expect_output(print(fit$settings$variance), "for 19 gaugings")
 })
 
 test_that("loess reweights proportionally in rounds, like the other fits", {
